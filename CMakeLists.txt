@@ -26,6 +26,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC external/bgfx/include external
 target_link_directories(${PROJECT_NAME} PRIVATE external/bgfx/.build/linux64_gcc/bin/)
 
 target_link_libraries(${PROJECT_NAME}
-        GL X11 ${CMAKE_DL_LIBS} pthread
+        GL X11 SDL2 dl pthread
         bgfxRelease bimgRelease bxRelease
         )
