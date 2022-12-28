@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
 
-include(cmake/prelude.cmake)
-
 project(
         ad-engine
         VERSION 0.1.0
@@ -10,20 +8,24 @@ project(
         LANGUAGES CXX
 )
 
-include(cmake/project-is-top-level.cmake)
-include(cmake/variables.cmake)
+set(CMAKE_CXX_STANDARD 20)
 
 # ---- Declare Library ----
 
-# include(source/gfx/project-is-top-level.cmake)
-
 # ---- Declare executable ----
 
-add_executable(ad-engine_exe source/main.cpp)
-add_executable(ad-engine::exe ALIAS ad-engine_exe)
+add_executable(${PROJECT_NAME} source/main.cpp)
 
-set_property(TARGET ad-engine_exe PROPERTY OUTPUT_NAME ad-engine)
+set(HEADERS include)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -D__extern_always_inline=inline -D_XOPEN_SOURCE_EXTENDED")
 
-target_compile_features(ad-engine_exe PRIVATE cxx_std_20)
+# --- Install submodules
 
-# target_link_libraries(ad-engine_exe PRIVATE gfx)
+target_include_directories(${PROJECT_NAME} PUBLIC external/bgfx/include external/bimg/include external/bx/include)
+
+target_link_directories(${PROJECT_NAME} PRIVATE external/bgfx/.build/linux64_gcc/bin/)
+
+target_link_libraries(${PROJECT_NAME}
+        GL X11 ${CMAKE_DL_LIBS} pthread
+        bgfxRelease bimgRelease bxRelease
+        )
