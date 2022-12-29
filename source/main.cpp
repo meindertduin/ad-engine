@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
+#include <gfx/render_pipeline.h>
 
 SDL_Window* window = NULL;
 const int WIDTH = 640;
@@ -71,6 +72,7 @@ bgfx::IndexBufferHandle m_ibh;
 bgfx::ProgramHandle m_program;
 
 int main ( int argc, char* args[] ) {
+    RenderPipeline renderPipeline;
 
     // Initialize SDL systems
     if( SDL_Init( SDL_INIT_VIDEO ) < 0 ) {

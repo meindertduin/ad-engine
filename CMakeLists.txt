@@ -12,9 +12,11 @@ set(CMAKE_CXX_STANDARD 20)
 
 # ---- Declare Library ----
 
+add_subdirectory(source/gfx)
+
 # ---- Declare executable ----
 
-add_executable(${PROJECT_NAME} source/main.cpp source/engine/file_system.cpp)
+add_executable(${PROJECT_NAME} source/main.cpp)
 
 set(HEADERS include)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -D__extern_always_inline=inline -D_XOPEN_SOURCE_EXTENDED -DBX_CONFIG_DEBUG=0")
@@ -29,3 +31,7 @@ target_link_libraries(${PROJECT_NAME}
         bgfxRelease bimgRelease bxRelease
         GL X11 SDL2 dl pthread rt
         )
+
+target_include_directories(${PROJECT_NAME} PRIVATE source/)
+target_link_directories(${PROJECT_NAME} PRIVATE source/gfx/)
+target_link_libraries(${PROJECT_NAME} gfx)
