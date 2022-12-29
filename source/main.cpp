@@ -1,17 +1,14 @@
-#include <cstdio>
 #include <fstream>
 
 #include <bx/math.h>
 #include <bgfx/bgfx.h>
-#include <bgfx/platform.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
-#include <gfx/render_pipeline.h>
 #include "engine/window.h"
 
-constexpr uint32_t WIDTH = 640;
-constexpr uint32_t HEIGHT = 480;
+constexpr int WIDTH = 640;
+constexpr int HEIGHT = 480;
 
 bgfx::ShaderHandle loadShader(const char* _name) {
     char* data = new char[2048];

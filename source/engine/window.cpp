@@ -7,8 +7,11 @@
 
 #include <utility>
 
-const int WIDTH = 640;
-const int HEIGHT = 480;
+AdWindow::AdWindow(const math::Size2 &size, std::string title) :
+        mSize(size),
+        mTitle(std::move(title))
+{
+}
 
 AdWindow::~AdWindow() {
     bgfx::shutdown();
@@ -19,14 +22,14 @@ AdWindow::~AdWindow() {
 
 bool AdWindow::initialize() {
     // Initialize SDL systems
-    if(SDL_Init( SDL_INIT_VIDEO ) < 0)
+    if(SDL_Init(SDL_INIT_VIDEO) < 0)
     {
         printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
     }
     else
     {
         //Create a window
-        pWindow = SDL_CreateWindow( "BGFX Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN );
+        pWindow = SDL_CreateWindow(mTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, mSize.width(), mSize.height(), SDL_WINDOW_SHOWN);
         if(pWindow == nullptr)
         {
             printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
@@ -52,11 +55,5 @@ bool AdWindow::initialize() {
 
     bgfx::init(init);
 
-    return false;
-}
-
-AdWindow::AdWindow(const math::SizeU2 &size, std::string title) :
-    mSize(size),
-    mTitle(std::move(title))
-{
+    return true;
 }
