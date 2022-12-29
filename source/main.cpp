@@ -8,10 +8,10 @@
 #include <SDL2/SDL_syswm.h>
 
 #include <gfx/render_pipeline.h>
+#include "engine/window.h"
 
-SDL_Window* window = NULL;
-const int WIDTH = 640;
-const int HEIGHT = 480;
+constexpr uint32_t WIDTH = 640;
+constexpr uint32_t HEIGHT = 480;
 
 bgfx::ShaderHandle loadShader(const char* _name) {
     char* data = new char[2048];
@@ -72,40 +72,8 @@ bgfx::IndexBufferHandle m_ibh;
 bgfx::ProgramHandle m_program;
 
 int main ( int argc, char* args[] ) {
-    RenderPipeline renderPipeline;
-
-    // Initialize SDL systems
-    if( SDL_Init( SDL_INIT_VIDEO ) < 0 ) {
-        printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
-    }
-    else {
-        //Create a window
-        window = SDL_CreateWindow( "BGFX Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN );
-        if( window == NULL ) {
-            printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
-        }
-    }
-
-    SDL_SysWMinfo wmi;
-    SDL_VERSION(&wmi.version);
-    if (!SDL_GetWindowWMInfo(window, &wmi)) {
-        return 1;
-    }
-
-    bgfx::PlatformData pd;
-    // and give the pointer to the window to pd
-    pd.ndt = wmi.info.x11.display;
-    pd.nwh = (void*)(uintptr_t)wmi.info.x11.window;
-
-    bgfx::Init init;
-    // Tell bgfx about the platform and window
-    init.platformData = pd;
-
-    // Render an empty frame
-    bgfx::renderFrame();
-
-    // Initialize bgfx
-    bgfx::init(init);
+    AdWindow window { math::Size { WIDTH, HEIGHT }, "Ad Render Demo" };
+    window.initialize();
 
     PosColorVertex::init();
     m_vbh = bgfx::createVertexBuffer(
@@ -199,12 +167,6 @@ int main ( int argc, char* args[] ) {
             bgfx::frame();
         }
     }
-
-    bgfx::shutdown();
-    // Free up window
-    SDL_DestroyWindow(window);
-    // Shutdown SDL
-    SDL_Quit();
 
     return 0;
 }
