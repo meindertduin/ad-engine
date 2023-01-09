@@ -19,7 +19,8 @@ add_subdirectory(source/gfx)
 
 add_executable(${PROJECT_NAME}
         source/main.cpp
-        source/engine/window.cpp
+        ${ENGINE_SOURCES}
+        ${GFX_SOURCES}
         source/math/size.h source/platform/gcc.h)
 
 set(HEADERS include)

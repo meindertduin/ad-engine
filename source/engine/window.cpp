@@ -7,9 +7,9 @@
 
 #include <utility>
 
-AdWindow::AdWindow(const math::Size2 &size, std::string title) :
-        mSize(size),
-        mTitle(std::move(title))
+AdWindow::AdWindow(const math::Size2D &size, std::string title) :
+    mSize(size),
+    mTitle(std::move(title))
 {
 }
 

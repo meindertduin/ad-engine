@@ -1,6 +1,3 @@
-add_library(
-    gfx OBJECT
-    render_pipeline.cpp
+set(GFX_SOURCES
+        render_pipeline.cpp
 )
-
-target_compile_features(gfx PUBLIC cxx_std_20)

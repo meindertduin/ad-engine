@@ -43,5 +43,5 @@ namespace math {
     template<typename T, typename ... U>
     Size(T, U...) -> Size<T, 1 + sizeof...(U)>;
 
-    using Size2 = Size<int, 2>;
+    using Size2D = Size<int, 2>;
 }
