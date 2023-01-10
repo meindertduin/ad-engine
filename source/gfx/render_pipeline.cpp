@@ -152,6 +152,6 @@ namespace gfx {
     };
 
     std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(int width, int height) {
-
+        return std::make_unique<RenderPipelineImpl>(width, height);
     }
 }

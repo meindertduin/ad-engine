@@ -1,3 +1,3 @@
 set(GFX_SOURCES
-        render_pipeline.cpp
+        source/gfx/render_pipeline.cpp
 )

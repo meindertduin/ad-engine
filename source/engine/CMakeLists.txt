@@ -1,3 +1,3 @@
 set(ENGINE_SOURCES
-    window.cpp
+    source/engine/window.cpp
 )

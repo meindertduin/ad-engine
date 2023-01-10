@@ -12,8 +12,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 # ---- Declare Library ----
 
-add_subdirectory(source/engine)
-add_subdirectory(source/gfx)
+include(source/engine/CMakeLists.txt)
+include(source/gfx/CMakeLists.txt)
 
 # ---- Declare executable ----
 
