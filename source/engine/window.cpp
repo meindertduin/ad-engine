@@ -57,3 +57,13 @@ bool AdWindow::initialize() {
 
     return true;
 }
+
+void AdWindow::pollEvents() {
+    SDL_Event currentEvent;
+
+    while(SDL_PollEvent(&currentEvent) != 0) {
+        if(currentEvent.type == SDL_QUIT) {
+            mClosed = true;
+        }
+    }
+}
