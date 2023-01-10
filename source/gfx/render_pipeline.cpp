@@ -79,6 +79,8 @@ namespace gfx {
                     bgfx::makeRef(s_cubeTriList, sizeof(s_cubeTriList))
             );
 
+            mFbh.idx = bgfx::kInvalidHandle;
+
             bgfx::ShaderHandle vsh = loadShader("shaders/build/v_simple.bin");
             bgfx::ShaderHandle fsh = loadShader("shaders/build/f_simple.bin");
 
@@ -104,6 +106,7 @@ namespace gfx {
             constexpr bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
             constexpr bx::Vec3 eye = { 0.0f, 0.0f, 10.0f };
 
+
             // Set view and projection matrix for view 0.
             float view[16];
             bx::mtxLookAt(view, eye, at);
@@ -115,6 +118,7 @@ namespace gfx {
 
             // Set view 0 default viewport.
             bgfx::setViewRect(0, 0, 0, mWidth, mHeight);
+            bgfx::setViewFrameBuffer(0, mFbh);
 
             bgfx::touch(0);
 
@@ -125,6 +129,8 @@ namespace gfx {
             mtx[12] = 0.0f;
             mtx[13] = 0.0f;
             mtx[14] = 0.0f;
+
+            bx::mtxTranslate(mtx, -4.0f, 4.0f, 0.0f);
 
             // Set model matrix for rendering.
             bgfx::setTransform(mtx);
@@ -148,6 +154,8 @@ namespace gfx {
 
         bgfx::VertexBufferHandle mVbh;
         bgfx::IndexBufferHandle mIbh;
+        bgfx::FrameBufferHandle mFbh;
+
         bgfx::ProgramHandle mProgram;
     };
 
