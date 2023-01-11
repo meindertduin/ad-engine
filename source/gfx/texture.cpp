@@ -4,21 +4,21 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#include <bgfx/bgfx.h>
-
 
 namespace gfx {
     class TextureImpl : public Texture {
     public:
-        explicit TextureImpl(const math::Size2D &size, unsigned char *data)
-            : mTextureHandle(bgfx::createTexture(bgfx::makeRef(data, size.width() * size.height() * 4)))
-        {
+        ~TextureImpl() override {
+            bgfx::destroy(mTextureHandle);
         }
 
-        ~TextureImpl() override = default;
+        explicit TextureImpl(const math::Size2D &size, unsigned char *data)
+        {
+            mTextureHandle = bgfx::createTexture2D(size.width(), size.height(), false, 1, bgfx::TextureFormat::RGBA8, BGFX_TEXTURE_NONE, bgfx::makeRef(data, size.width() * size.height() * 4));
+        }
 
-        void render(UniformHandle uniformHandle) override {
-            bgfx::setTexture(0, bgfx::UniformHandle { uniformHandle.idx }, mTextureHandle);
+        void render(bgfx::UniformHandle uniformHandle) override {
+            bgfx::setTexture(0, uniformHandle, mTextureHandle);
         }
 
     private:

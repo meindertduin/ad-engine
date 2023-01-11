@@ -26,31 +26,35 @@ namespace gfx {
         return handle;
     }
 
-    struct PosColorVertex {
+    struct PosTexColorVertex {
         float m_x;
         float m_y;
         float m_z;
+        float t_x;
+        float t_y;
         uint32_t m_abgr;
 
         static void init() {
             ms_decl
-                    .begin()
-                    .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-                    .add(bgfx::Attrib::Color0,   4, bgfx::AttribType::Uint8, true)
-                    .end();
+                .begin()
+                .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+                .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+                .add(bgfx::Attrib::Color0,   4, bgfx::AttribType::Uint8, true)
+                .end();
         };
 
         static bgfx::VertexLayout ms_decl;
     };
 
-    bgfx::VertexLayout PosColorVertex::ms_decl;
+    bgfx::VertexLayout PosTexColorVertex::ms_decl;
 
-    static PosColorVertex s_cubeVertices[] =
+    static PosTexColorVertex s_cubeVertices[] =
     {
-            {  0.5f,  0.5f, 0.0f, 0xff0000ff },
-            {  0.5f, -0.5f, 0.0f, 0xff0000ff },
-            { -0.5f, -0.5f, 0.0f, 0xff00ff00 },
-            { -0.5f,  0.5f, 0.0f, 0xff00ff00 }
+            // x      y     z     tx    ty    color
+            {  1.0f,  1.0f, 0.0f, 1.0f, 1.0f, 0xff0000ff },
+            {  1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0xff0000ff },
+            { -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0xff00ff00 },
+            { -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, 0xff00ff00 }
     };
 
     static const uint16_t s_cubeTriList[] =
@@ -68,14 +72,15 @@ namespace gfx {
         }
 
         void initialize() override {
-            PosColorVertex::init();
+            PosTexColorVertex::init();
 
             mTexture = Texture::loadFromFile("assets/bricks.png");
+            mTextureUniform = bgfx::createUniform("v_texCoord0", bgfx::UniformType::Sampler);
 
             mVbh = bgfx::createVertexBuffer(
                     // Static data can be passed with bgfx::makeRef
                     bgfx::makeRef(s_cubeVertices, sizeof(s_cubeVertices)),
-                    PosColorVertex::ms_decl
+                    PosTexColorVertex::ms_decl
             );
 
             mIbh = bgfx::createIndexBuffer(
@@ -143,6 +148,7 @@ namespace gfx {
             bgfx::setIndexBuffer(mIbh);
 
             // Set render states.
+            mTexture->render(mTextureUniform);
             bgfx::setState(BGFX_STATE_DEFAULT);
 
             // Submit primitive for rendering to view 0.
@@ -161,6 +167,7 @@ namespace gfx {
 
         bgfx::ProgramHandle mProgram;
         std::unique_ptr<Texture> mTexture { nullptr };
+        bgfx::UniformHandle mTextureUniform = BGFX_INVALID_HANDLE;
     };
 
     std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(int width, int height) {
