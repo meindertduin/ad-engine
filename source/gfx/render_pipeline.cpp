@@ -2,6 +2,8 @@
 #include <bgfx/bgfx.h>
 #include "render_pipeline.h"
 
+#include "texture.h"
+
 #include <fstream>
 
 namespace gfx {
@@ -68,6 +70,8 @@ namespace gfx {
         void initialize() override {
             PosColorVertex::init();
 
+            mTexture = Texture::loadFromFile("assets/bricks.png");
+
             mVbh = bgfx::createVertexBuffer(
                     // Static data can be passed with bgfx::makeRef
                     bgfx::makeRef(s_cubeVertices, sizeof(s_cubeVertices)),
@@ -105,7 +109,6 @@ namespace gfx {
         void render() override {
             constexpr bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
             constexpr bx::Vec3 eye = { 0.0f, 0.0f, 10.0f };
-
 
             // Set view and projection matrix for view 0.
             float view[16];
@@ -157,6 +160,7 @@ namespace gfx {
         bgfx::FrameBufferHandle mFbh;
 
         bgfx::ProgramHandle mProgram;
+        std::unique_ptr<Texture> mTexture { nullptr };
     };
 
     std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(int width, int height) {

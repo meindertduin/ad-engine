@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include "texture.h"
 
 namespace gfx {
     class RenderPipeline {
