@@ -6,14 +6,10 @@
 #include <bgfx/bgfx.h>
 
 namespace gfx {
-    struct UniformHandle {
-        uint16_t idx;
-    };
-
-    class Texture {
+    class Texture2D {
     public:
-        virtual ~Texture() = default;
-        static std::unique_ptr<Texture> loadFromFile(const std::string& path);
+        virtual ~Texture2D() = default;
+        static std::unique_ptr<Texture2D> loadFromFile(const std::string& path);
         virtual void render(bgfx::UniformHandle uniformHandle) = 0;
     };
 }

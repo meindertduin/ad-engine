@@ -48,11 +48,11 @@ namespace gfx {
 
     static PosTexColorVertex s_cubeVertices[] =
     {
-            // x      y     z     tx    ty  
-            {  1.0f,  1.0f, 0.0f, 1.0f, 1.0f },
-            {  1.0f, -1.0f, 0.0f, 1.0f, 0.0f },
-            { -1.0f, -1.0f, 0.0f, 0.0f, 0.0f },
-            { -1.0f,  1.0f, 0.0f, 0.0f, 1.0f }
+            // x      y     z     tx    ty
+            {  50.0f,  50.0f, 0.0f, 1.0f, 1.0f },
+            {  50.0f, -50.0f, 0.0f, 1.0f, 0.0f },
+            { -50.0f, -50.0f, 0.0f, 0.0f, 0.0f },
+            { -50.0f,  50.0f, 0.0f, 0.0f, 1.0f }
     };
 
     static const uint16_t s_cubeTriList[] =
@@ -72,7 +72,7 @@ namespace gfx {
         void initialize() override {
             PosTexColorVertex::init();
 
-            mTexture = Texture::loadFromFile("assets/bricks.png");
+            mTexture = Texture2D::loadFromFile("assets/bricks.png");
             mTextureUniform = bgfx::createUniform("v_texCoord0", bgfx::UniformType::Sampler);
 
             mVbh = bgfx::createVertexBuffer(
@@ -118,7 +118,11 @@ namespace gfx {
             bx::mtxLookAt(view, eye, at);
 
             float proj[16];
-            bx::mtxProj(proj, 60.0f, float(mWidth)/float(mHeight), 0.1f, 100.0f, bgfx::getCaps()->homogeneousDepth);
+
+            auto halfWidth = float(mWidth) / 2.0f;
+            auto halfHeight = float(mHeight) / 2.0f;
+
+            bx::mtxOrtho(proj, -halfWidth, halfWidth, -halfHeight, halfHeight, 0.1f, 1000.0f, 0.0f, bgfx::getCaps()->homogeneousDepth);
 
             bgfx::setViewTransform(0, view, proj);
 
@@ -136,7 +140,6 @@ namespace gfx {
             mtx[13] = 0.0f;
             mtx[14] = 0.0f;
 
-            bx::mtxTranslate(mtx, -4.0f, 4.0f, 0.0f);
 
             // Set model matrix for rendering.
             bgfx::setTransform(mtx);
@@ -164,7 +167,7 @@ namespace gfx {
         bgfx::FrameBufferHandle mFbh;
 
         bgfx::ProgramHandle mProgram;
-        std::unique_ptr<Texture> mTexture { nullptr };
+        std::unique_ptr<Texture2D> mTexture {nullptr };
         bgfx::UniformHandle mTextureUniform = BGFX_INVALID_HANDLE;
     };
 

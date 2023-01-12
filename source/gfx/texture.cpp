@@ -6,7 +6,7 @@
 
 
 namespace gfx {
-    class TextureImpl : public Texture {
+    class TextureImpl : public Texture2D {
     public:
         ~TextureImpl() override {
             bgfx::destroy(mTextureHandle);
@@ -25,7 +25,7 @@ namespace gfx {
         bgfx::TextureHandle mTextureHandle = BGFX_INVALID_HANDLE;
     };
 
-    std::unique_ptr<Texture> Texture::loadFromFile(const std::string &path) {
+    std::unique_ptr<Texture2D> Texture2D::loadFromFile(const std::string &path) {
         int width, height, channels;
         auto data = stbi_load(path.c_str(), &width, &height, &channels, 4);
 
