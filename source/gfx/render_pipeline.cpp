@@ -11,7 +11,9 @@ namespace gfx {
         char* data = new char[2048];
         std::ifstream file;
         size_t fileSize;
+
         file.open(_name);
+
         if(file.is_open()) {
             file.seekg(0, std::ios::end);
             fileSize = file.tellg();
@@ -19,6 +21,7 @@ namespace gfx {
             file.read(data, fileSize);
             file.close();
         }
+
         const bgfx::Memory* mem = bgfx::copy(data,fileSize+1);
         mem->data[mem->size-1] = '\0';
         bgfx::ShaderHandle handle = bgfx::createShader(mem);
@@ -26,12 +29,12 @@ namespace gfx {
         return handle;
     }
 
-    struct PosTexColorVertex {
-        float m_x;
-        float m_y;
-        float m_z;
-        float t_x;
-        float t_y;
+    struct PosTextVertex {
+        float x;
+        float y;
+        float z;
+        float tx;
+        float ty;
 
         static void init() {
             ms_decl
@@ -41,25 +44,23 @@ namespace gfx {
                 .end();
         };
 
-        static bgfx::VertexLayout ms_decl;
+        static inline bgfx::VertexLayout ms_decl;
     };
 
-    bgfx::VertexLayout PosTexColorVertex::ms_decl;
-
-    static PosTexColorVertex s_cubeVertices[] =
+    constexpr PosTextVertex sCubeVertices[] =
     {
-            // x      y     z     tx    ty
-            {  50.0f,  50.0f, 0.0f, 1.0f, 1.0f },
-            {  50.0f, -50.0f, 0.0f, 1.0f, 0.0f },
-            { -50.0f, -50.0f, 0.0f, 0.0f, 0.0f },
-            { -50.0f,  50.0f, 0.0f, 0.0f, 1.0f }
+        // x       y     z     tx    ty
+        {  50.0f,  50.0f, 0.0f, 1.0f, 1.0f },
+        {  50.0f, -50.0f, 0.0f, 1.0f, 0.0f },
+        { -50.0f, -50.0f, 0.0f, 0.0f, 0.0f },
+        { -50.0f,  50.0f, 0.0f, 0.0f, 1.0f }
     };
 
-    static const uint16_t s_cubeTriList[] =
-            {
-                    0,1,3,
-                    1,2,3
-            };
+    constexpr uint16_t sCubeTriList[] =
+    {
+        0,1,3,
+        1,2,3
+    };
 
     class RenderPipelineImpl : public RenderPipeline {
     public:
@@ -70,21 +71,17 @@ namespace gfx {
         }
 
         void initialize() override {
-            PosTexColorVertex::init();
+            PosTextVertex::init();
 
             mTexture = Texture2D::loadFromFile("assets/bricks.png");
             mTextureUniform = bgfx::createUniform("v_texCoord0", bgfx::UniformType::Sampler);
 
             mVbh = bgfx::createVertexBuffer(
-                    // Static data can be passed with bgfx::makeRef
-                    bgfx::makeRef(s_cubeVertices, sizeof(s_cubeVertices)),
-                    PosTexColorVertex::ms_decl
+                bgfx::makeRef(sCubeVertices, sizeof(sCubeVertices)),
+                PosTextVertex::ms_decl
             );
 
-            mIbh = bgfx::createIndexBuffer(
-                    // Static data can be passed with bgfx::makeRef
-                    bgfx::makeRef(s_cubeTriList, sizeof(s_cubeTriList))
-            );
+            mIbh = bgfx::createIndexBuffer(bgfx::makeRef(sCubeTriList, sizeof(sCubeTriList)));
 
             mFbh.idx = bgfx::kInvalidHandle;
 
@@ -99,13 +96,9 @@ namespace gfx {
             // Enable debug text.
             bgfx::setDebug(BGFX_DEBUG_TEXT /*| BGFX_DEBUG_STATS*/);
 
-            // Set view rectangle for 0th view
             bgfx::setViewRect(0, 0, 0, uint16_t(mWidth), uint16_t(mHeight));
-
-            // Clear the view rect
             bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x443355FF, 1.0f, 0);
 
-            // Set empty primitive on screen
             bgfx::touch(0);
         }
 
@@ -140,7 +133,6 @@ namespace gfx {
             mtx[13] = 0.0f;
             mtx[14] = 0.0f;
 
-
             // Set model matrix for rendering.
             bgfx::setTransform(mtx);
 
@@ -148,7 +140,6 @@ namespace gfx {
             bgfx::setVertexBuffer(0, mVbh);
             bgfx::setIndexBuffer(mIbh);
 
-            // Set render states.
             mTexture->render(mTextureUniform);
             bgfx::setState(BGFX_STATE_DEFAULT);
 
@@ -167,7 +158,7 @@ namespace gfx {
         bgfx::FrameBufferHandle mFbh;
 
         bgfx::ProgramHandle mProgram;
-        std::unique_ptr<Texture2D> mTexture {nullptr };
+        std::unique_ptr<Texture2D> mTexture { nullptr };
         bgfx::UniformHandle mTextureUniform = BGFX_INVALID_HANDLE;
     };
 
