@@ -32,14 +32,12 @@ namespace gfx {
         float m_z;
         float t_x;
         float t_y;
-        uint32_t m_abgr;
 
         static void init() {
             ms_decl
                 .begin()
                 .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
                 .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-                .add(bgfx::Attrib::Color0,   4, bgfx::AttribType::Uint8, true)
                 .end();
         };
 
@@ -50,11 +48,11 @@ namespace gfx {
 
     static PosTexColorVertex s_cubeVertices[] =
     {
-            // x      y     z     tx    ty    color
-            {  1.0f,  1.0f, 0.0f, 1.0f, 1.0f, 0xff0000ff },
-            {  1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0xff0000ff },
-            { -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0xff00ff00 },
-            { -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, 0xff00ff00 }
+            // x      y     z     tx    ty  
+            {  1.0f,  1.0f, 0.0f, 1.0f, 1.0f },
+            {  1.0f, -1.0f, 0.0f, 1.0f, 0.0f },
+            { -1.0f, -1.0f, 0.0f, 0.0f, 0.0f },
+            { -1.0f,  1.0f, 0.0f, 0.0f, 1.0f }
     };
 
     static const uint16_t s_cubeTriList[] =
