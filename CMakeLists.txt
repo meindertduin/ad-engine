@@ -31,7 +31,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -D__extern_alway
 target_include_directories(${PROJECT_NAME} PRIVATE source/)
 target_link_directories(${PROJECT_NAME} PRIVATE source/engine/ source/gfx/)
 
-target_include_directories(${PROJECT_NAME} PUBLIC external/bgfx/include external/bimg/include external/bx/include external/stb)
+target_include_directories(${PROJECT_NAME} PUBLIC external/bgfx/include external/bimg/include external/bx/include external/stb external/xxh3)
 
 target_link_directories(${PROJECT_NAME} PRIVATE external/bgfx/.build/linux64_gcc/bin/)
 
