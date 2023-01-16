@@ -10,65 +10,65 @@ extern "C" {
 }
 
 namespace lua {
-    bool execute(lua_State* L, const std::string &script, const std::string &name, int results_count);
+    bool execute(lua_State* L, const std::string &script, const std::string &name, int resultsCount);
 
     template<typename T>
-    inline bool is_type(lua_State *L, int index) {
+    inline bool isType(lua_State *L, int index) {
         return lua_islightuserdata(L, index) != 0;
     }
 
     template<>
-    inline bool is_type<int>(lua_State *L, int index) {
+    inline bool isType<int>(lua_State *L, int index) {
         return lua_isnumber(L, index) != 0;
     }
 
     template<>
-    inline bool is_type<float>(lua_State *L, int index) {
+    inline bool isType<float>(lua_State *L, int index) {
         return lua_isnumber(L, index) != 0;
     }
 
     template<>
-    inline bool is_type<glm::vec2>(lua_State *L, int index) {
+    inline bool isType<glm::vec2>(lua_State *L, int index) {
         return lua_istable(L, index) != 0 && luaL_len(L, index) == 2;
     }
 
     template<>
-    inline bool is_type<glm::vec3>(lua_State *L, int index) {
+    inline bool isType<glm::vec3>(lua_State *L, int index) {
         return lua_istable(L, index) != 0 && luaL_len(L, index) == 3;
     }
 
     template<>
-    inline bool is_type<glm::vec4>(lua_State *L, int index) {
+    inline bool isType<glm::vec4>(lua_State *L, int index) {
         return lua_istable(L, index) != 0 && luaL_len(L, index) == 4;
     }
 
     template<>
-    inline bool is_type<const char*>(lua_State *L, int index) {
+    inline bool isType<const char*>(lua_State *L, int index) {
         return lua_isstring(L, index) != 0;
     }
 
     template<typename T>
-    inline T convert_type(lua_State *L, int index) {
+    inline T convertType(lua_State *L, int index) {
         return static_cast<T>(lua_touserdata(L, index));
     }
 
     template<>
-    inline const char* convert_type<const char*>(lua_State *L, int index) {
+    inline const char* convertType<const char*>(lua_State *L, int index) {
         return lua_tostring(L, index);
     }
 
     template<>
-    inline float convert_type<float>(lua_State *L, int index) {
+    inline float convertType<float>(lua_State *L, int index) {
         return lua_tonumber(L, index);
     }
 
     template<>
-    inline int convert_type<int>(lua_State *L, int index) {
+    inline int convertType<int>(lua_State *L, int index) {
         return lua_tonumber(L, index);
     }
 
     template<>
-    inline glm::vec2 convert_type<glm::vec2>(lua_State *L, int index) {
+    inline glm::vec2 convertType<glm::vec2>(lua_State *L, int index) {
         glm::vec2 v;
 
         lua_rawgeti(L, index, 1);
@@ -83,7 +83,7 @@ namespace lua {
     }
 
     template<>
-    inline glm::vec3 convert_type<glm::vec3>(lua_State *L, int index) {
+    inline glm::vec3 convertType<glm::vec3>(lua_State *L, int index) {
         glm::vec3 v;
 
         lua_rawgeti(L, index, 1);
@@ -102,7 +102,7 @@ namespace lua {
     }
 
     template<>
-    inline glm::vec4 convert_type<glm::vec4>(lua_State *L, int index) {
+    inline glm::vec4 convertType<glm::vec4>(lua_State *L, int index) {
         glm::vec4 v;
 
         lua_rawgeti(L, index, 1);
@@ -125,16 +125,16 @@ namespace lua {
     }
 
     template<typename T>
-    T check_arg(lua_State* L, int index) {
-        if (!is_type<T>(L, index)) {
+    T checkArg(lua_State* L, int index) {
+        if (!isType<T>(L, index)) {
             luaL_error(L, "Invalid argument type");
         }
 
-        return convert_type<T>(L, index);
+        return convertType<T>(L, index);
     }
 
-    void create_system_variable(lua_State *L, const char* system_name, const char* var_name, void* value);
-    void create_system_variable(lua_State *L, const char* system_name, const char* var_name, int value);
-    void create_system_function(lua_State *L, const char* system_name, const char* var_name, lua_CFunction function);
-    void create_system_closure(lua_State *L, const char* system_name, void* object_ptr, const char* var_name, lua_CFunction function);
+    void createSystemVariable(lua_State *L, const char* systemName, const char* varName, void* value);
+    void createSystemVariable(lua_State *L, const char* systemName, const char* varName, int value);
+    void createSystemFunction(lua_State *L, const char* systemName, const char* varName, lua_CFunction function);
+    void createSystemClosure(lua_State *L, const char* systemName, void* objectPtr, const char* varName, lua_CFunction function);
 }
