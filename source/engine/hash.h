@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <compare>
 #include <string>
-#include "../platform/platform.h"
 #include "platform/gcc.h"
 
 class Hash64 {
