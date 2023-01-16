@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 include(source/engine/CMakeLists.txt)
 include(source/gfx/CMakeLists.txt)
+include(source/lua/CMakeLists.txt)
 
 # ---- Declare executable ----
 
@@ -21,6 +22,7 @@ add_executable(${PROJECT_NAME}
         source/main.cpp
         ${ENGINE_SOURCES}
         ${GFX_SOURCES}
+        ${LUA_SOURCES}
         source/math/size.h source/platform/gcc.h)
 
 set(HEADERS include)
@@ -29,7 +31,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -D__extern_alway
 # --- Install submodules
 
 target_include_directories(${PROJECT_NAME} PRIVATE source/)
-target_link_directories(${PROJECT_NAME} PRIVATE source/engine/ source/gfx/)
+target_link_directories(${PROJECT_NAME} PRIVATE source/engine/ source/gfx/ source/lua/)
 
 target_include_directories(${PROJECT_NAME} PUBLIC external/bgfx/include external/bimg/include external/bx/include external/stb external/xxh3)
 
