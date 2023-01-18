@@ -13,12 +13,13 @@ namespace gfx {
 
         static int addStage(lua_State *L) {
             auto shader = get_shader(L);
-            auto path = std::string { lua::checkArg<const char*>(L, 1) };
+            auto shaderType = std::string { lua::checkArg<const char*>(L, 1) };
+            auto path = std::string { lua::checkArg<const char*>(L, 2) };
 
             ShaderStage new_stage;
-            if (path.starts_with("f_")) {
+            if (shaderType == "Fragment") {
                 new_stage.type = ShaderType::Fragment;
-            } else if (path.starts_with("v_")) {
+            } else if (shaderType == "Vertex") {
                 new_stage.type = ShaderType::Vertex;
             } else {
                 // TODO throw error or handle case
@@ -28,7 +29,7 @@ namespace gfx {
             new_stage.data = fileReader.getFileContent();
             new_stage.path = Path { path };
 
-            shader->addStage(std::move(new_stage));
+            shader->addStage(new_stage);
 
             return 0;
         }
@@ -51,12 +52,21 @@ namespace gfx {
     Shader* ShaderManager::createShader(const Path &path) {
         auto shader = std::make_unique<Shader>();
 
-        mShaders.insert({ path, std::move(shader) });
-
         FileReader fileReader { path.value() };
         auto fileContent = fileReader.getFileContent();
 
+        auto root_state = lua_api::get_shader_state();
+        auto L = lua_newthread(root_state);
+        const auto state_ref = luaL_ref(root_state, LUA_REGISTRYINDEX);
+
+        lua_pushlightuserdata(L, shader.get());
+        lua_setglobal(L, "this");
+
         lua::execute(lua_api::get_shader_state(), fileContent, path.value(), 0);
+
+        luaL_unref(root_state, LUA_REGISTRYINDEX, state_ref);
+
+        mShaders.insert({ path, std::move(shader) });
 
         return mShaders[path].get();
     }

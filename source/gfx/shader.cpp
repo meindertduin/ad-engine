@@ -9,18 +9,18 @@ namespace gfx {
         }
     }
 
-    void Shader::addStage(gfx::ShaderStage&& stage) {
-        mStages.push_back(std::move(stage));
+    void Shader::addStage(const gfx::ShaderStage& stage) {
+        mStages.push_back(stage);
     }
 
     void Shader::compile() {
         for (auto &stage : mStages) {
             if (stage.type == ShaderType::Vertex) {
                 mVertexShaderHandle = bgfx::createShader(bgfx::makeRef(stage.data.data(), stage.data.size()));
-                bgfx::setName(mVertexShaderHandle, stage.filename.c_str());
+                bgfx::setName(mVertexShaderHandle, stage.path.value().c_str());
             } else if (stage.type == ShaderType::Fragment) {
                 mFragmentShaderHandle = bgfx::createShader(bgfx::makeRef(stage.data.data(), stage.data.size()));
-                bgfx::setName(mFragmentShaderHandle, stage.filename.c_str());
+                bgfx::setName(mFragmentShaderHandle, stage.path.value().c_str());
             }
         }
 

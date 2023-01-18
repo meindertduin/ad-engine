@@ -13,7 +13,6 @@ namespace gfx {
     };
 
     struct ShaderStage {
-        std::string filename;
         ShaderType type;
         Path path;
         std::string data;
@@ -23,7 +22,7 @@ namespace gfx {
     public:
         ~Shader();
 
-        void addStage(gfx::ShaderStage&& stage);
+        void addStage(const gfx::ShaderStage& stage);
         void compile();
         void bind(uint16_t viewId);
 
