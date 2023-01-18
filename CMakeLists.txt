@@ -38,6 +38,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC external/bgfx/include external
 target_link_directories(${PROJECT_NAME} PRIVATE external/bgfx/.build/linux64_gcc/bin/)
 
 target_link_libraries(${PROJECT_NAME}
-        bgfxRelease bimgRelease bxRelease
-        GL X11 SDL2 dl pthread rt
-        )
+    bgfxRelease bimgRelease bxRelease lua GL X11 SDL2 dl pthread rt
+)

@@ -9,8 +9,8 @@ namespace gfx {
         }
     }
 
-    void Shader::addStage(const gfx::ShaderStage& stage) {
-        mStages.push_back(stage);
+    void Shader::addStage(gfx::ShaderStage&& stage) {
+        mStages.push_back(std::move(stage));
     }
 
     void Shader::compile() {

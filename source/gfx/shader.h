@@ -4,6 +4,7 @@
 #include <vector>
 #include <bgfx/bgfx.h>
 #include "platform/gcc.h"
+#include "engine/path.h"
 
 namespace gfx {
     enum class ShaderType {
@@ -14,15 +15,15 @@ namespace gfx {
     struct ShaderStage {
         std::string filename;
         ShaderType type;
-
-        std::vector<char> data;
+        Path path;
+        std::string data;
     };
 
     class Shader {
     public:
         ~Shader();
 
-        void addStage(const ShaderStage& stage);
+        void addStage(gfx::ShaderStage&& stage);
         void compile();
         void bind(uint16_t viewId);
 

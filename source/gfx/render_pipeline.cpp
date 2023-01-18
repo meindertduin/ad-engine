@@ -3,6 +3,8 @@
 #include "render_pipeline.h"
 
 #include "texture.h"
+#include "shader.h"
+#include "shader_manager.h"
 
 #include <fstream>
 
@@ -85,10 +87,8 @@ namespace gfx {
 
             mFbh.idx = bgfx::kInvalidHandle;
 
-            bgfx::ShaderHandle vsh = loadShader("shaders/build/v_simple.bin");
-            bgfx::ShaderHandle fsh = loadShader("shaders/build/f_simple.bin");
-
-            mProgram = bgfx::createProgram(vsh, fsh,  true);
+            mShader = ShaderManager::instance().createShader(Path { "assets/shader_scripts/shader.lua" });
+            mShader->compile();
 
             // Reset window
             bgfx::reset(mWidth, mHeight, BGFX_RESET_VSYNC);
@@ -144,7 +144,7 @@ namespace gfx {
             bgfx::setState(BGFX_STATE_DEFAULT);
 
             // Submit primitive for rendering to view 0.
-            bgfx::submit(0, mProgram);
+            mShader->bind(0);
 
             bgfx::frame();
         }
@@ -157,9 +157,10 @@ namespace gfx {
         bgfx::IndexBufferHandle mIbh;
         bgfx::FrameBufferHandle mFbh;
 
-        bgfx::ProgramHandle mProgram;
         std::unique_ptr<Texture2D> mTexture { nullptr };
         bgfx::UniformHandle mTextureUniform = BGFX_INVALID_HANDLE;
+
+        Shader *mShader { nullptr };
     };
 
     std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(int width, int height) {
