@@ -17,13 +17,18 @@ namespace gfx {
             auto path = std::string { lua::checkArg<const char*>(L, 2) };
 
             ShaderStage new_stage;
-            if (shaderType == "Fragment") {
-                new_stage.type = ShaderType::Fragment;
-            } else if (shaderType == "Vertex") {
-                new_stage.type = ShaderType::Vertex;
-            } else {
-                // TODO throw error or handle case
+
+            static std::unordered_map<std::string, ShaderType> shaderTypeMap {
+                { "Vertex", ShaderType::Vertex },
+                { "Fragment", ShaderType::Fragment }
+            };
+
+            auto shaderTypeIt = shaderTypeMap.find(shaderType);
+            if (shaderTypeIt == shaderTypeMap.end()) {
+                throw std::runtime_error("Invalid shader type");
             }
+
+            new_stage.type = shaderTypeIt->second;
 
             FileReader fileReader { path };
             new_stage.data = fileReader.getFileContent();
