@@ -1,6 +1,7 @@
 #pragma once
 
 #include "allocator.h"
+#include "platform/gcc.h"
 
 template<typename T>
 class Vector {
@@ -35,11 +36,20 @@ public:
        mData = p;
    }
 
+   ~Vector() {
+       if (!mData) {
+           return;
+       }
+
+       destructItems();
+       mAllocator.deallocate(mData);
+   }
+
    Vector(const Vector &rhs) = delete;
    Vector& operator=(const Vector &rhs) = delete;
 
-   T* begin() const { return mData; }
-   T* end() const {
+   constexpr ALWAYS_INLINE T* begin() const { return mData; }
+   constexpr ALWAYS_INLINE T* end() const {
        if (mData == nullptr) {
            return nullptr;
        }
@@ -47,11 +57,11 @@ public:
        return mData + mSize;
    }
 
-   T& operator[](const std::size_t index) const {
+   constexpr ALWAYS_INLINE T& operator[](const std::size_t index) const {
        return mData[index];
    }
 
-   std::size_t size() const { return mSize; }
+   [[nodiscard]] constexpr ALWAYS_INLINE std::size_t size() const { return mSize; }
 
    void push(T&& value) {
        auto size = mSize;
@@ -93,11 +103,18 @@ public:
             mSize = newSize;
         }
    }
+
 protected:
     Allocator &mAllocator;
     T *mData;
     std::size_t mCapacity;
     std::size_t mSize;
+
+    void destructItems() {
+        for (auto i = 0; i < mSize; ++i) {
+            mData[i].~T();
+        }
+    }
 
     void expand() {
         reserve(mCapacity < 4 ? 4 : mCapacity * 1.5);
