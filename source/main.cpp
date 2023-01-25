@@ -13,17 +13,6 @@ constexpr int HEIGHT = 480;
 
 auto main() -> int {
     auto allocator = std::make_unique<ListAllocator>(1024 * 1024 * 10, ListAllocator::PlacementPolicy::First);
-    auto testVector = Vector<int>(*allocator);
-
-    testVector.push(1);
-    testVector.push(5);
-    testVector.push(8);
-    testVector.push(10);
-    testVector.push(20);
-
-    for (int i : testVector) {
-        std::cout << i << std::endl;
-    }
 
     AdWindow window { math::Size { WIDTH, HEIGHT }, "Ad Render Demo" };
     window.initialize();
