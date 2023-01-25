@@ -25,20 +25,13 @@ protected:
 
 class ListAllocator : public Allocator {
 public:
-    enum class PlacementPolicy {
-        First,
-        Best,
-    };
-
-    ListAllocator(std::size_t size, PlacementPolicy policy);
+    explicit ListAllocator(std::size_t size);
     ~ListAllocator();
 
     void* allocate(std::size_t size, std::size_t alignment) override;
     void deallocate(void* pointer) override;
     void reset();
 private:
-    PlacementPolicy mPolicy { PlacementPolicy::First };
-
     struct FreeBlock {
         std::size_t size;
         FreeBlock* next;

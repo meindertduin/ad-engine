@@ -30,9 +30,8 @@ inline constexpr std::size_t calculatePadding(std::size_t size, std::size_t alig
     return padding;
 }
 
-ListAllocator::ListAllocator(std::size_t size, ListAllocator::PlacementPolicy policy)
+ListAllocator::ListAllocator(std::size_t size)
     : Allocator(size)
-    , mPolicy(policy)
 {
     mStart = malloc(size);
     reset();
