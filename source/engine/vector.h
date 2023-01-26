@@ -115,8 +115,12 @@ protected:
     std::size_t mCapacity;
     std::size_t mSize;
 
-    void destructItems() {
-        for (auto i = 0; i < mSize; ++i) {
+    void destructItems(int from = 0, int to = -1) {
+        if (to == -1) {
+            to = mSize;
+        }
+
+        for (auto i = from; i < to; i++) {
             mData[i].~T();
         }
     }

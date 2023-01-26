@@ -17,7 +17,7 @@ namespace gfx {
             auto shaderType = std::string { lua::checkArg<const char*>(L, 1) };
             auto path = std::string { lua::checkArg<const char*>(L, 2) };
 
-            ShaderStage new_stage { Engine::instance().allocator() };
+            ShaderStage newStage {Engine::instance().allocator() };
 
             static std::unordered_map<std::string, ShaderType> shaderTypeMap {
                 { "Vertex", ShaderType::Vertex },
@@ -29,17 +29,20 @@ namespace gfx {
                 throw std::runtime_error("Invalid shader type");
             }
 
-            new_stage.type = shaderTypeIt->second;
+            newStage.type = shaderTypeIt->second;
 
             FileReader fileReader { path };
             auto fileContent = fileReader.getFileContent();
+            newStage.data.reserve(fileContent.size());
+
+            // TODO - Implement a back_inserter for new Vector type and read from stream in fileReader
             for (auto &c : fileContent) {
-                new_stage.data.push(c);
+                newStage.data.push(c);
             }
 
-            new_stage.path = Path { path };
+            newStage.path = Path {path };
 
-            shader->addStage(std::move(new_stage));
+            shader->addStage(std::move(newStage));
 
             return 0;
         }
