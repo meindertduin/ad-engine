@@ -82,10 +82,10 @@ void *ListAllocator::allocate(std::size_t size, std::size_t alignment) {
     mFreeBlocks.remove(current, previous);
 
     // Calculate the address of the new allocated block
-    auto headerAddress = (AllocatedBlock*)(current);
+    auto headerAddress = (std::size_t)(current);
 
-    headerAddress->size = size;
-    headerAddress->padding = padding;
+    ((AllocatedBlock*) headerAddress)->size = size;
+    ((AllocatedBlock*) headerAddress)->padding = padding;
 
     auto dataAddress = headerAddress + sizeof(AllocatedBlock);
 
@@ -100,12 +100,15 @@ void ListAllocator::deallocate(void *pointer) {
     auto headerAddress = currentAddress - sizeof(AllocatedBlock);
     auto allocatedHeader = (AllocatedBlock*)(headerAddress);
 
-    auto newFreeBlock = (Node*)(headerAddress);
-    newFreeBlock->data.size = allocatedHeader->size;
+    auto blockSize = allocatedHeader->size + allocatedHeader->padding + sizeof(AllocatedBlock);
+
+    auto newFreeBlock = (Node*)(currentAddress);
+    newFreeBlock->data.size = blockSize;
     newFreeBlock->next = nullptr;
 
     auto* current = mFreeBlocks.head;
     Node* previous = nullptr;
+
     while (current != nullptr) {
         if ((std::size_t)(current) > headerAddress) {
             // Found the block that is after the new free block
