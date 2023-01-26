@@ -43,4 +43,6 @@ private:
 
     using Node = SinglyLinkedList<FreeBlock>::Node;
     SinglyLinkedList<FreeBlock> mFreeBlocks = SinglyLinkedList<FreeBlock>();
+
+    void tryMergeFreedBlock(Node* freeNode, Node* previousNode);
 };

@@ -70,7 +70,9 @@ void *ListAllocator::allocate(std::size_t size, std::size_t alignment) {
     if (newFreeBlockSize > 0) {
         // TODO - what if the new free block is smaller than the header size?
         // There is space left for a new free block
-        auto newFreeBlock = (Node*) (current + requiredSize);
+        auto currentAddress = (std::size_t) current;
+        auto newFreeBlock = (Node*)(currentAddress + requiredSize);
+
         newFreeBlock->data.size = newFreeBlockSize;
         newFreeBlock->next = current->next;
 
@@ -102,7 +104,7 @@ void ListAllocator::deallocate(void *pointer) {
 
     auto blockSize = allocatedHeader->size + allocatedHeader->padding + sizeof(AllocatedBlock);
 
-    auto newFreeBlock = (Node*)(currentAddress);
+    auto newFreeBlock = (Node*)(headerAddress);
     newFreeBlock->data.size = blockSize;
     newFreeBlock->next = nullptr;
 
@@ -110,7 +112,7 @@ void ListAllocator::deallocate(void *pointer) {
     Node* previous = nullptr;
 
     while (current != nullptr) {
-        if ((std::size_t)(current) > headerAddress) {
+        if ((std::size_t)(current) >= headerAddress) {
             // Found the block that is after the new free block
             mFreeBlocks.insert(newFreeBlock, previous);
             break;
@@ -121,7 +123,9 @@ void ListAllocator::deallocate(void *pointer) {
         current = current->next;
     }
 
-    mUsed -= (sizeof(AllocatedBlock) + newFreeBlock->data.size + allocatedHeader->padding);
+    mUsed -= blockSize;
+
+    tryMergeFreedBlock(newFreeBlock, previous);
 }
 
 void ListAllocator::reset() {
@@ -132,4 +136,30 @@ void ListAllocator::reset() {
     firstNode->next = nullptr;
     mFreeBlocks.head = nullptr;
     mFreeBlocks.insert(firstNode, nullptr);
+}
+
+void ListAllocator::tryMergeFreedBlock(ListAllocator::Node *freeNode, ListAllocator::Node *previousNode) {
+    auto nextNode = freeNode->next;
+
+    if (nextNode != nullptr) {
+        auto nextNodeAddress = (std::size_t)(nextNode);
+        auto freeNodeAddress = (std::size_t)(freeNode);
+
+        if (nextNodeAddress == freeNodeAddress + freeNode->data.size) {
+            // Merge with the next block
+            freeNode->data.size += nextNode->data.size;
+            mFreeBlocks.remove(nextNode, freeNode);
+        }
+    }
+
+    if (previousNode != nullptr) {
+        auto previousNodeAddress = (std::size_t)(previousNode);
+        auto freeNodeAddress = (std::size_t)(freeNode);
+
+        if (previousNodeAddress + previousNode->data.size == freeNodeAddress) {
+            // Merge with the previous block
+            previousNode->data.size += freeNode->data.size;
+            mFreeBlocks.remove(freeNode, previousNode);
+        }
+    }
 }
