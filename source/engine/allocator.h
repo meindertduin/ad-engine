@@ -32,7 +32,7 @@ public:
     void deallocate(void* pointer) override;
     void reset();
 private:
-    struct FreeBlock : public Node {
+    struct FreeBlock {
         std::size_t size { 0 };
     };
 
@@ -41,5 +41,6 @@ private:
         uint8_t padding;
     };
 
+    using Node = SinglyLinkedList<FreeBlock>::Node;
     SinglyLinkedList<FreeBlock> mFreeBlocks = SinglyLinkedList<FreeBlock>();
 };

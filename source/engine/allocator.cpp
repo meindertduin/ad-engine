@@ -46,46 +46,86 @@ void *ListAllocator::allocate(std::size_t size, std::size_t alignment) {
     auto padding = calculatePadding(mUsed, alignment, sizeof(AllocatedBlock));
     auto requiredSize = size + padding + sizeof(AllocatedBlock);
 
-    auto* current = reinterpret_cast<FreeBlock*>(mFreeBlocks.head);
-    FreeBlock* previous = nullptr;
+    auto* current = mFreeBlocks.head;
+    Node* previous = nullptr;
 
     while (current != nullptr) {
-        if (current->size >= requiredSize) {
+        if (current->data.size >= requiredSize) {
             // Found a block that fits
-
-            // Calculate the new free block size
-            auto newFreeBlockSize = current->size - requiredSize;
-            if (newFreeBlockSize > 0) {
-                // There is space left for a new free block
-                auto newFreeBlock = (FreeBlock*)(current + requiredSize);
-                newFreeBlock->size = newFreeBlockSize;
-                newFreeBlock->next = current->next;
-
-                // Insert the new free block
-                mFreeBlocks.insert(newFreeBlock, previous);
-            }
-
-            // Remove the node from the free-headers list
-            mFreeBlocks.remove(current, previous);
+            break;
         }
 
         // Move to next block
         previous = current;
-        current = reinterpret_cast<FreeBlock*>(current->next);
+        current = current->next;
     }
 
-    return nullptr;
+    if (current->data.size < requiredSize) {
+        // No block with enough memory found
+        throw std::bad_alloc();
+    }
+
+    // Calculate the new free block size
+    auto newFreeBlockSize = current->data.size - requiredSize;
+    if (newFreeBlockSize > 0) {
+        // TODO - what if the new free block is smaller than the header size?
+        // There is space left for a new free block
+        auto newFreeBlock = (Node*) (current + requiredSize);
+        newFreeBlock->data.size = newFreeBlockSize;
+        newFreeBlock->next = current->next;
+
+        // Insert the new free block
+        mFreeBlocks.insert(newFreeBlock, current);
+    }
+
+    // Remove the node from the free-headers list
+    mFreeBlocks.remove(current, previous);
+
+    // Calculate the address of the new allocated block
+    auto headerAddress = (AllocatedBlock*)(current);
+
+    headerAddress->size = size;
+    headerAddress->padding = padding;
+
+    auto dataAddress = headerAddress + sizeof(AllocatedBlock);
+
+    mUsed += requiredSize;
+    mPeak = std::max(mPeak, mUsed);
+
+    return (void*) dataAddress;
 }
 
 void ListAllocator::deallocate(void *pointer) {
+    auto currentAddress = (std::size_t)(pointer);
+    auto headerAddress = currentAddress - sizeof(AllocatedBlock);
+    auto allocatedHeader = (AllocatedBlock*)(headerAddress);
 
+    auto newFreeBlock = (Node*)(headerAddress);
+    newFreeBlock->data.size = allocatedHeader->size;
+    newFreeBlock->next = nullptr;
+
+    auto* current = mFreeBlocks.head;
+    Node* previous = nullptr;
+    while (current != nullptr) {
+        if ((std::size_t)(current) > headerAddress) {
+            // Found the block that is after the new free block
+            mFreeBlocks.insert(newFreeBlock, previous);
+            break;
+        }
+
+        // Move to next block
+        previous = current;
+        current = current->next;
+    }
+
+    mUsed -= (sizeof(AllocatedBlock) + newFreeBlock->data.size + allocatedHeader->padding);
 }
 
 void ListAllocator::reset() {
     mUsed = 0;
     mPeak = 0;
-    auto firstNode = (FreeBlock*) mStart;
-    firstNode->size = mTotalSize;
+    auto firstNode = (Node*) mStart;
+    firstNode->data.size = mTotalSize;
     firstNode->next = nullptr;
     mFreeBlocks.head = nullptr;
     mFreeBlocks.insert(firstNode, nullptr);

@@ -1,16 +1,14 @@
 #pragma once
 
-struct Node {
-    Node* next { nullptr };
-};
-
-template<typename T>
-concept DerivedFromNode = std::is_base_of_v<Node, T>;
-
-template<DerivedFromNode T>
+ template<typename T>
 class SinglyLinkedList {
 public:
-    Node *head { nullptr };
+    struct Node {
+        T data;
+        Node* next = nullptr;
+    };
+
+    Node *head;
 
     inline void insert_back(Node* newNode) {
         if (head != nullptr) {

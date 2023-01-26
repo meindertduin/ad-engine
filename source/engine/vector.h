@@ -17,7 +17,7 @@ public:
       }
    }
 
-   Vector(const Vector &&rhs) noexcept
+   Vector(Vector &&rhs) noexcept
       : mAllocator(rhs.mAllocator)
       , mData(nullptr)
       , mCapacity(0)
@@ -55,6 +55,10 @@ public:
        }
 
        return mData + mSize;
+   }
+
+   constexpr ALWAYS_INLINE T* data() {
+       return mData;
    }
 
    constexpr ALWAYS_INLINE T& operator[](const std::size_t index) const {
@@ -96,6 +100,7 @@ public:
                 for (auto i = 0; i < mSize; ++i) {
                     new (newData + i) T(std::move(mData[i]));
                 }
+
                 mAllocator.deallocate(mData);
             }
             mData = newData;

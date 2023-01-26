@@ -6,4 +6,5 @@ set(ENGINE_SOURCES
     source/engine/window.cpp
     source/engine/file_reader.cpp
     source/engine/allocator.cpp
+    source/engine/engine.cpp
 )

@@ -6,6 +6,8 @@
 #include "platform/gcc.h"
 #include "engine/path.h"
 
+#include "engine/vector.h"
+
 namespace gfx {
     enum class ShaderType {
         Vertex,
@@ -13,16 +15,20 @@ namespace gfx {
     };
 
     struct ShaderStage {
+        explicit ShaderStage(Allocator &allocator)
+            : data(allocator)
+        {}
+
         ShaderType type;
         Path path;
-        std::string data;
+        Vector<char> data;
     };
 
     class Shader {
     public:
         ~Shader();
 
-        void addStage(const gfx::ShaderStage& stage);
+        void addStage(gfx::ShaderStage&& stage);
         void compile();
         void bind(uint16_t viewId);
 

@@ -1,6 +1,7 @@
 #include "shader_manager.h"
 #include "lua/helpers.h"
 #include "engine/file_reader.h"
+#include "engine/engine.h"
 
 namespace gfx {
     namespace lua_api {
@@ -16,7 +17,7 @@ namespace gfx {
             auto shaderType = std::string { lua::checkArg<const char*>(L, 1) };
             auto path = std::string { lua::checkArg<const char*>(L, 2) };
 
-            ShaderStage new_stage;
+            ShaderStage new_stage { Engine::instance().allocator() };
 
             static std::unordered_map<std::string, ShaderType> shaderTypeMap {
                 { "Vertex", ShaderType::Vertex },
@@ -31,10 +32,14 @@ namespace gfx {
             new_stage.type = shaderTypeIt->second;
 
             FileReader fileReader { path };
-            new_stage.data = fileReader.getFileContent();
+            auto fileContent = fileReader.getFileContent();
+            for (auto &c : fileContent) {
+                new_stage.data.push(c);
+            }
+
             new_stage.path = Path { path };
 
-            shader->addStage(new_stage);
+            shader->addStage(std::move(new_stage));
 
             return 0;
         }
