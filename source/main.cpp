@@ -3,6 +3,8 @@
 #include "engine/window.h"
 #include "gfx/render_pipeline.h"
 
+#include <iostream>
+
 constexpr int WIDTH = 640;
 constexpr int HEIGHT = 480;
 

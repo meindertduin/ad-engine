@@ -1,6 +1,7 @@
 #include "shader_manager.h"
 #include "lua/helpers.h"
 #include "engine/file_reader.h"
+#include "engine/engine.h"
 
 namespace gfx {
     namespace lua_api {
@@ -16,7 +17,7 @@ namespace gfx {
             auto shaderType = std::string { lua::checkArg<const char*>(L, 1) };
             auto path = std::string { lua::checkArg<const char*>(L, 2) };
 
-            ShaderStage new_stage;
+            ShaderStage newStage {Engine::instance().allocator() };
 
             static std::unordered_map<std::string, ShaderType> shaderTypeMap {
                 { "Vertex", ShaderType::Vertex },
@@ -28,13 +29,20 @@ namespace gfx {
                 throw std::runtime_error("Invalid shader type");
             }
 
-            new_stage.type = shaderTypeIt->second;
+            newStage.type = shaderTypeIt->second;
 
             FileReader fileReader { path };
-            new_stage.data = fileReader.getFileContent();
-            new_stage.path = Path { path };
+            auto fileContent = fileReader.getFileContent();
+            newStage.data.reserve(fileContent.size());
 
-            shader->addStage(new_stage);
+            // TODO - Implement a back_inserter for new Vector type and read from stream in fileReader
+            for (auto &c : fileContent) {
+                newStage.data.push(c);
+            }
+
+            newStage.path = Path {path };
+
+            shader->addStage(std::move(newStage));
 
             return 0;
         }
