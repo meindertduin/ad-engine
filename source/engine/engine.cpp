@@ -1,5 +1,6 @@
-//
-// Created by dikkie on 1/26/23.
-//
-
 #include "engine.h"
+#include "gfx/shader_manager.h"
+
+void Engine::shutdown() {
+    gfx::ShaderManager::instance().cleanup();
+}

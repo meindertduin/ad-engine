@@ -15,6 +15,10 @@ namespace gfx {
 
         Shader* createShader(const Path &path);
         Shader* getShader(const Path &path);
+
+        void cleanup() {
+            mShaders.clear();
+        }
     private:
         ShaderManager() = default;
 

@@ -2,10 +2,8 @@
 
 namespace gfx {
     Shader::~Shader() {
-        bgfx::destroy(mProgramHandle);
-        if (mDestroyShaders) {
-            bgfx::destroy(mVertexShaderHandle);
-            bgfx::destroy(mFragmentShaderHandle);
+        if (compiled()) {
+            bgfx::destroy(mProgramHandle);
         }
     }
 
@@ -24,7 +22,7 @@ namespace gfx {
             }
         }
 
-        mProgramHandle = bgfx::createProgram(mVertexShaderHandle, mFragmentShaderHandle, true);
+        mProgramHandle = bgfx::createProgram(mVertexShaderHandle, mFragmentShaderHandle, mDestroyShaders);
         mCompiled = true;
     }
 

@@ -2,6 +2,7 @@
 
 #include "engine/window.h"
 #include "gfx/render_pipeline.h"
+#include "engine/engine.h"
 
 #include <iostream>
 
@@ -20,6 +21,8 @@ auto main() -> int {
 
         renderPipeline->render();
     }
+
+    Engine::instance().shutdown();
 
     return 0;
 }
