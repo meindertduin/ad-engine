@@ -63,7 +63,7 @@ namespace gfx {
     }
 
     Shader* ShaderManager::createShader(const Path &path) {
-        auto shader = std::make_unique<Shader>();
+        auto shader = std::make_unique<Shader>(Engine::instance().allocator());
 
         FileReader fileReader { path.value() };
         auto fileContent = fileReader.getFileContent();

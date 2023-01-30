@@ -24,8 +24,20 @@ namespace gfx {
         Vector<char> data;
     };
 
+    struct Uniform {
+        std::string name;
+
+        bgfx::UniformHandle handle;
+        bgfx::UniformType::Enum type;
+    };
+
     class Shader {
     public:
+        explicit Shader(Allocator &allocator)
+            : mStages(allocator)
+            , mUniforms(allocator)
+        {}
+
         ~Shader();
 
         void addStage(gfx::ShaderStage&& stage);
@@ -45,9 +57,10 @@ namespace gfx {
         bgfx::ShaderHandle mVertexShaderHandle = BGFX_INVALID_HANDLE;
         bgfx::ShaderHandle mFragmentShaderHandle = BGFX_INVALID_HANDLE;
 
-        bool mCompiled;
+        bool mCompiled { false };
         bool mDestroyShaders { true };
 
-        std::vector<ShaderStage> mStages;
+        Vector<ShaderStage> mStages;
+        Vector<Uniform> mUniforms;
     };
 }
