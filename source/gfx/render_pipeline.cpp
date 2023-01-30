@@ -73,8 +73,6 @@ namespace gfx {
         }
 
         ~RenderPipelineImpl() override {
-            ShaderManager::instance().cleanup();
-
             bgfx::destroy(mTextureUniform);
 
             bgfx::destroy(mIbh);
