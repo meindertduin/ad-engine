@@ -36,7 +36,7 @@ namespace gfx {
             return mProgramHandle;
         }
 
-        [[nodiscard]] constexpr ALWAYS_INLINE bool isCompiled() const {
+        [[nodiscard]] constexpr ALWAYS_INLINE bool compiled() const {
             return mCompiled;
         }
     private:

@@ -72,6 +72,15 @@ namespace gfx {
         {
         }
 
+        ~RenderPipelineImpl() override {
+            ShaderManager::instance().cleanup();
+
+            bgfx::destroy(mTextureUniform);
+
+            bgfx::destroy(mIbh);
+            bgfx::destroy(mVbh);
+        }
+
         void initialize() override {
             PosTextVertex::init();
 
@@ -148,7 +157,6 @@ namespace gfx {
 
             bgfx::frame();
         }
-
     private:
         int mWidth;
         int mHeight;
@@ -157,8 +165,9 @@ namespace gfx {
         bgfx::IndexBufferHandle mIbh;
         bgfx::FrameBufferHandle mFbh;
 
-        std::unique_ptr<Texture2D> mTexture { nullptr };
         bgfx::UniformHandle mTextureUniform = BGFX_INVALID_HANDLE;
+
+        std::unique_ptr<Texture2D> mTexture { nullptr };
 
         Shader *mShader { nullptr };
     };
