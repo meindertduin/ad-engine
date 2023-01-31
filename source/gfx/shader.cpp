@@ -3,6 +3,7 @@
 namespace gfx {
     Shader::~Shader() {
         if (compiled()) {
+            bgfx::destroy(mParamsUniformHandle);
             bgfx::destroy(mProgramHandle);
         }
     }
@@ -23,10 +24,20 @@ namespace gfx {
         }
 
         mProgramHandle = bgfx::createProgram(mVertexShaderHandle, mFragmentShaderHandle, mDestroyShaders);
+        mParamsUniformHandle = bgfx::createUniform("u_params", bgfx::UniformType::Vec4);
+
         mCompiled = true;
     }
 
     void Shader::bind(uint16_t viewId) {
+        float params[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
+
+        bgfx::setUniform(mParamsUniformHandle, params);
+
         bgfx::submit(viewId, mProgramHandle);
+    }
+
+    void Shader::addUniform(const Uniform &uniform) {
+        mUniforms.push(uniform);
     }
 }

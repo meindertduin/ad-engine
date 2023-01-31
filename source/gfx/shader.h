@@ -8,6 +8,8 @@
 
 #include "engine/vector.h"
 
+#include <glm/glm.hpp>
+
 namespace gfx {
     enum class ShaderType {
         Vertex,
@@ -26,9 +28,11 @@ namespace gfx {
 
     struct Uniform {
         std::string name;
-
-        bgfx::UniformHandle handle;
         bgfx::UniformType::Enum type;
+
+        union {
+            glm::vec4 v4;
+        } value;
     };
 
     class Shader {
@@ -51,6 +55,8 @@ namespace gfx {
         [[nodiscard]] constexpr ALWAYS_INLINE bool compiled() const {
             return mCompiled;
         }
+
+        void addUniform(const Uniform &uniform);
     private:
         bgfx::ProgramHandle mProgramHandle = BGFX_INVALID_HANDLE;
 
@@ -62,5 +68,7 @@ namespace gfx {
 
         Vector<ShaderStage> mStages;
         Vector<Uniform> mUniforms;
+
+        bgfx::UniformHandle mParamsUniformHandle = BGFX_INVALID_HANDLE;
     };
 }
