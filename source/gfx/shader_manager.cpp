@@ -70,23 +70,6 @@ namespace gfx {
 
             uniform.type = uniformTypeIt->second;
 
-            if (lua_gettop(L) > 2) {
-                switch (lua_type(L, 3)) {
-                    case LUA_TTABLE: {
-                        auto len = luaL_len(L, 3);
-                        switch (len) {
-                            case 4:
-                                uniform.value.v4 = lua::checkArg<glm::vec4>(L, 3);
-                                break;
-                            default:
-                                luaL_error(L, "Uniform %s is not supported", uniformName.c_str());
-                                break;
-                        }
-                        break;
-                    }
-                }
-            }
-
             shader->addUniform(uniform);
         }
 

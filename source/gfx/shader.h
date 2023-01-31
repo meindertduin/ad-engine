@@ -29,10 +29,6 @@ namespace gfx {
     struct Uniform {
         std::string name;
         bgfx::UniformType::Enum type;
-
-        union {
-            glm::vec4 v4;
-        } value;
     };
 
     class Shader {
