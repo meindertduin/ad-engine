@@ -28,7 +28,15 @@ namespace gfx {
 
     struct Uniform {
         std::string name;
-        bgfx::UniformType::Enum type;
+
+       enum class Type {
+            Float,
+            Vec2,
+            Vec3,
+            Vec4,
+            Mat3,
+            Mat4
+        } type;
     };
 
     class Shader {

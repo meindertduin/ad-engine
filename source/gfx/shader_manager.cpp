@@ -56,11 +56,13 @@ namespace gfx {
             Uniform uniform;
             uniform.name = uniformName;
 
-            static std::unordered_map<std::string, bgfx::UniformType::Enum> uniformTypeMap{
-                    {"sampler", bgfx::UniformType::Sampler},
-                    {"vec4",    bgfx::UniformType::Vec4},
-                    {"mat3",    bgfx::UniformType::Mat3},
-                    {"mat4",    bgfx::UniformType::Mat4}
+            static std::unordered_map<std::string, Uniform::Type> uniformTypeMap{
+                { "Float", Uniform::Type::Float },
+                { "Vec2", Uniform::Type::Vec2 },
+                { "Vec3", Uniform::Type::Vec3 },
+                { "Vec4", Uniform::Type::Vec4 },
+                { "Mat3", Uniform::Type::Mat3 },
+                { "Mat4", Uniform::Type::Mat4 }
             };
 
             auto uniformTypeIt = uniformTypeMap.find(uniformType);

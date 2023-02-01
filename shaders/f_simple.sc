@@ -2,9 +2,9 @@ $input v_texcoord0
 
 #include <bgfx_shader.sh>
 
-uniform vec4 u_params[1];
+uniform vec4 u_params[12];
 
-#define u_k u_params[0].x
+#define u_k u_params[1].w
 
 SAMPLER2D(s_cubeTex, 0);
 

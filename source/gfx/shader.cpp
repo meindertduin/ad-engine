@@ -24,15 +24,15 @@ namespace gfx {
         }
 
         mProgramHandle = bgfx::createProgram(mVertexShaderHandle, mFragmentShaderHandle, mDestroyShaders);
-        mParamsUniformHandle = bgfx::createUniform("u_params", bgfx::UniformType::Vec4);
+        mParamsUniformHandle = bgfx::createUniform("u_params", bgfx::UniformType::Vec4, 12);
 
         mCompiled = true;
     }
 
     void Shader::bind(uint16_t viewId) {
-        float params[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
+        float params[8] = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 
-        bgfx::setUniform(mParamsUniformHandle, params);
+        bgfx::setUniform(mParamsUniformHandle, params, 12);
 
         bgfx::submit(viewId, mProgramHandle);
     }
