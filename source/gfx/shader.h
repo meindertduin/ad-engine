@@ -8,6 +8,8 @@
 
 #include "engine/vector.h"
 
+#include <glm/glm.hpp>
+
 namespace gfx {
     enum class ShaderType {
         Vertex,
@@ -24,8 +26,26 @@ namespace gfx {
         Vector<char> data;
     };
 
+    struct Uniform {
+        std::string name;
+
+       enum class Type {
+            Float,
+            Vec2,
+            Vec3,
+            Vec4,
+            Mat3,
+            Mat4
+        } type;
+    };
+
     class Shader {
     public:
+        explicit Shader(Allocator &allocator)
+            : mStages(allocator)
+            , mUniforms(allocator)
+        {}
+
         ~Shader();
 
         void addStage(gfx::ShaderStage&& stage);
@@ -39,15 +59,24 @@ namespace gfx {
         [[nodiscard]] constexpr ALWAYS_INLINE bool compiled() const {
             return mCompiled;
         }
+
+        [[nodiscard]] constexpr ALWAYS_INLINE const Vector<Uniform>& uniforms() const {
+            return mUniforms;
+        }
+
+        void addUniform(const Uniform &uniform);
     private:
         bgfx::ProgramHandle mProgramHandle = BGFX_INVALID_HANDLE;
 
         bgfx::ShaderHandle mVertexShaderHandle = BGFX_INVALID_HANDLE;
         bgfx::ShaderHandle mFragmentShaderHandle = BGFX_INVALID_HANDLE;
 
-        bool mCompiled;
+        bool mCompiled { false };
         bool mDestroyShaders { true };
 
-        std::vector<ShaderStage> mStages;
+        Vector<ShaderStage> mStages;
+        Vector<Uniform> mUniforms;
+
+        bgfx::UniformHandle mParamsUniformHandle = BGFX_INVALID_HANDLE;
     };
 }
