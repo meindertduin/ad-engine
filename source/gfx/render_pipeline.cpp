@@ -9,6 +9,8 @@
 #include <fstream>
 
 namespace gfx {
+    constexpr int MaxShaderParams = 16;
+
     bgfx::ShaderHandle loadShader(const char* _name) {
         char* data = new char[2048];
         std::ifstream file;
@@ -82,6 +84,7 @@ namespace gfx {
         void initialize() override {
             PosTextVertex::init();
 
+            mShaderParamsUniformHandle = bgfx::createUniform("u_params", bgfx::UniformType::Vec4, MaxShaderParams);
             mTexture = Texture2D::loadFromFile("assets/bricks.png");
             mTextureUniform = bgfx::createUniform("v_texCoord0", bgfx::UniformType::Sampler);
 
@@ -150,7 +153,9 @@ namespace gfx {
             mTexture->render(mTextureUniform);
             bgfx::setState(BGFX_STATE_DEFAULT);
 
-            // Submit primitive for rendering to view 0.
+            float params[8] = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+            bgfx::setUniform(mShaderParamsUniformHandle, params, MaxShaderParams);
+
             mShader->bind(0);
 
             bgfx::frame();
@@ -164,6 +169,7 @@ namespace gfx {
         bgfx::FrameBufferHandle mFbh;
 
         bgfx::UniformHandle mTextureUniform = BGFX_INVALID_HANDLE;
+        bgfx::UniformHandle mShaderParamsUniformHandle = BGFX_INVALID_HANDLE;
 
         std::unique_ptr<Texture2D> mTexture { nullptr };
 

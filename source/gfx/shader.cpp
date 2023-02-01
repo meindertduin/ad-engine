@@ -30,10 +30,6 @@ namespace gfx {
     }
 
     void Shader::bind(uint16_t viewId) {
-        float params[8] = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-
-        bgfx::setUniform(mParamsUniformHandle, params, 12);
-
         bgfx::submit(viewId, mProgramHandle);
     }
 

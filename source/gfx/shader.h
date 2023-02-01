@@ -60,6 +60,10 @@ namespace gfx {
             return mCompiled;
         }
 
+        [[nodiscard]] constexpr ALWAYS_INLINE const Vector<Uniform>& uniforms() const {
+            return mUniforms;
+        }
+
         void addUniform(const Uniform &uniform);
     private:
         bgfx::ProgramHandle mProgramHandle = BGFX_INVALID_HANDLE;
