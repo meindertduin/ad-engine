@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <bitset>
+
 #include "platform/gcc.h"
 
 namespace game {

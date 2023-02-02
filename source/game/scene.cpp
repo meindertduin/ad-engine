@@ -1,5 +1,6 @@
 #include "scene.h"
 #include "engine/allocator.h"
+#include "render_world.h"
 
 #include <queue>
 #include <array>
@@ -60,6 +61,8 @@ namespace game {
                 mFreeObjects.push(Object { i });
             }
         }
+
+        RenderWorld mRenderWorld;
     };
 
     std::unique_ptr<Scene> Scene::createInstance(Allocator &allocator) {
