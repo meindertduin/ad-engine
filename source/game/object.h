@@ -4,10 +4,9 @@
 #include <bitset>
 
 #include "platform/gcc.h"
+#include "constants.h"
 
 namespace game {
-
-    constexpr uint32_t MaxComponents = 32;
     using Signature = std::bitset<MaxComponents>;
 
     class Object {

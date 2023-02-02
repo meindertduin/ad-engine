@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <stdexcept>
+#include "constants.h"
 
 namespace game {
     using ComponentType = uint32_t;
@@ -35,7 +36,7 @@ namespace game {
             }
 
             ComponentType registerType() {
-                if (sComponentCount >= 32) {
+                if (sComponentCount >= MaxComponents) {
                     throw std::runtime_error("Too many components");
                 }
 

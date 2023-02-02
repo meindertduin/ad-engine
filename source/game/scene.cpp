@@ -7,8 +7,6 @@
 #include <cassert>
 
 namespace game {
-    constexpr uint32_t MaxObjects = 1000;
-
     class SceneImpl : public Scene {
     public:
         explicit SceneImpl(Allocator &allocator)
@@ -58,7 +56,7 @@ namespace game {
 
         void initializeObjects() {
             for (uint32_t i = 0; i < MaxObjects; i++) {
-                mFreeObjects.push(Object { i });
+                mFreeObjects.emplace(i);
             }
         }
 
