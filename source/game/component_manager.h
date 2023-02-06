@@ -9,6 +9,11 @@
 namespace game {
     class ComponentManager {
     public:
+        ComponentManager() = default;
+
+        ComponentManager(const ComponentManager &) = delete;
+        ComponentManager &operator=(const ComponentManager &other) = delete;
+
         class IComponentArray {
         public:
             virtual ~IComponentArray() = default;
@@ -60,6 +65,10 @@ namespace game {
                 }
 
                 return &mComponents[object];
+            }
+
+            void entityDestroyed(Object object) override {
+                remove(object);
             }
 
             auto begin() { return mComponents.begin(); }
