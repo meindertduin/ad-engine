@@ -11,6 +11,6 @@ namespace game {
         void addSprite(Object object, const gfx::Sprite &sprite);
         void removeSprite(Object object);
     private:
-        std::map<uint32_t , gfx::Sprite> mSprites;
+        std::map<Object, gfx::Sprite> mSprites;
     };
 }

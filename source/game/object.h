@@ -27,7 +27,17 @@ namespace game {
             return mId != other.mId;
         }
 
+        auto operator <=>(const Object &other) const {
+            return mId <=> other.mId;
+        }
     private:
         uint32_t  mId;
     };
 }
+
+template<>
+struct std::hash<game::Object> {
+    auto operator()(const game::Object object) const -> size_t {
+        return hash<uint32_t>()(object.id());
+    }
+};
