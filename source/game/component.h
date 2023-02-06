@@ -1,12 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include <stdexcept>
 #include "constants.h"
+#include "component_registry.h"
 
 namespace game {
-    using ComponentType = uint32_t;
-
     namespace detail {
         template <typename T>
         class ComponentTypeRegister;
@@ -25,26 +23,6 @@ namespace game {
 
         friend class detail::ComponentTypeRegister<T>;
     };
-
-    namespace detail {
-        inline uint32_t sComponentCount = 0;
-
-        template<typename T>
-        struct ComponentTypeRegister {
-            ComponentTypeRegister() {
-                registerType();
-            }
-
-            ComponentType registerType() {
-                if (sComponentCount >= MaxComponents) {
-                    throw std::runtime_error("Too many components");
-                }
-
-                T::mType = sComponentCount++;
-                printf("Registered component type with id %d\n", T::mType);
-            }
-        };
-    }
 
 #define REGISTER_COMPONENT(type) \
     static inline game::detail::ComponentTypeRegister<type> gComponentTypeRegister_##type;

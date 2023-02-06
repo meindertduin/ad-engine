@@ -2,8 +2,7 @@
 #include "engine/allocator.h"
 #include "render_world.h"
 
-#include <queue>
-#include <array>
+#include "ecs.h"
 #include <cassert>
 
 namespace game {
@@ -12,7 +11,6 @@ namespace game {
         explicit SceneImpl(Allocator &allocator)
             : mAllocator(allocator)
         {
-            initializeObjects();
         }
 
         void update(float dt) override {
@@ -24,41 +22,18 @@ namespace game {
         }
 
         Object createObject() override {
-            if (mFreeObjects.empty()) {
-                throw std::runtime_error("Max objects amount exceeded.");
-            }
-
-            auto id = mFreeObjects.front();
-            mFreeObjects.pop();
-
-            mObjectCount++;
-
-            return Object { id };
+            return mEcs.createObject();
         }
 
         void destroyObject(Object object) override {
             assert(object.id() <= MaxObjects);
 
-            mFreeObjects.push(object);
-
-            mSignatures[object.id()].reset();
-            mFreeObjects.push(object);
-
-            mObjectCount--;
+            mEcs.destroyObject(object);
         }
 
     private:
+        Ecs mEcs;
         Allocator &mAllocator;
-
-        std::queue<Object> mFreeObjects;
-        std::array<Signature, MaxObjects> mSignatures;
-        uint32_t mObjectCount = 0;
-
-        void initializeObjects() {
-            for (uint32_t i = 0; i < MaxObjects; i++) {
-                mFreeObjects.emplace(i);
-            }
-        }
 
         RenderWorld mRenderWorld;
     };

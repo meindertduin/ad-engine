@@ -3,7 +3,7 @@
 #include "object.h"
 #include "gfx/sprite.h"
 
-#include <map>
+#include <unordered_map>
 
 namespace game {
     class RenderWorld {
@@ -11,6 +11,6 @@ namespace game {
         void addSprite(Object object, const gfx::Sprite &sprite);
         void removeSprite(Object object);
     private:
-        std::map<Object, gfx::Sprite> mSprites;
+        std::unordered_map<Object, gfx::Sprite> mSprites;
     };
 }

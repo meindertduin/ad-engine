@@ -5,5 +5,6 @@
 namespace gfx {
     class Sprite : public game::Component<Sprite> {
     public:
+        Sprite() noexcept = default;
     };
 }

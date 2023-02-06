@@ -1,7 +1,9 @@
 #pragma once
 
 #include "object.h"
-#include <map>
+#include "component_registry.h"
+#include "component_array.h"
+
 #include <stdexcept>
 #include <optional>
 #include <memory>
@@ -9,75 +11,14 @@
 namespace game {
     class ComponentManager {
     public:
-        ComponentManager() = default;
+        explicit ComponentManager(const ComponentRegistry &registry) {
+            for (const auto &[componentType, staticData] : registry.componentsStaticData()) {
+                mComponentArrays.insert({ componentType, staticData->createComponentArray() });
+            }
+        }
 
         ComponentManager(const ComponentManager &) = delete;
         ComponentManager &operator=(const ComponentManager &other) = delete;
-
-        class IComponentArray {
-        public:
-            virtual ~IComponentArray() = default;
-            virtual void entityDestroyed(Object object) = 0;
-        };
-
-        template <typename T>
-        class ComponentArray : public IComponentArray {
-        public:
-            void insert(Object object, T component) {
-                if (mComponents.find(object) != mComponents.end()) {
-                    throw std::runtime_error("Component already exists");
-                }
-
-                mComponents.insert({ object, component });
-
-                mSize++;
-            }
-
-            void remove(Object object) {
-                if (mComponents.find(object) == mComponents.end()) {
-                    throw std::runtime_error("Component does not exist");
-                }
-
-                mComponents.erase(object);
-
-                mSize--;
-            }
-
-            T &get(Object object) {
-                if (mComponents.find(object) == mComponents.end()) {
-                    throw std::runtime_error("Component does not exist");
-                }
-
-                return mComponents[object];
-            }
-
-            T* getPtr(Object object) {
-                if (mComponents.find(object) == mComponents.end()) {
-                    return nullptr;
-                }
-
-                return &mComponents[object];
-            }
-
-            std::optional<T*> tryGetPtr(Object object) {
-                if (mComponents.find(object) == mComponents.end()) {
-                    return std::nullopt;
-                }
-
-                return &mComponents[object];
-            }
-
-            void entityDestroyed(Object object) override {
-                remove(object);
-            }
-
-            auto begin() { return mComponents.begin(); }
-            auto end() { return mComponents.end(); }
-        private:
-            std::map<Object, T> mComponents { 128 };
-            size_t mSize { 0 };
-        };
-
 
         template<typename T>
         void addComponent(Object object, T component) {
@@ -119,6 +60,6 @@ namespace game {
             return std::static_pointer_cast<ComponentArray<T>>(mComponentArrays[T::type()]);
         }
     private:
-        std::map<uint32_t, std::shared_ptr<IComponentArray>> mComponentArrays;
+        std::unordered_map<ComponentType , std::shared_ptr<IComponentArray>> mComponentArrays;
     };
 }
