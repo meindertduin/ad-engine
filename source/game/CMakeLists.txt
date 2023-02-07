@@ -8,4 +8,5 @@ set(GAME_SOURCES
         source/game/object.cpp
         source/game/render_world.cpp
         source/game/component.cpp
+        source/game/transform.cpp
 )
