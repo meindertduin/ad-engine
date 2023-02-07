@@ -40,7 +40,7 @@ namespace game {
     };
 
     namespace detail {
-        static inline uint32_t sComponentCount = 0;
+        inline uint32_t sComponentCount = 0;
 
         template<typename T>
         struct ComponentTypeRegister {
