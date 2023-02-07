@@ -93,7 +93,7 @@ namespace game {
 
         void initializeObjects() {
             for (uint32_t i = 0; i < MaxObjects; i++) {
-                mFreeObjects.emplace(i);
+                mFreeObjects.emplace(i, this);
             }
         }
 

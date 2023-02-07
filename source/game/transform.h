@@ -5,6 +5,11 @@ namespace game {
     public:
         Transform() noexcept = default;
 
+        Transform(float x, float y) noexcept
+            : mX(x)
+            , mY(y)
+        {}
+
         [[nodiscard]] ALWAYS_INLINE constexpr float x() const {
             return mX;
         }
@@ -22,7 +27,7 @@ namespace game {
             mX = x;
             mY = y;
         }
-        
+
     private:
         float mX = 0.0f;
         float mY = 0.0f;

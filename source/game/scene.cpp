@@ -2,8 +2,9 @@
 #include "engine/allocator.h"
 #include "render_world.h"
 
-#include "ecs.h"
 #include <cassert>
+
+#include "ecs.h"
 
 namespace game {
     class SceneImpl : public Scene {
@@ -30,7 +31,6 @@ namespace game {
 
             mEcs.destroyObject(object);
         }
-
     private:
         Ecs mEcs;
         Allocator &mAllocator;
