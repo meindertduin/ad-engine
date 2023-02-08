@@ -114,13 +114,15 @@ namespace gfx {
 
         luaL_unref(root_state, LUA_REGISTRYINDEX, state_ref);
 
+        shader->compile();
+
         mShaderPathsIdsMap.insert({ path, mNextId });
         mShaders.insert({ mNextId, std::move(shader) });
 
         return ShaderHandle { mNextId++ };
     }
 
-    Shader* ShaderManager::get(int id) {
+    Shader* ShaderManager::get(uint32_t id) {
         return mShaders[id].get();
     }
 }

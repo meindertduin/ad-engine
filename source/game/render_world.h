@@ -2,15 +2,18 @@
 
 #include "object.h"
 #include "gfx/sprite.h"
+#include "scene.h"
 
-#include <unordered_map>
+#include "gfx/render_pipeline.h"
 
 namespace game {
     class RenderWorld {
     public:
-        void addSprite(Object object, const gfx::Sprite &sprite);
-        void removeSprite(Object object);
+        explicit RenderWorld(Scene &scene);
+
+        void render();
     private:
-        std::unordered_map<Object, gfx::Sprite> mSprites;
+        Scene &mScene;
+        std::unique_ptr<gfx::RenderPipeline> mRenderPipeline;
     };
 }

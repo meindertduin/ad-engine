@@ -5,6 +5,8 @@
 #include "object.h"
 
 namespace game {
+    class Ecs;
+
     class Scene {
     public:
         virtual ~Scene() = default;
@@ -16,5 +18,7 @@ namespace game {
 
         virtual Object createObject() = 0;
         virtual void destroyObject(Object object) = 0;
+
+        virtual Ecs& ecs() = 0;
     };
 }

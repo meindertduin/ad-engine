@@ -18,6 +18,7 @@ namespace gfx {
         }
 
         void setShader(ShaderHandle shader);
+        [[nodiscard]] constexpr ALWAYS_INLINE ShaderHandle shader() const { return mShader; }
     private:
         Allocator &mAllocator;
         Vector<Uniform> mUniforms;

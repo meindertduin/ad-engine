@@ -15,7 +15,7 @@ namespace gfx {
         }
 
         ShaderHandle createShader(const Path &path);
-        Shader* get(int id);
+        Shader* get(uint32_t id);
 
         void cleanup() {
             mShaderPathsIdsMap.clear();

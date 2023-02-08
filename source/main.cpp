@@ -30,7 +30,7 @@ auto main() -> int {
     while(!window.closed()) {
         window.pollEvents();
 
-        renderPipeline->render();
+        scene->render();
     }
 
     Engine::instance().shutdown();
