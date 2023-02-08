@@ -15,8 +15,14 @@ public:
     [[nodiscard]] constexpr ALWAYS_INLINE uint32_t id() const { return mId; }
 
     T* operator->() const {
-        return T::Manager::instance().get(mId);
+        return T::ManagerType::instance().get(mId);
     }
 private:
     uint32_t mId;
+};
+
+template<typename T>
+class Resource {
+public:
+    using ManagerType = T;
 };

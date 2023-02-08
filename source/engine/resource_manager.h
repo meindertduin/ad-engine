@@ -1,0 +1,8 @@
+//
+// Created by dikkie on 2/8/23.
+//
+
+#ifndef AD_ENGINE_RESOURCE_MANAGER_H
+#define AD_ENGINE_RESOURCE_MANAGER_H
+
+#endif //AD_ENGINE_RESOURCE_MANAGER_H

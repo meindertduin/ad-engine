@@ -7,6 +7,7 @@
 #include "engine/path.h"
 
 #include "engine/vector.h"
+#include "engine/resource.h"
 
 #include <glm/glm.hpp>
 
@@ -41,10 +42,8 @@ namespace gfx {
         } type;
     };
 
-    class Shader {
+    class Shader : public Resource<ShaderManager> {
     public:
-        using Manager = ShaderManager;
-
         explicit Shader(Allocator &allocator)
             : mStages(allocator)
             , mUniforms(allocator)
