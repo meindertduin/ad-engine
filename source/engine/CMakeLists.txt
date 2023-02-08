@@ -7,4 +7,5 @@ set(ENGINE_SOURCES
     source/engine/file_reader.cpp
     source/engine/allocator.cpp
     source/engine/engine.cpp
+    source/engine/resource.h
 )

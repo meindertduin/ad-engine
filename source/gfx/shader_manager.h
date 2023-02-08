@@ -2,6 +2,7 @@
 
 #include "shader.h"
 #include "engine/path.h"
+#include "engine/resource.h"
 #include <memory>
 #include <unordered_map>
 
@@ -13,15 +14,19 @@ namespace gfx {
             return sInstance;
         }
 
-        Shader* createShader(const Path &path);
-        Shader* getShader(const Path &path);
+        ShaderHandle createShader(const Path &path);
+        Shader* get(int id);
 
         void cleanup() {
+            mShaderPathsIdsMap.clear();
             mShaders.clear();
         }
     private:
         ShaderManager() = default;
 
-        std::unordered_map<Path, std::unique_ptr<Shader>> mShaders;
+        std::unordered_map<Path, uint32_t> mShaderPathsIdsMap;
+        std::unordered_map<uint32_t, std::unique_ptr<Shader>> mShaders;
+
+        uint32_t mNextId { 0 };
     };
 }

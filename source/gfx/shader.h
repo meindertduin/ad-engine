@@ -7,10 +7,16 @@
 #include "engine/path.h"
 
 #include "engine/vector.h"
+#include "engine/resource.h"
 
 #include <glm/glm.hpp>
 
 namespace gfx {
+    class Shader;
+    class ShaderManager;
+
+    using ShaderHandle = Handle<Shader>;
+
     enum class ShaderType {
         Vertex,
         Fragment
@@ -39,7 +45,7 @@ namespace gfx {
         } type;
     };
 
-    class Shader {
+    class Shader : public Resource<ShaderManager> {
     public:
         explicit Shader(Allocator &allocator)
             : mStages(allocator)

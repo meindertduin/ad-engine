@@ -1,0 +1,12 @@
+set(GAME_SOURCES
+        source/game/ecs.cpp
+        source/game/component_registry.h
+        source/game/component_array.h
+        source/game/component_manager.h
+        source/game/constants.h
+        source/game/scene.cpp
+        source/game/object.cpp
+        source/game/render_world.cpp
+        source/game/component.cpp
+        source/game/transform.cpp
+)
