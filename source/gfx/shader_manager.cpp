@@ -116,6 +116,10 @@ namespace gfx {
     }
 
     Shader *ShaderManager::getShader(const Path &path) {
+        if (mShaders.find(path) == mShaders.end()) {
+            return createShader(path);
+        }
+
         return mShaders[path].get();
     }
 }

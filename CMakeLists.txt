@@ -12,18 +12,18 @@ set(CMAKE_CXX_STANDARD 20)
 
 # ---- Declare Library ----
 
+include(source/game/CMakeLists.txt)
 include(source/engine/CMakeLists.txt)
 include(source/gfx/CMakeLists.txt)
-include(source/game/CMakeLists.txt)
 include(source/lua/CMakeLists.txt)
 
 # ---- Declare executable ----
 
 add_executable(${PROJECT_NAME}
         source/main.cpp
+        ${GAME_SOURCES}
         ${ENGINE_SOURCES}
         ${GFX_SOURCES}
-        ${GAME_SOURCES}
         ${LUA_SOURCES}
         source/math/size.h source/platform/gcc.h)
 

@@ -1,7 +1,10 @@
 set(GFX_SOURCES
         source/gfx/render_pipeline.cpp
+        source/gfx/render_component.cpp
         source/gfx/texture.cpp
+        source/gfx/material.cpp
         source/gfx/sprite.cpp
         source/gfx/shader.cpp
         source/gfx/shader_manager.cpp
+        source/gfx/material_manager.cpp
 )
