@@ -13,6 +13,9 @@
 
 namespace gfx {
     class ShaderManager;
+    class Shader;
+
+    using ShaderHandle = Handle<Shader>;
 
     enum class ShaderType {
         Vertex,

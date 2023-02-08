@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include <memory>
 #include "engine/path.h"
+#include "engine/resource.h"
+#include "material.h"
 
 namespace gfx {
     class Material;
@@ -14,10 +16,15 @@ namespace gfx {
             return instance;
         }
 
-        Material* createMaterial(const Path &path);
-        Material* getMaterial(const Path &path);
+        MaterialHandle createMaterial(const Path &path);
+        Material* get(int id);
+
     private:
         MaterialManager() = default;
-        std::unordered_map<Path, std::unique_ptr<Material>> mMaterials;
+
+        std::unordered_map<Path, uint32_t> mMaterialPathsIdsMap;
+        std::unordered_map<uint32_t, std::unique_ptr<Material>> mMaterials;
+
+        uint32_t mNextId { 0 };
     };
 }

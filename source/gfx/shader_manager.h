@@ -14,7 +14,7 @@ namespace gfx {
             return sInstance;
         }
 
-        Handle<Shader> createShader(const Path &path);
+        ShaderHandle createShader(const Path &path);
         Shader* get(int id);
 
         void cleanup() {

@@ -6,7 +6,7 @@ namespace gfx {
     REGISTER_COMPONENT(RenderComponent);
 
     RenderComponent::RenderComponent(const Path &materialPath) noexcept
-        : mMaterial(MaterialManager::instance().getMaterial(materialPath))
+        : mMaterial(MaterialManager::instance().createMaterial(materialPath))
     {
     }
 }

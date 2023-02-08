@@ -93,9 +93,9 @@ namespace gfx {
         }
     }
 
-    Handle<Shader> ShaderManager::createShader(const Path &path) {
+    ShaderHandle ShaderManager::createShader(const Path &path) {
         if (mShaderPathsIdsMap.contains(path)) {
-            return Handle<Shader> { mShaderPathsIdsMap[path] };
+            return ShaderHandle { mShaderPathsIdsMap[path] };
         }
 
         auto shader = std::make_unique<Shader>(Engine::instance().allocator());
@@ -117,7 +117,7 @@ namespace gfx {
         mShaderPathsIdsMap.insert({ path, mNextId });
         mShaders.insert({ mNextId, std::move(shader) });
 
-        return Handle<Shader> { mNextId++ };
+        return ShaderHandle { mNextId++ };
     }
 
     Shader* ShaderManager::get(int id) {

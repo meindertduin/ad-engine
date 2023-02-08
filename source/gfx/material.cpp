@@ -1,7 +1,7 @@
 #include "material.h"
 
 namespace gfx {
-    void Material::setShader(Handle<Shader> shader) {
+    void Material::setShader(ShaderHandle shader) {
         mShader = shader;
     }
 }

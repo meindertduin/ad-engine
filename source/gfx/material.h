@@ -5,6 +5,9 @@
 #include "engine/resource.h"
 
 namespace gfx {
+    class Material;
+    using MaterialHandle = Handle<Material>;
+
     class Material {
     public:
         explicit Material(Allocator &allocator)
@@ -13,10 +16,10 @@ namespace gfx {
         {
         }
 
-        void setShader(Handle<Shader> shader);
+        void setShader(ShaderHandle shader);
     private:
         Allocator &mAllocator;
         Vector<Uniform> mUniforms;
-        Handle<Shader> mShader;
+        ShaderHandle mShader;
     };
 }

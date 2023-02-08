@@ -40,7 +40,11 @@ namespace gfx {
         }
     }
 
-    Material* MaterialManager::createMaterial(const Path &path) {
+    MaterialHandle MaterialManager::createMaterial(const Path &path) {
+        if (mMaterialPathsIdsMap.find(path) != mMaterialPathsIdsMap.end()) {
+            return MaterialHandle { mMaterialPathsIdsMap[path] };
+        }
+
         auto material = std::make_unique<Material>(Engine::instance().allocator());
 
         FileReader fileReader { path.value() };
@@ -57,16 +61,13 @@ namespace gfx {
 
         luaL_unref(root_state, LUA_REGISTRYINDEX, state_ref);
 
-        mMaterials.insert({ path, std::move(material) });
+        mMaterialPathsIdsMap.insert({ path, mNextId });
+        mMaterials.insert({ mNextId, std::move(material) });
 
-        return mMaterials[path].get();
+        return MaterialHandle { mNextId++ };
     }
 
-    Material* MaterialManager::getMaterial(const Path &path) {
-        if (mMaterials.find(path) == mMaterials.end()) {
-            return createMaterial(path);
-        }
-
-        return mMaterials[path].get();
+    Material* MaterialManager::get(int id) {
+        return mMaterials[id].get();
     }
 }

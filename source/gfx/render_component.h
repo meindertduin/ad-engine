@@ -9,6 +9,6 @@ namespace gfx {
     public:
         explicit RenderComponent(const Path &materialPath) noexcept;
     private:
-        Material* mMaterial { nullptr };
+        MaterialHandle mMaterial;
     };
 };
