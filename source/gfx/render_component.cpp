@@ -5,8 +5,9 @@
 namespace gfx {
     REGISTER_COMPONENT(RenderComponent);
 
-    RenderComponent::RenderComponent(const Path &materialPath) noexcept
+    RenderComponent::RenderComponent(const Path &materialPath, const Path &texturePath) noexcept
         : mMaterial(MaterialManager::instance().createMaterial(materialPath))
+        , mTexture(Texture2D::loadFromFile("assets/bricks.png"))
     {
     }
 }

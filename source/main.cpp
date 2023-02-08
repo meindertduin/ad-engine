@@ -22,7 +22,7 @@ auto main() -> int {
     auto object = scene->createObject();
     printf("Object id: %d \n", object.id());
 
-    object.addComponent(gfx::RenderComponent { Path { "assets/material_scripts/material.lua" } });
+    object.addComponent(gfx::RenderComponent { Path { "assets/material_scripts/material.lua" }, Path { "assets/bricks.png" } });
 
     auto renderPipeline = gfx::RenderPipeline::createInstance(WIDTH, HEIGHT);
     renderPipeline->initialize();
