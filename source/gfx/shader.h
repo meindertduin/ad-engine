@@ -11,6 +11,8 @@
 #include <glm/glm.hpp>
 
 namespace gfx {
+    class ShaderManager;
+
     enum class ShaderType {
         Vertex,
         Fragment
@@ -41,6 +43,8 @@ namespace gfx {
 
     class Shader {
     public:
+        using Manager = ShaderManager;
+
         explicit Shader(Allocator &allocator)
             : mStages(allocator)
             , mUniforms(allocator)

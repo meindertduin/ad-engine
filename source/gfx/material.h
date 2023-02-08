@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "shader.h"
+#include "engine/resource.h"
 
 namespace gfx {
     class Material {
@@ -12,11 +13,10 @@ namespace gfx {
         {
         }
 
-        void setShader(Shader *shader);
-
+        void setShader(Handle<Shader> shader);
     private:
         Allocator &mAllocator;
         Vector<Uniform> mUniforms;
-        Shader* mShader { nullptr };
+        Handle<Shader> mShader;
     };
 }

@@ -173,7 +173,7 @@ namespace gfx {
 
         std::unique_ptr<Texture2D> mTexture { nullptr };
 
-        Shader *mShader { nullptr };
+        Handle<Shader> mShader;
     };
 
     std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(int width, int height) {

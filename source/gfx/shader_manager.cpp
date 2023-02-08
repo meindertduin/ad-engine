@@ -93,7 +93,11 @@ namespace gfx {
         }
     }
 
-    Shader* ShaderManager::createShader(const Path &path) {
+    Handle<Shader> ShaderManager::createShader(const Path &path) {
+        if (mShaderPathsIdsMap.contains(path)) {
+            return Handle<Shader> { mShaderPathsIdsMap[path] };
+        }
+
         auto shader = std::make_unique<Shader>(Engine::instance().allocator());
 
         FileReader fileReader { path.value() };
@@ -110,16 +114,13 @@ namespace gfx {
 
         luaL_unref(root_state, LUA_REGISTRYINDEX, state_ref);
 
-        mShaders.insert({ path, std::move(shader) });
+        mShaderPathsIdsMap.insert({ path, mNextId });
+        mShaders.insert({ mNextId, std::move(shader) });
 
-        return mShaders[path].get();
+        return Handle<Shader> { mNextId++ };
     }
 
-    Shader *ShaderManager::getShader(const Path &path) {
-        if (mShaders.find(path) == mShaders.end()) {
-            return createShader(path);
-        }
-
-        return mShaders[path].get();
+    Shader* ShaderManager::get(int id) {
+        return mShaders[id].get();
     }
 }

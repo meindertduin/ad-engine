@@ -18,7 +18,7 @@ namespace gfx {
             auto material = getMaterial(L);
             auto shaderPath = lua::checkArg<const char*>(L, 1);
 
-            auto shader = ShaderManager::instance().getShader(Path{ shaderPath });
+            auto shader = ShaderManager::instance().createShader(Path { shaderPath });
 
             material->setShader(shader);
 
