@@ -12,8 +12,8 @@
 #include <glm/glm.hpp>
 
 namespace gfx {
-    class ShaderManager;
     class Shader;
+    class ShaderManager;
 
     using ShaderHandle = Handle<Shader>;
 

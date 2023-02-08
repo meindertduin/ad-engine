@@ -7,8 +7,6 @@
 #include "material.h"
 
 namespace gfx {
-    class Material;
-
     class MaterialManager {
     public:
         static MaterialManager& instance() {

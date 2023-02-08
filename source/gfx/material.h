@@ -6,9 +6,10 @@
 
 namespace gfx {
     class Material;
+    class MaterialManager;
     using MaterialHandle = Handle<Material>;
 
-    class Material {
+    class Material : public Resource<MaterialManager> {
     public:
         explicit Material(Allocator &allocator)
             : mAllocator(allocator)
