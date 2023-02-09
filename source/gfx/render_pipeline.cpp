@@ -3,11 +3,12 @@
 #include "render_pipeline.h"
 
 #include "texture.h"
-#include "shader.h"
 #include "shader_manager.h"
 
 #include <fstream>
 #include "material_manager.h"
+
+#include "game/transform.h"
 
 namespace gfx {
     constexpr int MaxShaderParams = 16;
@@ -133,13 +134,13 @@ namespace gfx {
             bgfx::touch(0);
         }
 
-        void renderObject(RenderComponent &component) override {
+        void renderObject(const game::Transform &transform, RenderComponent &component) override {
             float mtx[16];
             bx::mtxRotateY(mtx, 0.0f);
 
             // position x,y,z
-            mtx[12] = 0.0f;
-            mtx[13] = 0.0f;
+            mtx[12] = transform.x();
+            mtx[13] = transform.y();
             mtx[14] = 0.0f;
 
             // Set model matrix for rendering.

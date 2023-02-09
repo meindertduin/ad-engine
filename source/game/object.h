@@ -40,7 +40,7 @@ namespace game {
         }
 
         template<typename C>
-        C& getComponent() {
+        C& getComponent() const {
             mManager->template getComponent<C>(*this);
         }
     private:

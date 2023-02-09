@@ -7,6 +7,7 @@
 #include "game/scene.h"
 #include "game/ecs.h"
 #include "gfx/render_component.h"
+#include "game/transform.h"
 
 #include <iostream>
 
@@ -23,6 +24,7 @@ auto main() -> int {
     printf("Object id: %d \n", object.id());
 
     object.addComponent(gfx::RenderComponent { Path { "assets/material_scripts/material.lua" }, Path { "assets/bricks.png" } });
+    object.addComponent(game::Transform { 0.0f, 0.0f });
 
     auto renderPipeline = gfx::RenderPipeline::createInstance(WIDTH, HEIGHT);
     renderPipeline->initialize();

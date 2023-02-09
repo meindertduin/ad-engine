@@ -1,6 +1,7 @@
 #include "render_world.h"
 #include "ecs.h"
 #include "gfx/render_component.h"
+#include "transform.h"
 
 namespace game {
     RenderWorld::RenderWorld(Scene &scene)
@@ -13,8 +14,11 @@ namespace game {
     void RenderWorld::render() {
         mRenderPipeline->beforeRender();
 
+        auto transformComponentArray = mScene.ecs().getComponentArray<Transform>();
+
         for (auto &[object, component] : *mScene.ecs().getComponentArray<gfx::RenderComponent>()) {
-            mRenderPipeline->renderObject(component);
+            auto transform = transformComponentArray->get(object);
+            mRenderPipeline->renderObject(transform, component);
         }
 
         mRenderPipeline->afterRender();
