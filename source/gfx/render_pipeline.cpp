@@ -3,10 +3,12 @@
 #include "render_pipeline.h"
 
 #include "texture.h"
-#include "shader.h"
 #include "shader_manager.h"
 
 #include <fstream>
+#include "material_manager.h"
+
+#include "game/transform.h"
 
 namespace gfx {
     constexpr int MaxShaderParams = 16;
@@ -85,7 +87,6 @@ namespace gfx {
             PosTextVertex::init();
 
             mShaderParamsUniformHandle = bgfx::createUniform("u_params", bgfx::UniformType::Vec4, MaxShaderParams);
-            mTexture = Texture2D::loadFromFile("assets/bricks.png");
             mTextureUniform = bgfx::createUniform("v_texCoord0", bgfx::UniformType::Sampler);
 
             mVbh = bgfx::createVertexBuffer(
@@ -96,9 +97,6 @@ namespace gfx {
             mIbh = bgfx::createIndexBuffer(bgfx::makeRef(sCubeTriList, sizeof(sCubeTriList)));
 
             mFbh.idx = bgfx::kInvalidHandle;
-
-            mShader = ShaderManager::instance().createShader(Path { "assets/shader_scripts/shader.lua" });
-            mShader->compile();
 
             // Reset window
             bgfx::reset(mWidth, mHeight, BGFX_RESET_VSYNC);
@@ -112,7 +110,7 @@ namespace gfx {
             bgfx::touch(0);
         }
 
-        void render() override {
+        void beforeRender() override {
             constexpr bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
             constexpr bx::Vec3 eye = { 0.0f, 0.0f, 10.0f };
 
@@ -134,13 +132,15 @@ namespace gfx {
             bgfx::setViewFrameBuffer(0, mFbh);
 
             bgfx::touch(0);
+        }
 
+        void renderObject(const game::Transform &transform, RenderComponent &component) override {
             float mtx[16];
             bx::mtxRotateY(mtx, 0.0f);
 
             // position x,y,z
-            mtx[12] = 0.0f;
-            mtx[13] = 0.0f;
+            mtx[12] = transform.x();
+            mtx[13] = transform.y();
             mtx[14] = 0.0f;
 
             // Set model matrix for rendering.
@@ -150,14 +150,16 @@ namespace gfx {
             bgfx::setVertexBuffer(0, mVbh);
             bgfx::setIndexBuffer(mIbh);
 
-            mTexture->render(mTextureUniform);
+            component.texture()->render(mTextureUniform);
             bgfx::setState(BGFX_STATE_DEFAULT);
 
             float params[8] = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
             bgfx::setUniform(mShaderParamsUniformHandle, params, MaxShaderParams);
 
-            mShader->bind(0);
+            component.material()->shader()->bind(0);
+        }
 
+        void afterRender() override {
             bgfx::frame();
         }
     private:
@@ -170,10 +172,6 @@ namespace gfx {
 
         bgfx::UniformHandle mTextureUniform = BGFX_INVALID_HANDLE;
         bgfx::UniformHandle mShaderParamsUniformHandle = BGFX_INVALID_HANDLE;
-
-        std::unique_ptr<Texture2D> mTexture { nullptr };
-
-        ShaderHandle mShader;
     };
 
     std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(int width, int height) {

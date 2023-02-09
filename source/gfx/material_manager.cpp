@@ -67,7 +67,7 @@ namespace gfx {
         return MaterialHandle { mNextId++ };
     }
 
-    Material* MaterialManager::get(int id) {
+    Material* MaterialManager::get(uint32_t id) {
         return mMaterials[id].get();
     }
 }

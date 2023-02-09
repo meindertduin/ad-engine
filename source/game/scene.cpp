@@ -11,6 +11,7 @@ namespace game {
     public:
         explicit SceneImpl(Allocator &allocator)
             : mAllocator(allocator)
+            , mRenderWorld(*this)
         {
         }
 
@@ -19,7 +20,7 @@ namespace game {
         }
 
         void render() override {
-            throw std::runtime_error("Not implemented yet.");
+            mRenderWorld.render();
         }
 
         Object createObject() override {
@@ -31,6 +32,11 @@ namespace game {
 
             mEcs.destroyObject(object);
         }
+
+        Ecs& ecs() override {
+            return mEcs;
+        }
+
     private:
         Ecs mEcs;
         Allocator &mAllocator;

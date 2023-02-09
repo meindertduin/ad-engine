@@ -15,7 +15,7 @@ namespace gfx {
         }
 
         MaterialHandle createMaterial(const Path &path);
-        Material* get(int id);
+        Material* get(uint32_t id);
 
     private:
         MaterialManager() = default;

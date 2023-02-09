@@ -7,6 +7,7 @@
 #include "game/scene.h"
 #include "game/ecs.h"
 #include "gfx/render_component.h"
+#include "game/transform.h"
 
 #include <iostream>
 
@@ -21,8 +22,13 @@ auto main() -> int {
 
     auto object = scene->createObject();
     printf("Object id: %d \n", object.id());
+    object.addComponent(gfx::RenderComponent { Path { "assets/material_scripts/material.lua" }, Path { "assets/bricks.png" } });
+    object.addComponent(game::Transform { 0.0f, 0.0f });
 
-    object.addComponent(gfx::RenderComponent { Path { "assets/material_scripts/material.lua" } });
+    auto secondObject = scene->createObject();
+    printf("Object id: %d \n", secondObject.id());
+    secondObject.addComponent(gfx::RenderComponent { Path { "assets/material_scripts/material.lua" }, Path { "assets/bricks.png" } });
+    secondObject.addComponent(game::Transform { 200.0f, 100.0f });
 
     auto renderPipeline = gfx::RenderPipeline::createInstance(WIDTH, HEIGHT);
     renderPipeline->initialize();
@@ -30,7 +36,7 @@ auto main() -> int {
     while(!window.closed()) {
         window.pollEvents();
 
-        renderPipeline->render();
+        scene->render();
     }
 
     Engine::instance().shutdown();
