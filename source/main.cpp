@@ -9,12 +9,15 @@
 #include "gfx/render_component.h"
 #include "game/transform.h"
 
-#include <iostream>
+#include "engine/logging.h"
 
 constexpr int WIDTH = 640;
 constexpr int HEIGHT = 480;
 
 auto main() -> int {
+    Logger::info("Starting application. %d", 1);
+    Logger::debug("Starting application.");
+
     AdWindow window { math::Size { WIDTH, HEIGHT }, "Ad Render Demo" };
     window.initialize();
 
