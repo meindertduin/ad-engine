@@ -7,7 +7,6 @@ constexpr std::string EscapeSeqGreen = "\033[32m";
 constexpr std::string EscapeSeqRed = "\033[31m";
 constexpr std::string EscapeSeqReset = "\033[0m";
 
-
 void Logger::info(const char *format, ...) {
     va_list args;
     va_start(args, format);
@@ -68,10 +67,10 @@ void Logger::log(Level level, char* message) {
             std::cout << EscapeSeqOrange << "[WARNING] " << message << EscapeSeqReset << std::endl;
             break;
         case Level::Error:
-            std::cout << EscapeSeqRed.c_str() << "[ERROR] " << message << EscapeSeqReset << std::endl;
+            std::cout << EscapeSeqRed << "[ERROR] " << message << EscapeSeqReset << std::endl;
             break;
         case Level::Fatal:
-            std::cout << EscapeSeqRed.c_str() << "[FATAL] " << message << EscapeSeqReset << std::endl;
+            std::cout << EscapeSeqRed << "[FATAL] " << message << EscapeSeqReset << std::endl;
             break;
     }
 }
