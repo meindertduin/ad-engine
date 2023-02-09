@@ -22,9 +22,13 @@ auto main() -> int {
 
     auto object = scene->createObject();
     printf("Object id: %d \n", object.id());
-
     object.addComponent(gfx::RenderComponent { Path { "assets/material_scripts/material.lua" }, Path { "assets/bricks.png" } });
     object.addComponent(game::Transform { 0.0f, 0.0f });
+
+    auto secondObject = scene->createObject();
+    printf("Object id: %d \n", secondObject.id());
+    secondObject.addComponent(gfx::RenderComponent { Path { "assets/material_scripts/material.lua" }, Path { "assets/bricks.png" } });
+    secondObject.addComponent(game::Transform { 200.0f, 100.0f });
 
     auto renderPipeline = gfx::RenderPipeline::createInstance(WIDTH, HEIGHT);
     renderPipeline->initialize();

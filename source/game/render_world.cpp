@@ -5,8 +5,8 @@
 
 namespace game {
     RenderWorld::RenderWorld(Scene &scene)
-            : mScene(scene)
-            , mRenderPipeline(gfx::RenderPipeline::createInstance(640, 480))
+        : mScene(scene)
+        , mRenderPipeline(gfx::RenderPipeline::createInstance(640, 480))
     {
         mRenderPipeline->initialize();
     }
