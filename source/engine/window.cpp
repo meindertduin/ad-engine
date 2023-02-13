@@ -7,7 +7,6 @@
 #include <SDL2/SDL_syswm.h>
 
 #include <utility>
-#include <stdexcept>
 
 AdWindow::AdWindow(const math::Size2D &size, std::string title) :
     mSize(size),
