@@ -1,15 +1,24 @@
 #pragma once
 
-#include <tuple>
+#include <string_view>
 
-template<typename ...Args>
-struct VariadicArgs {
-    using ArgTuple = std::tuple<Args...>;
-    using ArgsCount = std::integral_constant<std::size_t, sizeof...(Args)>;
-
-    using FirstArg = std::tuple_element_t<0, ArgTuple>;
-    using SecondArg = std::tuple_element_t<1, ArgTuple>;
-    using ThirdArg = std::tuple_element_t<2, ArgTuple>;
-    using FourthArg = std::tuple_element_t<3, ArgTuple>;
-    using FifthArg = std::tuple_element_t<4, ArgTuple>;
-};
+template <typename T>
+constexpr auto typeName() {
+    std::string_view name, prefix, suffix;
+#ifdef __clang__
+    name = __PRETTY_FUNCTION__;
+  prefix = "auto type_name() [T = ";
+  suffix = "]";
+#elif defined(__GNUC__)
+    name = __PRETTY_FUNCTION__;
+    prefix = "constexpr auto typeName() [with T = ";
+    suffix = "]";
+#elif defined(_MSC_VER)
+    name = __FUNCSIG__;
+  prefix = "auto __cdecl type_name<";
+  suffix = ">(void)";
+#endif
+    name.remove_prefix(prefix.size());
+    name.remove_suffix(suffix.size());
+    return name;
+}

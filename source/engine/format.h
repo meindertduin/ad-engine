@@ -3,10 +3,27 @@
 #include <string>
 #include "utils/types.h"
 
+template<typename T = char>
+concept BoundedCharArray = std::is_bounded_array_v<T>;
+
 template<typename T>
 struct FormatType {
     static std::string format(const T &value) {
         return std::to_string(value);
+    }
+};
+
+template<>
+struct FormatType<std::basic_string_view<char>> {
+    static std::string format(const std::basic_string_view<char> &value) {
+        return std::string(value);
+    }
+};
+
+template<BoundedCharArray T>
+struct FormatType<T> {
+    static std::string format(const T &value) {
+        return std::string(value);
     }
 };
 

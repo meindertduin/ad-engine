@@ -1,6 +1,7 @@
 #pragma once
 
 #include "component_array.h"
+#include "engine/logging.h"
 
 #include <algorithm>
 #include <memory>
@@ -54,7 +55,7 @@ namespace game {
                 }
 
                 T::mType = sComponentCount++;
-                printf("Registered component type with id %d\n", T::mType);
+                LOG_DEBUG("Registered {} component type with id {}", typeName<T>(), T::mType);
 
                 ComponentRegistry::registerComponent<T>();
 

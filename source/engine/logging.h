@@ -46,3 +46,6 @@ private:
     static void log(Level level, const std::string &message);
 };
 
+#define LOG_DEBUG(format, ...) \
+Logger::debug(formatString("[{}, {}, {}] ", __FILE_NAME__, __FUNCTION__, __LINE__) + format, ##__VA_ARGS__)
+

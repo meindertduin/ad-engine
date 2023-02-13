@@ -15,6 +15,8 @@ constexpr int WIDTH = 640;
 constexpr int HEIGHT = 480;
 
 auto main() -> int {
+    LOG_DEBUG("Application starting");
+
     AdWindow window { math::Size { WIDTH, HEIGHT }, "Ad Render Demo" };
     window.initialize();
 

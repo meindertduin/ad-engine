@@ -1,4 +1,3 @@
-#include <iostream>
 #include "logging.h"
 
 constexpr std::string EscapeSeqOrange = "\033[33m";
@@ -9,19 +8,19 @@ constexpr std::string EscapeSeqReset = "\033[0m";
 void Logger::log(Level level, const std::string &message) {
     switch (level) {
         case Level::Info:
-            std::cout << "[INFO] " << message << std::endl;
+            printf("[INFO] %s\n", message.c_str());
             break;
         case Level::Debug:
-            std::cout << EscapeSeqGreen << "[DEBUG] " << message << EscapeSeqReset << std::endl;
+            printf("%s[DEBUG] %s%s\n", EscapeSeqGreen.c_str(), message.c_str(), EscapeSeqReset.c_str());
             break;
         case Level::Warning:
-            std::cout << EscapeSeqOrange << "[WARNING] " << message << EscapeSeqReset << std::endl;
+            printf("%s[WARNING] %s%s\n", EscapeSeqOrange.c_str(), message.c_str(), EscapeSeqReset.c_str());
             break;
         case Level::Error:
-            std::cout << EscapeSeqRed << "[ERROR] " << message << EscapeSeqReset << std::endl;
+            printf("%s[ERROR] %s%s\n", EscapeSeqRed.c_str(), message.c_str(), EscapeSeqReset.c_str());
             break;
         case Level::Fatal:
-            std::cout << EscapeSeqRed << "[FATAL] " << message << EscapeSeqReset << std::endl;
+            printf("%s[FATAL] %s%s\n", EscapeSeqRed.c_str(), message.c_str(), EscapeSeqReset.c_str());
             break;
     }
 }
