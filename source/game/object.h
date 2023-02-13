@@ -5,6 +5,7 @@
 
 #include "platform/gcc.h"
 #include "constants.h"
+#include "engine/format.h"
 
 namespace game {
     class Ecs;
@@ -50,6 +51,14 @@ namespace game {
 
     using Object = Entity<Ecs>;
 }
+
+
+template<>
+struct FormatType<game::Object> {
+    static std::string format(const game::Object &value) {
+        return formatString("Object({})", value.id());
+    }
+};
 
 template<>
 struct std::hash<game::Object> {

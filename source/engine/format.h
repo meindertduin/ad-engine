@@ -51,5 +51,7 @@ std::string formatString(const std::string &format, Args &&...args) {
     int index = 0;
     (detail::formatString(result, format, index, std::forward<Args>(args)), ...);
 
+    result += format.substr(index);
+
     return result;
 }
