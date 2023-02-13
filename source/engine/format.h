@@ -40,7 +40,7 @@ namespace detail {
 }
 
 template<typename ...Args>
-std::string format(const std::string &format, Args &&...args) {
+std::string formatString(const std::string &format, Args &&...args) {
     if (format.empty()) {
         return "";
     }

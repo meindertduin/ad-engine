@@ -21,17 +21,17 @@ auto main() -> int {
 
     std::string great = "Great";
     std::string world = "World";
-    printf("%s \n", format("Hello, {} {}!", great, world).c_str());
+    printf("%s \n", formatString("Hello, {} {}!", great, world).c_str());
 
     auto scene = game::Scene::createInstance(Engine::instance().allocator());
 
     auto object = scene->createObject();
-    Logger::info("Object id: %d", object.id());
+    Logger::info("Object id: {}", object.id());
     object.addComponent(gfx::RenderComponent { Path { "assets/material_scripts/material.lua" }, Path { "assets/bricks.png" } });
     object.addComponent(game::Transform { 0.0f, 0.0f });
 
     auto secondObject = scene->createObject();
-    Logger::info("SecondObject id: %d \n", secondObject.id());
+    Logger::info("SecondObject id: {} \n", secondObject.id());
     secondObject.addComponent(gfx::RenderComponent { Path { "assets/material_scripts/material.lua" }, Path { "assets/bricks.png" } });
     secondObject.addComponent(game::Transform { 200.0f, 100.0f });
 
