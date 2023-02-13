@@ -10,6 +10,7 @@
 #include "game/transform.h"
 
 #include "engine/logging.h"
+#include "engine/format.h"
 
 constexpr int WIDTH = 640;
 constexpr int HEIGHT = 480;
@@ -17,6 +18,10 @@ constexpr int HEIGHT = 480;
 auto main() -> int {
     AdWindow window { math::Size { WIDTH, HEIGHT }, "Ad Render Demo" };
     window.initialize();
+
+    std::string great = "Great";
+    std::string world = "World";
+    printf("%s \n", format("Hello, {} {}!", great, world).c_str());
 
     auto scene = game::Scene::createInstance(Engine::instance().allocator());
 
