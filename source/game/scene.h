@@ -1,8 +1,9 @@
 #pragma once
 
 #include <memory>
-#include "engine/allocator.h"
 #include "object.h"
+#include "engine/allocator.h"
+#include "engine/format.h"
 
 namespace game {
     class Ecs;

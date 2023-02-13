@@ -1,5 +1,7 @@
 set(ENGINE_SOURCES
     source/engine/path.h
+    source/engine/format.h
+    source/engine/logging.cpp
     source/engine/singly_linked_list.h
     source/engine/vector.cpp
     source/engine/hash.cpp

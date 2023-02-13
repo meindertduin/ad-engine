@@ -16,6 +16,7 @@ include(source/game/CMakeLists.txt)
 include(source/engine/CMakeLists.txt)
 include(source/gfx/CMakeLists.txt)
 include(source/lua/CMakeLists.txt)
+include(source/utils/CMakeLists.txt)
 
 # ---- Declare executable ----
 
@@ -25,6 +26,7 @@ add_executable(${PROJECT_NAME}
         ${ENGINE_SOURCES}
         ${GFX_SOURCES}
         ${LUA_SOURCES}
+        ${UTILS_SOURCES}
         source/math/size.h source/platform/gcc.h)
 
 set(HEADERS include)
