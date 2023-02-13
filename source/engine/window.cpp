@@ -1,4 +1,5 @@
 #include "window.h"
+#include "logging.h"
 
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
@@ -6,6 +7,7 @@
 #include <SDL2/SDL_syswm.h>
 
 #include <utility>
+#include <stdexcept>
 
 AdWindow::AdWindow(const math::Size2D &size, std::string title) :
     mSize(size),
@@ -22,24 +24,23 @@ AdWindow::~AdWindow() {
 
 bool AdWindow::initialize() {
     // Initialize SDL systems
-    if(SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
-        printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
+    if(SDL_Init(SDL_INIT_VIDEO) < 0) {
+        Logger::error("Failed to initialize SDL: {}", SDL_GetError());
+        return false;
     }
-    else
-    {
+    else {
         //Create a window
         pWindow = SDL_CreateWindow(mTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, mSize.width(), mSize.height(), SDL_WINDOW_SHOWN);
-        if(pWindow == nullptr)
-        {
-            printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
+        if(pWindow == nullptr) {
+            Logger::error("Failed to create SDL window: {}", SDL_GetError());
+            return false;
         }
     }
 
     SDL_SysWMinfo wmi;
     SDL_VERSION(&wmi.version);
-    if (!SDL_GetWindowWMInfo(pWindow, &wmi))
-    {
+    if (!SDL_GetWindowWMInfo(pWindow, &wmi)) {
+        Logger::error("Failed to get SDL window info: {}", SDL_GetError());
         return false;
     }
 
@@ -53,7 +54,10 @@ bool AdWindow::initialize() {
 
     bgfx::renderFrame();
 
-    bgfx::init(init);
+    if (!bgfx::init(init)) {
+        Logger::error("Failed to initialize bgfx");
+        return false;
+    }
 
     return true;
 }

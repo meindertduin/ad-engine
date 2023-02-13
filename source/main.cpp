@@ -18,7 +18,10 @@ auto main() -> int {
     LOG_DEBUG("Application starting");
 
     AdWindow window { math::Size { WIDTH, HEIGHT }, "Ad Render Demo" };
-    window.initialize();
+
+    if (!window.initialize()) {
+        return 1;
+    }
 
     auto scene = game::Scene::createInstance(Engine::instance().allocator());
 
