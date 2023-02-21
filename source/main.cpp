@@ -10,6 +10,7 @@
 #include "game/transform.h"
 
 #include "engine/logging.h"
+#include "engine/map.h"
 
 constexpr int WIDTH = 640;
 constexpr int HEIGHT = 480;
@@ -37,6 +38,13 @@ auto main() -> int {
 
     auto renderPipeline = gfx::RenderPipeline::createInstance(WIDTH, HEIGHT);
     renderPipeline->initialize();
+
+    HashMap<int, int> map { Engine::instance().allocator() };
+
+    map.insert(1, 2);
+    map.insert(2, 3);
+    map.insert(4, 3);
+    Logger::info("{}", map[4]);
 
     while(!window.closed()) {
         window.pollEvents();
