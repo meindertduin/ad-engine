@@ -5,14 +5,18 @@
 #include <cassert>
 
 #include "ecs.h"
+#include "engine/application.h"
 
 namespace game {
     class SceneImpl : public Scene {
     public:
         explicit SceneImpl(Allocator &allocator)
             : mAllocator(allocator)
-            , mRenderWorld(*this)
         {
+        }
+
+        void initialize() override {
+            mRenderWorld = std::make_unique<RenderWorld>(*this, Application::instance()->window().size());
         }
 
         void update(float dt) override {
@@ -20,7 +24,7 @@ namespace game {
         }
 
         void render() override {
-            mRenderWorld.render();
+            mRenderWorld->render();
         }
 
         Object createObject() override {
@@ -40,8 +44,7 @@ namespace game {
     private:
         Ecs mEcs;
         Allocator &mAllocator;
-
-        RenderWorld mRenderWorld;
+        std::unique_ptr<RenderWorld> mRenderWorld;
     };
 
     std::unique_ptr<Scene> Scene::createInstance(Allocator &allocator) {

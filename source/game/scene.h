@@ -14,6 +14,7 @@ namespace game {
 
         static std::unique_ptr<Scene> createInstance(Allocator &allocator);
 
+        virtual void initialize() = 0;
         virtual void update(float dt) = 0;
         virtual void render() = 0;
 

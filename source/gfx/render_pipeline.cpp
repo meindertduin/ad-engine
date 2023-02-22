@@ -70,9 +70,9 @@ namespace gfx {
 
     class RenderPipelineImpl : public RenderPipeline {
     public:
-        RenderPipelineImpl(int width, int height)
-            : mWidth(width)
-            , mHeight(height)
+        explicit RenderPipelineImpl(math::Size2D frameDimensions)
+            : mWidth(frameDimensions.width())
+            , mHeight(frameDimensions.height())
         {
         }
 
@@ -174,7 +174,7 @@ namespace gfx {
         bgfx::UniformHandle mShaderParamsUniformHandle = BGFX_INVALID_HANDLE;
     };
 
-    std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(int width, int height) {
-        return std::make_unique<RenderPipelineImpl>(width, height);
+    std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(math::Size2D frameDimensions) {
+        return std::make_unique<RenderPipelineImpl>(frameDimensions);
     }
 }

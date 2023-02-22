@@ -3,13 +3,14 @@
 #include <memory>
 #include "texture.h"
 #include "render_component.h"
+#include "math/size.h"
 
 namespace game { class Transform; }
 
 namespace gfx {
     class RenderPipeline {
     public:
-        static std::unique_ptr<RenderPipeline> createInstance(int width, int height);
+        static std::unique_ptr<RenderPipeline> createInstance(math::Size2D frameDimensions);
 
         virtual void initialize() = 0;
 

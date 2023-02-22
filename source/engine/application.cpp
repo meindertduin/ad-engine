@@ -22,9 +22,10 @@ bool Application::initialize() {
         return false;
     }
 
-    mScene = game::Scene::createInstance(Engine::instance().allocator());
-
     sInitialized = true;
+
+    mScene = game::Scene::createInstance(Engine::instance().allocator());
+    mScene->initialize();
 
     return true;
 }

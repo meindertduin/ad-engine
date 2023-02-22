@@ -20,6 +20,8 @@ public:
 
     bool initialize();
     void run();
+
+    AdWindow &window() { return mWindow; }
 protected:
     explicit Application(const WindowOptions &options);
 private:
