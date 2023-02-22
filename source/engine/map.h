@@ -141,9 +141,7 @@ private:
 
         for (uint32_t i = 0; i < mCapacity; i++) {
             if (mKeys[i].valid) {
-                newMap.insert(*reinterpret_cast<K*>(&mKeys[i].key), mValues[i]);
-            } else {
-                break;
+                newMap.insert(*reinterpret_cast<K *>(&mKeys[i].key), mValues[i]);
             }
         }
 

@@ -41,11 +41,14 @@ auto main() -> int {
 
     HashMap<uint32_t, uint32_t> map { Engine::instance().allocator() };
 
-    for (auto i = 0; i < 50; i++) {
+    for (auto i = 0; i < 500; i++) {
         map.insert(i, i + 10);
     }
 
-    for (auto i = 0; i < 50; i++) {
+    map.remove(400);
+    map.insert(400, 410);
+
+    for (auto i = 0; i < 500; i++) {
         if (map[i] != i + 10) {
             Logger::error("Map is broken at index {}, {}", i, map[i]);
         }
