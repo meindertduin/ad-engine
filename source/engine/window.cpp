@@ -8,9 +8,9 @@
 
 #include <utility>
 
-AdWindow::AdWindow(const math::Size2D &size, std::string title) :
-    mSize(size),
-    mTitle(std::move(title))
+AdWindow::AdWindow(const WindowOptions &options)
+    : mSize(options.size)
+    , mTitle(std::move(options.title))
 {
 }
 
@@ -70,3 +70,4 @@ void AdWindow::pollEvents() {
         }
     }
 }
+

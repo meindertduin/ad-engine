@@ -1,16 +1,10 @@
 #include <fstream>
 
-#include "engine/window.h"
-#include "gfx/render_pipeline.h"
-#include "engine/engine.h"
-
-#include "game/scene.h"
-#include "game/ecs.h"
-#include "gfx/render_component.h"
-#include "game/transform.h"
-
 #include "engine/logging.h"
-#include "engine/map.h"
+#include "engine/window.h"
+#include "game/scene.h"
+#include "engine/application.h"
+#include "engine/engine.h"
 
 constexpr int WIDTH = 640;
 constexpr int HEIGHT = 480;
@@ -18,32 +12,14 @@ constexpr int HEIGHT = 480;
 auto main() -> int {
     LOG_DEBUG("Application starting");
 
-    AdWindow window { math::Size { WIDTH, HEIGHT }, "Ad Render Demo" };
+    WindowOptions options { .title = "Application", .size = { WIDTH, HEIGHT } };
+    Application app(options);
 
-    if (!window.initialize()) {
+    if (!app.initialize()) {
         return 1;
     }
 
-    auto scene = game::Scene::createInstance(Engine::instance().allocator());
-
-    auto object = scene->createObject();
-    Logger::info("Object: {}", object);
-    object.addComponent(gfx::RenderComponent { Path { "assets/material_scripts/material.lua" }, Path { "assets/bricks.png" } });
-    object.addComponent(game::Transform { 20.0f, 20.0f });
-
-    auto secondObject = scene->createObject();
-    Logger::info("SecondObject: {} \n", secondObject);
-    secondObject.addComponent(gfx::RenderComponent { Path { "assets/material_scripts/material.lua" }, Path { "assets/bricks.png" } });
-    secondObject.addComponent(game::Transform { 200.0f, 100.0f });
-
-    auto renderPipeline = gfx::RenderPipeline::createInstance(WIDTH, HEIGHT);
-    renderPipeline->initialize();
-
-    while(!window.closed()) {
-        window.pollEvents();
-
-        scene->render();
-    }
+    app.run();
 
     Engine::instance().shutdown();
 

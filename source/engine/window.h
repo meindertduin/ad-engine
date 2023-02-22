@@ -6,9 +6,14 @@
 
 struct SDL_Window;
 
+struct WindowOptions {
+    std::string title;
+    math::Size2D size;
+};
+
 class AdWindow {
 public:
-    explicit AdWindow(const math::Size2D &size, std::string title);
+    explicit AdWindow(const WindowOptions &options);
     ~AdWindow();
 
     bool initialize();

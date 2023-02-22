@@ -11,4 +11,5 @@ set(ENGINE_SOURCES
     source/engine/allocator.cpp
     source/engine/engine.cpp
     source/engine/resource.h
+    source/engine/application.cpp
 )
