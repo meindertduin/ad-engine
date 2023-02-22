@@ -25,9 +25,9 @@ public:
         Iterator& operator=(const Iterator &rhs) = default;
 
         Iterator& operator++() {
-            ++mIndex;
+            mIndex++;
             while (mIndex < mMap.mCapacity && !mMap.mKeys[mIndex].valid) {
-                ++mIndex;
+                mIndex++;
             }
 
             return *this;
@@ -54,6 +54,14 @@ public:
         T* operator->() {
             return &mMap.mValues[mIndex];
         }
+
+        K& key() {
+            return *reinterpret_cast<K*>(mMap.mKeys[mIndex].key);
+        }
+
+        T& value() {
+            return mMap.mValues[mIndex];
+        }
     private:
         HashMap<K, T> &mMap;
         std::size_t mIndex;
@@ -67,10 +75,16 @@ public:
     }
 
     ~HashMap() {
-        for (auto i = 0; i < mCapacity; ++i) {
+        if (!mKeys) {
+            return;
+        }
+        
+        for (auto i = 0; i < mCapacity; i++) {
             if (mKeys[i].valid) {
                 reinterpret_cast<K*>(mKeys[i].key)->~K();
-                reinterpret_cast<T*>(mValues[i])->~T();
+                auto &value = mValues[i];
+                value.~T();
+                mKeys[i].valid = false;
             }
         }
 
@@ -175,6 +189,15 @@ public:
             rehash(index);
             index = (index + 1) % mCapacity;
         }
+    }
+
+    Iterator find(const K &key) {
+        auto index = findIndex(key);
+        if (index == mCapacity) {
+            return end();
+        }
+
+        return Iterator(*this, index);
     }
 
     bool contains(const K &key) const {

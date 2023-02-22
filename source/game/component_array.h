@@ -1,6 +1,7 @@
 #pragma once
 
 #include "object.h"
+#include "engine/map.h"
 #include <unordered_map>
 #include <optional>
 #include <stdexcept>
@@ -15,12 +16,17 @@ namespace game {
     template <typename T>
     class ComponentArray : public IComponentArray {
     public:
+        explicit ComponentArray(Allocator &allocator)
+            : mComponents(allocator)
+        {
+        }
+
         void insert(Object object, T component) {
             if (mComponents.find(object) != mComponents.end()) {
                 throw std::runtime_error("Component already exists");
             }
 
-            mComponents.insert({ object, component });
+            mComponents.insert(object, component);
 
             mSize++;
         }
@@ -30,7 +36,7 @@ namespace game {
                 throw std::runtime_error("Component does not exist");
             }
 
-            mComponents.erase(object);
+            mComponents.remove(object);
 
             mSize--;
         }
@@ -66,7 +72,7 @@ namespace game {
         auto begin() { return mComponents.begin(); }
         auto end() { return mComponents.end(); }
     private:
-        std::unordered_map<Object, T> mComponents { 128 };
+        HashMap<Object, T> mComponents;
         size_t mSize { 0 };
     };
 }

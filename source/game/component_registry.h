@@ -2,6 +2,7 @@
 
 #include "component_array.h"
 #include "engine/logging.h"
+#include "engine/engine.h"
 
 #include <algorithm>
 #include <memory>
@@ -15,7 +16,7 @@ namespace game {
     template <typename T>
     struct ComponentArrayStaticData : public IComponentArrayStaticData {
         [[nodiscard]] std::shared_ptr<IComponentArray> createComponentArray() const override {
-            return std::make_shared<ComponentArray<T>>();
+            return std::make_shared<ComponentArray<T>>(Engine::instance().allocator());
         }
     };
 

@@ -29,7 +29,7 @@ auto main() -> int {
     auto object = scene->createObject();
     Logger::info("Object: {}", object);
     object.addComponent(gfx::RenderComponent { Path { "assets/material_scripts/material.lua" }, Path { "assets/bricks.png" } });
-    object.addComponent(game::Transform { 0.0f, 0.0f });
+    object.addComponent(game::Transform { 20.0f, 20.0f });
 
     auto secondObject = scene->createObject();
     Logger::info("SecondObject: {} \n", secondObject);
@@ -39,24 +39,20 @@ auto main() -> int {
     auto renderPipeline = gfx::RenderPipeline::createInstance(WIDTH, HEIGHT);
     renderPipeline->initialize();
 
-    HashMap<uint32_t, uint32_t> map { Engine::instance().allocator() };
+    // HashMap<uint32_t, uint32_t> map { Engine::instance().allocator() };
 
-    for (auto i = 0; i < 500; i++) {
-        map.insert(i, i + 10);
-    }
+    //for (auto i = 0; i < 500; i++) {
+    //    map.insert(i, i + 10);
+    //}
 
-    map.remove(400);
-    map.insert(400, 410);
+    //map.remove(400);
+    //map.insert(400, 410);
 
-    for (auto i = 0; i < 500; i++) {
-        if (map[i] != i + 10) {
-            Logger::error("Map is broken at index {}, {}", i, map[i]);
-        }
-    }
-
-    for (auto value : map) {
-        Logger::info("Map value: {}", value);
-    }
+    // for (auto i = 0; i < 500; i++) {
+    //     if (map[i] != i + 10) {
+    //         Logger::error("Map is broken at index {}, {}", i, map[i]);
+    //     }
+    // }
 
     while(!window.closed()) {
         window.pollEvents();
