@@ -15,13 +15,18 @@ namespace gfx {
 
 class Application {
 public:
-    explicit Application(const WindowOptions &options);
+    static Application* createInstance(const WindowOptions &options);
+    static Application* instance();
 
     bool initialize();
     void run();
-
+protected:
+    explicit Application(const WindowOptions &options);
 private:
+    static inline bool sInitialized { false };
+
     AdWindow mWindow;
-    bool mInitialized { false };
     std::unique_ptr<game::Scene> mScene { nullptr };
+
+    static inline Application* sInstance { nullptr };
 };

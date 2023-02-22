@@ -13,13 +13,13 @@ auto main() -> int {
     LOG_DEBUG("Application starting");
 
     WindowOptions options { .title = "Application", .size = { WIDTH, HEIGHT } };
-    Application app(options);
+    auto app = Application::createInstance(options);
 
-    if (!app.initialize()) {
+    if (!app->initialize()) {
         return 1;
     }
 
-    app.run();
+    app->run();
 
     Engine::instance().shutdown();
 

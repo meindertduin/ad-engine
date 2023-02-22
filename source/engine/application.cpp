@@ -13,7 +13,7 @@ Application::Application(const WindowOptions &options)
 }
 
 bool Application::initialize() {
-    if (mInitialized) {
+    if (sInitialized) {
         Logger::error("Application already initialized");
         return false;
     }
@@ -24,7 +24,7 @@ bool Application::initialize() {
 
     mScene = game::Scene::createInstance(Engine::instance().allocator());
 
-    mInitialized = true;
+    sInitialized = true;
 
     return true;
 }
@@ -46,5 +46,23 @@ void Application::run() {
 
         mScene->render();
     }
+}
+
+Application *Application::createInstance(const WindowOptions &options) {
+    if (sInstance) {
+        Logger::error("Application already created");
+        return nullptr;
+    }
+
+    sInstance = new Application(options);
+
+    return sInstance;
+}
+
+Application *Application::instance() {
+    assert(sInstance && "Application not created");
+    assert(sInitialized && "Application not initialized");
+
+    return sInstance;
 }
 
