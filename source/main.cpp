@@ -54,6 +54,10 @@ auto main() -> int {
         }
     }
 
+    for (auto value : map) {
+        Logger::info("Map value: {}", value);
+    }
+
     while(!window.closed()) {
         window.pollEvents();
 

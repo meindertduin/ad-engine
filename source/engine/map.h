@@ -13,6 +13,53 @@ private:
     };
 
 public:
+    class Iterator {
+    public:
+        Iterator(HashMap<K, T> &map, std::size_t index)
+            : mMap(map)
+            , mIndex(index)
+        {
+        }
+
+        Iterator(const Iterator &rhs) = default;
+        Iterator& operator=(const Iterator &rhs) = default;
+
+        Iterator& operator++() {
+            ++mIndex;
+            while (mIndex < mMap.mCapacity && !mMap.mKeys[mIndex].valid) {
+                ++mIndex;
+            }
+
+            return *this;
+        }
+
+        Iterator operator++(int) {
+            Iterator tmp(*this);
+            operator++();
+            return tmp;
+        }
+
+        bool operator==(const Iterator &rhs) const {
+            return mIndex == rhs.mIndex;
+        }
+
+        bool operator!=(const Iterator &rhs) const {
+            return mIndex != rhs.mIndex;
+        }
+
+        T& operator*() {
+            return mMap.mValues[mIndex];
+        }
+
+        T* operator->() {
+            return &mMap.mValues[mIndex];
+        }
+    private:
+        HashMap<K, T> &mMap;
+        std::size_t mIndex;
+    };
+
+public:
     explicit HashMap(Allocator &allocator, uint32_t initialCapacity = 16)
         : mAllocator(allocator)
     {
@@ -70,6 +117,20 @@ public:
     T& operator[](const K &key) {
         auto index = findIndex(key);
         return mValues[index];
+    }
+
+    Iterator begin() {
+        for (auto i = 0; i < mCapacity; ++i) {
+            if (mKeys[i].valid) {
+                return Iterator(*this, i);
+            }
+        }
+
+        return { *this, mCapacity };
+    }
+
+    Iterator end() {
+        return { *this, mCapacity };
     }
 
     void insert(const K &key, const T &value) {
