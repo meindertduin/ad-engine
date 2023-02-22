@@ -98,6 +98,10 @@ void *ListAllocator::allocate(std::size_t size, std::size_t alignment) {
 }
 
 void ListAllocator::deallocate(void *pointer) {
+    if (pointer == nullptr) {
+        return;
+    }
+
     auto currentAddress = (std::size_t)(pointer);
     auto headerAddress = currentAddress - sizeof(AllocatedBlock);
     auto allocatedHeader = (AllocatedBlock*)(headerAddress);

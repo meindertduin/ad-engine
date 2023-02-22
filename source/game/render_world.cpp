@@ -16,7 +16,11 @@ namespace game {
 
         auto transformComponentArray = mScene.ecs().getComponentArray<Transform>();
 
-        for (auto &[object, component] : *mScene.ecs().getComponentArray<gfx::RenderComponent>()) {
+        auto componentArray = mScene.ecs().getComponentArray<gfx::RenderComponent>();
+        for (auto it = componentArray->begin(); it != componentArray->end(); it++) {
+            auto &object = it.key();
+            auto &component = it.value();
+
             auto transform = transformComponentArray->get(object);
             mRenderPipeline->renderObject(transform, component);
         }

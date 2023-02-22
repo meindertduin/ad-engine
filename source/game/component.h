@@ -13,8 +13,6 @@ namespace game {
     template<typename T>
     class Component {
     public:
-        virtual ~Component() = default;
-
         [[nodiscard]] static ComponentType type() {
             return mType;
         };

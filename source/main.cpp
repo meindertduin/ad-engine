@@ -10,6 +10,7 @@
 #include "game/transform.h"
 
 #include "engine/logging.h"
+#include "engine/map.h"
 
 constexpr int WIDTH = 640;
 constexpr int HEIGHT = 480;
@@ -28,7 +29,7 @@ auto main() -> int {
     auto object = scene->createObject();
     Logger::info("Object: {}", object);
     object.addComponent(gfx::RenderComponent { Path { "assets/material_scripts/material.lua" }, Path { "assets/bricks.png" } });
-    object.addComponent(game::Transform { 0.0f, 0.0f });
+    object.addComponent(game::Transform { 20.0f, 20.0f });
 
     auto secondObject = scene->createObject();
     Logger::info("SecondObject: {} \n", secondObject);

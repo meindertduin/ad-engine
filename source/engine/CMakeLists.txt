@@ -3,6 +3,7 @@ set(ENGINE_SOURCES
     source/engine/format.h
     source/engine/logging.cpp
     source/engine/singly_linked_list.h
+    source/engine/map.h
     source/engine/vector.cpp
     source/engine/hash.cpp
     source/engine/window.cpp

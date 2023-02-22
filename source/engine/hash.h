@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <compare>
 #include <string>
+#include <stdexcept>
 #include "platform/gcc.h"
 
 class Hash64 {
@@ -17,6 +18,21 @@ public:
     [[nodiscard]] constexpr ALWAYS_INLINE uint64_t value() const { return mHash; }
 private:
     uint64_t mHash {0 };
+};
+
+
+class Hash32 {
+public:
+    Hash32() = default;
+    explicit Hash32(const uint32_t &value);
+
+    auto operator==(const Hash32 &rhs) const { return mHash == rhs.mHash; }
+    auto operator!=(const Hash32 rhs) const { return mHash != rhs.mHash; }
+    auto operator<=>(const Hash32 rhs) const { return mHash <=> rhs.mHash; }
+
+    [[nodiscard]] constexpr ALWAYS_INLINE uint64_t value() const { return mHash; }
+private:
+    uint32_t mHash { 0 };
 };
 
 template<>
