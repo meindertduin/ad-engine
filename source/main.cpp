@@ -39,21 +39,6 @@ auto main() -> int {
     auto renderPipeline = gfx::RenderPipeline::createInstance(WIDTH, HEIGHT);
     renderPipeline->initialize();
 
-    // HashMap<uint32_t, uint32_t> map { Engine::instance().allocator() };
-
-    //for (auto i = 0; i < 500; i++) {
-    //    map.insert(i, i + 10);
-    //}
-
-    //map.remove(400);
-    //map.insert(400, 410);
-
-    // for (auto i = 0; i < 500; i++) {
-    //     if (map[i] != i + 10) {
-    //         Logger::error("Map is broken at index {}, {}", i, map[i]);
-    //     }
-    // }
-
     while(!window.closed()) {
         window.pollEvents();
 
