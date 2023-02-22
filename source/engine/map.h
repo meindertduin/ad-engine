@@ -20,6 +20,13 @@ public:
     }
 
     ~HashMap() {
+        for (auto i = 0; i < mCapacity; ++i) {
+            if (mKeys[i].valid) {
+                reinterpret_cast<K*>(mKeys[i].key)->~K();
+                reinterpret_cast<T*>(mValues[i])->~T();
+            }
+        }
+
         mAllocator.deallocate(mKeys);
         mAllocator.deallocate(mValues);
     }
@@ -116,12 +123,12 @@ public:
 
 private:
     Allocator &mAllocator;
-    uint32_t mSize;
-    uint32_t mCapacity;
-    uint32_t mMask;
+    uint32_t mSize { 0 };
+    uint32_t mCapacity { 0 };
+    uint32_t mMask { 0 };
 
-    KeyEntry *mKeys;
-    T *mValues;
+    KeyEntry *mKeys { nullptr };
+    T *mValues { nullptr };
 
     void initialize(uint32_t capacity) {
         mSize = 0;
