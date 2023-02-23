@@ -17,11 +17,16 @@ namespace game {
 
         void initialize() override {
             mRenderWorld = std::make_unique<RenderWorld>(*this, Application::instance()->window().size());
-            mWindowEventObserver = Application::instance()->window().windowEvent().subscribe([this](const WindowEvent &value) {
+
+            auto windowEventCallback = [this](const WindowEvent &value) {
                 if (value.type == WindowEvent::Type::Resize) {
                     mRenderWorld->resize(value.size);
                 }
-            });
+            };
+
+            mWindowEventObserver = Application::instance()->window()
+                    .windowEvent()
+                    .subscribe(windowEventCallback);
         }
 
         void update(float dt) override {
