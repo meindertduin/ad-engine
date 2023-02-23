@@ -58,9 +58,7 @@ public:
         uint32_t id = mNextObserverId++;
 
         std::function<void(uint32_t)> unsubscribe = [this](uint32_t observerId) {
-            if (this != nullptr) {
-                mObservers.erase(observerId);
-            }
+            mObservers.erase(observerId);
         };
 
         auto observer = std::make_shared<Observer<T>>(id, std::move(callback), unsubscribe);
