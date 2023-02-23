@@ -43,10 +43,6 @@ public:
             return mIndex == rhs.mIndex;
         }
 
-        bool operator!=(const Iterator &rhs) const {
-            return mIndex != rhs.mIndex;
-        }
-
         T& operator*() {
             return mMap.mValues[mIndex];
         }

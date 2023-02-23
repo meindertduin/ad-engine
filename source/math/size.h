@@ -33,10 +33,6 @@ namespace math {
             return std::equal(v.begin(), v.end(), other.v.begin());
         }
 
-        constexpr auto operator!=(const Size& other) const noexcept {
-            return !std::equal(v.begin(), v.end(), other.v.begin());
-        }
-
         std::array<T, Dimensions> v;
     };
 

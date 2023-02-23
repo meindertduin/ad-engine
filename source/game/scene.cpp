@@ -5,14 +5,28 @@
 #include <cassert>
 
 #include "ecs.h"
+#include "engine/application.h"
 
 namespace game {
     class SceneImpl : public Scene {
     public:
         explicit SceneImpl(Allocator &allocator)
             : mAllocator(allocator)
-            , mRenderWorld(*this)
         {
+        }
+
+        void initialize() override {
+            mRenderWorld = std::make_unique<RenderWorld>(*this, Application::instance()->window().size());
+
+            auto windowEventCallback = [this](const WindowEvent &value) {
+                if (value.type == WindowEvent::Type::Resize) {
+                    mRenderWorld->resize(value.size);
+                }
+            };
+
+            mWindowEventObserver = Application::instance()->window()
+                    .windowEvent()
+                    .subscribe(windowEventCallback);
         }
 
         void update(float dt) override {
@@ -20,7 +34,7 @@ namespace game {
         }
 
         void render() override {
-            mRenderWorld.render();
+            mRenderWorld->render();
         }
 
         Object createObject() override {
@@ -40,8 +54,9 @@ namespace game {
     private:
         Ecs mEcs;
         Allocator &mAllocator;
+        std::unique_ptr<RenderWorld> mRenderWorld;
 
-        RenderWorld mRenderWorld;
+        std::shared_ptr<Observer<WindowEvent>> mWindowEventObserver { nullptr };
     };
 
     std::unique_ptr<Scene> Scene::createInstance(Allocator &allocator) {

@@ -12,7 +12,6 @@ public:
     explicit Hash64(const std::string &value);
 
     auto operator==(const Hash64 &rhs) const { return mHash == rhs.mHash; }
-    auto operator!=(const Hash64 rhs) const { return mHash != rhs.mHash; }
     auto operator<=>(const Hash64 rhs) const { return mHash <=> rhs.mHash; }
 
     [[nodiscard]] constexpr ALWAYS_INLINE uint64_t value() const { return mHash; }
@@ -27,7 +26,6 @@ public:
     explicit Hash32(const uint32_t &value);
 
     auto operator==(const Hash32 &rhs) const { return mHash == rhs.mHash; }
-    auto operator!=(const Hash32 rhs) const { return mHash != rhs.mHash; }
     auto operator<=>(const Hash32 rhs) const { return mHash <=> rhs.mHash; }
 
     [[nodiscard]] constexpr ALWAYS_INLINE uint64_t value() const { return mHash; }

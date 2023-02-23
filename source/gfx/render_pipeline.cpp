@@ -1,22 +1,20 @@
 #include <bx/math.h>
 #include <bgfx/bgfx.h>
-#include "render_pipeline.h"
+#include <fstream>
 
+#include "render_pipeline.h"
+#include "material_manager.h"
+#include "game/transform.h"
 #include "texture.h"
 #include "shader_manager.h"
-
-#include <fstream>
-#include "material_manager.h"
-
-#include "game/transform.h"
 
 namespace gfx {
     constexpr int MaxShaderParams = 16;
 
     bgfx::ShaderHandle loadShader(const char* _name) {
-        char* data = new char[2048];
+        char data[2048];
         std::ifstream file;
-        size_t fileSize;
+        uint32_t fileSize;
 
         file.open(_name);
 
@@ -28,10 +26,11 @@ namespace gfx {
             file.close();
         }
 
-        const bgfx::Memory* mem = bgfx::copy(data,fileSize+1);
+        const bgfx::Memory* mem = bgfx::copy(data, fileSize+1);
         mem->data[mem->size-1] = '\0';
         bgfx::ShaderHandle handle = bgfx::createShader(mem);
         bgfx::setName(handle, _name);
+
         return handle;
     }
 
@@ -70,9 +69,9 @@ namespace gfx {
 
     class RenderPipelineImpl : public RenderPipeline {
     public:
-        RenderPipelineImpl(int width, int height)
-            : mWidth(width)
-            , mHeight(height)
+        explicit RenderPipelineImpl(math::Size2D frameDimensions)
+            : mWidth(frameDimensions.width())
+            , mHeight(frameDimensions.height())
         {
         }
 
@@ -162,9 +161,22 @@ namespace gfx {
         void afterRender() override {
             bgfx::frame();
         }
+
+        void resize(math::Size2D frameDimensions) override {
+           mWidth = frameDimensions.width();
+           mHeight = frameDimensions.height();
+
+            bgfx::reset(mWidth, mHeight, BGFX_RESET_VSYNC);
+
+            bgfx::setViewRect(0, 0, 0, mWidth, mHeight);
+            bgfx::setViewFrameBuffer(0, mFbh);
+
+            bgfx::touch(0);
+        }
+
     private:
-        int mWidth;
-        int mHeight;
+        uint32_t mWidth;
+        uint32_t mHeight;
 
         bgfx::VertexBufferHandle mVbh;
         bgfx::IndexBufferHandle mIbh;
@@ -174,7 +186,7 @@ namespace gfx {
         bgfx::UniformHandle mShaderParamsUniformHandle = BGFX_INVALID_HANDLE;
     };
 
-    std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(int width, int height) {
-        return std::make_unique<RenderPipelineImpl>(width, height);
+    std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(math::Size2D frameDimensions) {
+        return std::make_unique<RenderPipelineImpl>(frameDimensions);
     }
 }
