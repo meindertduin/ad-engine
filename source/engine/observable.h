@@ -5,8 +5,8 @@
 #include <functional>
 #include <memory>
 #include <map>
+#include <utility>
 #include "platform/gcc.h"
-
 
 template<typename T>
 class Observer {
@@ -14,10 +14,10 @@ public:
     using Callback = std::function<void(const T &)>;
     using Unsubscribe = std::function<void(uint32_t)>;
 
-    Observer(uint32_t id, Callback callback, const Unsubscribe &unsubscribe)
+    Observer(uint32_t id, Callback callback, Unsubscribe unsubscribe)
         : mId(id)
         , mCallback(std::forward<std::function<void(const T &)>>(callback)),
-        mUnsubscribe(unsubscribe)
+        mUnsubscribe(std::move(unsubscribe))
     {
     }
 
