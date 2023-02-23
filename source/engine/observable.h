@@ -7,12 +7,16 @@
 #include <map>
 #include "platform/gcc.h"
 
+
 template<typename T>
 class Observer {
 public:
-    Observer(uint32_t id, const std::function<void(const T &)> &callback, const std::function<void(uint32_t)> &unsubscribe)
+    using Callback = std::function<void(const T &)>;
+    using Unsubscribe = std::function<void(uint32_t)>;
+
+    Observer(uint32_t id, Callback callback, const Unsubscribe &unsubscribe)
         : mId(id)
-        , mCallback(callback),
+        , mCallback(std::forward<std::function<void(const T &)>>(callback)),
         mUnsubscribe(unsubscribe)
     {
     }
@@ -42,16 +46,18 @@ private:
 template<typename T>
 class Observable {
 public:
+    using Callback = std::function<void(const T &)>;
+
     virtual ~Observable() = default;
 
-    std::shared_ptr<Observer<T>> subscribe(const std::function<void(const T &)> &callback) {
+    std::shared_ptr<Observer<T>> subscribe(Callback &&callback) {
         uint32_t id = mNextObserverId++;
 
         static std::function<void(uint32_t)> unsubscribe = [this](uint32_t id) {
             mObservers.erase(id);
         };
 
-        auto observer = std::make_shared<Observer<T>>(id, callback, unsubscribe);
+        auto observer = std::make_shared<Observer<T>>(id, std::forward<Callback>(callback), unsubscribe);
 
         mObservers.insert({ id, observer.get() });
 

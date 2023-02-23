@@ -15,6 +15,15 @@ auto main() -> int {
     WindowOptions options { .title = "Application", .size = { WIDTH, HEIGHT } };
     auto app = Application::createInstance(options);
 
+    Observable<std::string> observable;
+    auto observer = observable.subscribe([](const std::string &value) {
+        Logger::info("Observer: {}", value);
+    });
+
+    observable.notify("Hello");
+    observable.notify("World");
+    observer->~Observer();
+
     if (!app->initialize()) {
         return 1;
     }
