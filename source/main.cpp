@@ -16,13 +16,14 @@ auto main() -> int {
     auto app = Application::createInstance(options);
 
     Observable<std::string> observable;
-    auto observer = observable.subscribe([](const std::string &value) {
+    const auto function = [](const std::string &value) {
         Logger::info("Observer: {}", value);
-    });
+    };
+
+    auto observer = observable.subscribe(function);
 
     observable.notify("Hello");
     observable.notify("World");
-    observer->~Observer();
 
     if (!app->initialize()) {
         return 1;

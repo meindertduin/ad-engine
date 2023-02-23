@@ -1,20 +1,18 @@
 #include <bx/math.h>
 #include <bgfx/bgfx.h>
-#include "render_pipeline.h"
+#include <fstream>
 
+#include "render_pipeline.h"
+#include "material_manager.h"
+#include "game/transform.h"
 #include "texture.h"
 #include "shader_manager.h"
-
-#include <fstream>
-#include "material_manager.h"
-
-#include "game/transform.h"
 
 namespace gfx {
     constexpr int MaxShaderParams = 16;
 
     bgfx::ShaderHandle loadShader(const char* _name) {
-        char* data = new char[2048];
+        char data[2048];
         std::ifstream file;
         size_t fileSize;
 
@@ -28,10 +26,11 @@ namespace gfx {
             file.close();
         }
 
-        const bgfx::Memory* mem = bgfx::copy(data,fileSize+1);
+        const bgfx::Memory* mem = bgfx::copy(data, fileSize+1);
         mem->data[mem->size-1] = '\0';
         bgfx::ShaderHandle handle = bgfx::createShader(mem);
         bgfx::setName(handle, _name);
+
         return handle;
     }
 

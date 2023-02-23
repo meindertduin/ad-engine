@@ -7,6 +7,7 @@
 #include <map>
 #include <utility>
 #include "platform/gcc.h"
+#include "logging.h"
 
 template<typename T>
 class Observer {
@@ -14,9 +15,9 @@ public:
     using Callback = std::function<void(const T &)>;
     using Unsubscribe = std::function<void(uint32_t)>;
 
-    Observer(uint32_t id, Callback callback, Unsubscribe unsubscribe)
+    explicit Observer(uint32_t id, Callback &&callback, Unsubscribe unsubscribe)
         : mId(id)
-        , mCallback(std::forward<std::function<void(const T &)>>(callback)),
+        , mCallback(std::move(callback)),
         mUnsubscribe(std::move(unsubscribe))
     {
     }
@@ -53,11 +54,11 @@ public:
     std::shared_ptr<Observer<T>> subscribe(Callback &&callback) {
         uint32_t id = mNextObserverId++;
 
-        static std::function<void(uint32_t)> unsubscribe = [this](uint32_t id) {
-            mObservers.erase(id);
+        static std::function<void(uint32_t)> unsubscribe = [this](uint32_t observerId) {
+            mObservers.erase(observerId);
         };
 
-        auto observer = std::make_shared<Observer<T>>(id, std::forward<Callback>(callback), unsubscribe);
+        auto observer = std::make_shared<Observer<T>>(id, std::move(callback), unsubscribe);
 
         mObservers.insert({ id, observer.get() });
 
