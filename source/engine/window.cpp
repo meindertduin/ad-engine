@@ -29,7 +29,7 @@ bool AdWindow::initialize() {
     }
     else {
         //Create a window
-        pWindow = SDL_CreateWindow(mTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, mSize.width(), mSize.height(), SDL_WINDOW_SHOWN);
+        pWindow = SDL_CreateWindow(mTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, mSize.width(), mSize.height(), SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
         if(pWindow == nullptr) {
             Logger::error("Failed to create SDL window: {}", SDL_GetError());
             return false;
@@ -67,6 +67,14 @@ void AdWindow::pollEvents() {
     while(SDL_PollEvent(&currentEvent) != 0) {
         if(currentEvent.type == SDL_QUIT) {
             mClosed = true;
+        }
+
+        if (currentEvent.type == SDL_WINDOWEVENT) {
+            if (currentEvent.window.event == SDL_WINDOWEVENT_RESIZED) {
+                mSize = math::Size2D {currentEvent.window.data1, currentEvent.window.data2};
+
+                mWindowEventObservable.notify({ WindowEvent::Type::Resize, mSize });
+            }
         }
     }
 }
