@@ -25,6 +25,8 @@ auto main() -> int {
     observable.notify("Hello");
     observable.notify("World");
 
+    observer->unsubscribe();
+
     if (!app->initialize()) {
         return 1;
     }

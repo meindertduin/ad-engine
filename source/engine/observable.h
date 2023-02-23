@@ -22,6 +22,9 @@ public:
     {
     }
 
+    Observer(const Observer &) = delete;
+    Observer& operator=(const Observer &) = delete;
+
     ~Observer() {
         mUnsubscribe(mId);
     }
@@ -34,7 +37,7 @@ public:
         mCallback(subject);
     }
 
-    void unsubscribe() {
+    void unsubscribe() const {
         mUnsubscribe(mId);
     }
 
@@ -54,8 +57,10 @@ public:
     std::shared_ptr<Observer<T>> subscribe(Callback &&callback) {
         uint32_t id = mNextObserverId++;
 
-        static std::function<void(uint32_t)> unsubscribe = [this](uint32_t observerId) {
-            mObservers.erase(observerId);
+        std::function<void(uint32_t)> unsubscribe = [this](uint32_t observerId) {
+            if (this != nullptr) {
+                mObservers.erase(observerId);
+            }
         };
 
         auto observer = std::make_shared<Observer<T>>(id, std::move(callback), unsubscribe);

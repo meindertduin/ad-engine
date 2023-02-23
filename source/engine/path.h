@@ -22,7 +22,6 @@ public:
     [[nodiscard]] constexpr ALWAYS_INLINE Hash64 hash() const { return mHash; }
 
     inline auto operator==(const Path &rhs) const { return mHash == rhs.mHash; }
-    inline auto operator!=(const Path &rhs) const { return mHash != rhs.mHash; }
 
 private:
     std::string mValue {};

@@ -27,10 +27,6 @@ namespace game {
             return mId == other.mId;
         }
 
-        bool operator!=(const Entity &other) const {
-            return mId != other.mId;
-        }
-
         auto operator <=>(const Entity &other) const {
             return mId <=> other.mId;
         }

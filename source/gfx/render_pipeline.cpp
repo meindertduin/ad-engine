@@ -14,7 +14,7 @@ namespace gfx {
     bgfx::ShaderHandle loadShader(const char* _name) {
         char data[2048];
         std::ifstream file;
-        size_t fileSize;
+        uint32_t fileSize;
 
         file.open(_name);
 
@@ -175,8 +175,8 @@ namespace gfx {
         }
 
     private:
-        int mWidth;
-        int mHeight;
+        uint32_t mWidth;
+        uint32_t mHeight;
 
         bgfx::VertexBufferHandle mVbh;
         bgfx::IndexBufferHandle mIbh;
