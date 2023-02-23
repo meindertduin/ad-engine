@@ -27,4 +27,8 @@ namespace game {
 
         mRenderPipeline->afterRender();
     }
+
+    void RenderWorld::resize(const math::Size2D &frameDimensions) {
+        mRenderPipeline->resize(frameDimensions);
+    }
 }

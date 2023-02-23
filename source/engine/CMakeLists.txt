@@ -12,4 +12,5 @@ set(ENGINE_SOURCES
     source/engine/engine.cpp
     source/engine/resource.h
     source/engine/application.cpp
+    source/engine/observable.h
 )

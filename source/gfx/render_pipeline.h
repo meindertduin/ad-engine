@@ -18,6 +18,8 @@ namespace gfx {
         virtual void renderObject(const game::Transform &transform, RenderComponent &component) = 0;
         virtual void afterRender() = 0;
 
+        virtual void resize(math::Size2D frameDimensions) = 0;
+
         virtual ~RenderPipeline() = default;
     };
 }

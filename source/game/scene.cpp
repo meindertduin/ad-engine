@@ -17,6 +17,11 @@ namespace game {
 
         void initialize() override {
             mRenderWorld = std::make_unique<RenderWorld>(*this, Application::instance()->window().size());
+            mWindowEventObserver = Application::instance()->window().windowEvent().subscribe([this](const WindowEvent &value) {
+                if (value.type == WindowEvent::Type::Resize) {
+                    mRenderWorld->resize(value.size);
+                }
+            });
         }
 
         void update(float dt) override {
@@ -45,6 +50,8 @@ namespace game {
         Ecs mEcs;
         Allocator &mAllocator;
         std::unique_ptr<RenderWorld> mRenderWorld;
+
+        std::shared_ptr<Observer<WindowEvent>> mWindowEventObserver { nullptr };
     };
 
     std::unique_ptr<Scene> Scene::createInstance(Allocator &allocator) {

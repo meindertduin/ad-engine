@@ -162,6 +162,19 @@ namespace gfx {
         void afterRender() override {
             bgfx::frame();
         }
+
+        void resize(math::Size2D frameDimensions) override {
+           mWidth = frameDimensions.width();
+           mHeight = frameDimensions.height();
+
+            bgfx::reset(mWidth, mHeight, BGFX_RESET_VSYNC);
+
+            bgfx::setViewRect(0, 0, 0, mWidth, mHeight);
+            bgfx::setViewFrameBuffer(0, mFbh);
+
+            bgfx::touch(0);
+        }
+
     private:
         int mWidth;
         int mHeight;
