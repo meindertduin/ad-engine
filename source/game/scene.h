@@ -12,7 +12,7 @@ namespace game {
     public:
         virtual ~Scene() = default;
 
-        static std::unique_ptr<Scene> createInstance(Allocator &allocator);
+        static std::unique_ptr<Scene> createInstance();
 
         virtual void initialize() = 0;
         virtual void update(float dt) = 0;

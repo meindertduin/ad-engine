@@ -9,6 +9,8 @@
 
 namespace game {
     struct IComponentArrayStaticData {
+        virtual ~IComponentArrayStaticData() = default;
+
         ComponentType type { 0 };
         [[nodiscard]] virtual std::shared_ptr<IComponentArray> createComponentArray() const = 0;
     };
@@ -50,7 +52,7 @@ namespace game {
                 registerType();
             }
 
-            uint32_t registerType() {
+            uint32_t registerType() const {
                 if (sComponentCount >= MaxComponents) {
                     throw std::runtime_error("Too many components");
                 }

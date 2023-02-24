@@ -18,7 +18,7 @@ public:
         return mAllocator;
     }
 
-    void shutdown();
+    static void shutdown();
 private:
     Engine() = default;
 

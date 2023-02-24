@@ -7,19 +7,20 @@ constexpr std::string EscapeSeqReset = "\033[0m";
 
 void Logger::log(Level level, const std::string &message) {
     switch (level) {
-        case Level::Info:
+        using enum Logger::Level;
+        case Info:
             printf("[INFO] %s\n", message.c_str());
             break;
-        case Level::Debug:
+        case Debug:
             printf("%s[DEBUG] %s%s\n", EscapeSeqGreen.c_str(), message.c_str(), EscapeSeqReset.c_str());
             break;
-        case Level::Warning:
+        case Warning:
             printf("%s[WARNING] %s%s\n", EscapeSeqOrange.c_str(), message.c_str(), EscapeSeqReset.c_str());
             break;
-        case Level::Error:
+        case Error:
             printf("%s[ERROR] %s%s\n", EscapeSeqRed.c_str(), message.c_str(), EscapeSeqReset.c_str());
             break;
-        case Level::Fatal:
+        case Fatal:
             printf("%s[FATAL] %s%s\n", EscapeSeqRed.c_str(), message.c_str(), EscapeSeqReset.c_str());
             break;
     }

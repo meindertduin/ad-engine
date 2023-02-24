@@ -43,7 +43,7 @@ struct FormatType<const char *> {
 
 namespace detail {
     template<typename T>
-    void formatString(std::string &result, const std::string &format, int &index, const T &value) {
+    void formatString(std::string &result, const std::string_view &format, int &index, const T &value) {
         auto pos = format.find("{}", index);
         if (pos == std::string::npos) {
             return;

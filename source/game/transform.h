@@ -32,5 +32,4 @@ namespace game {
         float mX = 0.0f;
         float mY = 0.0f;
     };
-
 }

@@ -18,7 +18,7 @@ namespace game {
 
         auto componentArray = mScene.ecs().getComponentArray<gfx::RenderComponent>();
         for (auto it = componentArray->begin(); it != componentArray->end(); it++) {
-            auto &object = it.key();
+            const auto &object = it.key();
             auto &component = it.value();
 
             auto transform = transformComponentArray->get(object);

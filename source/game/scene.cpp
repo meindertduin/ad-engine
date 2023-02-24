@@ -10,10 +10,6 @@
 namespace game {
     class SceneImpl : public Scene {
     public:
-        explicit SceneImpl(Allocator &allocator)
-            : mAllocator(allocator)
-        {
-        }
 
         void initialize() override {
             mRenderWorld = std::make_unique<RenderWorld>(*this, Application::instance()->window().size());
@@ -53,13 +49,12 @@ namespace game {
 
     private:
         Ecs mEcs;
-        Allocator &mAllocator;
         std::unique_ptr<RenderWorld> mRenderWorld;
 
         std::shared_ptr<Observer<WindowEvent>> mWindowEventObserver { nullptr };
     };
 
-    std::unique_ptr<Scene> Scene::createInstance(Allocator &allocator) {
-        return std::make_unique<SceneImpl>(allocator);
+    std::unique_ptr<Scene> Scene::createInstance() {
+        return std::make_unique<SceneImpl>();
     }
 }
