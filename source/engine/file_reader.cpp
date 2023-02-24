@@ -12,8 +12,9 @@ FileReader::~FileReader() {
 
 void FileReader::openFile(const std::string &filename) {
     mFs.open(filename);
-    if (!mFs.is_open())
+    if (!mFs.is_open()) {
         throw std::runtime_error("Could not open file: " + filename);
+    }
 }
 
 bool FileReader::nextLine(char *line, size_t size) {

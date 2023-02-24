@@ -29,7 +29,7 @@ namespace gfx {
         mCompiled = true;
     }
 
-    void Shader::bind(uint16_t viewId) {
+    void Shader::bind(uint16_t viewId) const {
         bgfx::submit(viewId, mProgramHandle);
     }
 

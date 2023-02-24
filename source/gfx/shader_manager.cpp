@@ -36,7 +36,7 @@ namespace gfx {
             newStage.data.reserve(fileContent.size());
 
             // TODO - Implement a back_inserter for new Vector type and read from stream in fileReader
-            for (auto &c : fileContent) {
+            for (const auto &c : fileContent) {
                 newStage.data.push(c);
             }
 
@@ -48,6 +48,8 @@ namespace gfx {
         }
 
         static int addUniform(lua_State *L) {
+            using enum gfx::Uniform::Type;
+
             auto shader = getShader(L);
 
             auto uniformName = std::string{lua::checkArg<const char *>(L, 1)};
@@ -57,12 +59,12 @@ namespace gfx {
             uniform.name = uniformName;
 
             static std::unordered_map<std::string, Uniform::Type> uniformTypeMap{
-                { "Float", Uniform::Type::Float },
-                { "Vec2", Uniform::Type::Vec2 },
-                { "Vec3", Uniform::Type::Vec3 },
-                { "Vec4", Uniform::Type::Vec4 },
-                { "Mat3", Uniform::Type::Mat3 },
-                { "Mat4", Uniform::Type::Mat4 }
+                { "Float", Float },
+                { "Vec2",  Vec2 },
+                { "Vec3",  Vec3 },
+                { "Vec4",  Vec4 },
+                { "Mat3",  Mat3 },
+                { "Mat4",  Mat4 }
             };
 
             auto uniformTypeIt = uniformTypeMap.find(uniformType);

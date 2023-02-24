@@ -6,11 +6,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
-#include <utility>
-
 AdWindow::AdWindow(const WindowOptions &options)
     : mSize(options.size)
-    , mTitle(std::move(options.title))
+    , mTitle(options.title)
 {
 }
 
@@ -37,7 +35,7 @@ bool AdWindow::initialize() {
     }
 
     SDL_SysWMinfo wmi;
-    SDL_VERSION(&wmi.version);
+    SDL_VERSION(&wmi.version)
     if (!SDL_GetWindowWMInfo(pWindow, &wmi)) {
         Logger::error("Failed to get SDL window info: {}", SDL_GetError());
         return false;
@@ -46,7 +44,7 @@ bool AdWindow::initialize() {
     bgfx::PlatformData pd;
     // and give the pointer to the window to pd
     pd.ndt = wmi.info.x11.display;
-    pd.nwh = (void*)(uintptr_t)wmi.info.x11.window;
+    pd.nwh = (void*) wmi.info.x11.window;
 
     bgfx::Init init;
     init.platformData = pd;

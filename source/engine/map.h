@@ -63,7 +63,6 @@ public:
         std::size_t mIndex;
     };
 
-public:
     explicit HashMap(Allocator &allocator, uint32_t initialCapacity = 16)
         : mAllocator(allocator)
     {
@@ -93,13 +92,12 @@ public:
 
     HashMap(HashMap &&rhs) noexcept
         : mAllocator(rhs.mAllocator)
+        , mKeys(rhs.mKeys)
+        , mValues(rhs.mValues)
+        , mCapacity(rhs.mCapacity)
+        , mSize(rhs.mSize)
+        , mMask(rhs.mMask)
     {
-        mKeys = rhs.mKeys;
-        mValues = rhs.mValues;
-        mCapacity = rhs.mCapacity;
-        mSize = rhs.mSize;
-        mMask = rhs.mMask;
-
         rhs.mKeys = nullptr;
         rhs.mValues = nullptr;
         rhs.mCapacity = 0;

@@ -2,6 +2,8 @@
 
 #include "format.h"
 
+#include <source_location>
+
 class Logger {
 public:
     template<typename ...Args>

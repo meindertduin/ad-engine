@@ -33,7 +33,7 @@ auto main() -> int {
 
     app->run();
 
-    Engine::instance().shutdown();
+    Engine::shutdown();
 
     return 0;
 }

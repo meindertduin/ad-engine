@@ -41,7 +41,7 @@ namespace gfx {
     }
 
     MaterialHandle MaterialManager::createMaterial(const Path &path) {
-        if (mMaterialPathsIdsMap.find(path) != mMaterialPathsIdsMap.end()) {
+        if (mMaterialPathsIdsMap.contains(path)) {
             return MaterialHandle { mMaterialPathsIdsMap[path] };
         }
 
@@ -61,7 +61,7 @@ namespace gfx {
 
         luaL_unref(root_state, LUA_REGISTRYINDEX, state_ref);
 
-        mMaterialPathsIdsMap.insert({ path, mNextId });
+        mMaterialPathsIdsMap.try_emplace(path, mNextId);
         mMaterials.insert({ mNextId, std::move(material) });
 
         return MaterialHandle { mNextId++ };

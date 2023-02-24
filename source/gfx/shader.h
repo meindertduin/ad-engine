@@ -56,7 +56,7 @@ namespace gfx {
 
         void addStage(gfx::ShaderStage&& stage);
         void compile();
-        void bind(uint16_t viewId);
+        void bind(uint16_t viewId) const;
 
         [[nodiscard]] constexpr ALWAYS_INLINE bgfx::ProgramHandle programHandle() const {
             return mProgramHandle;

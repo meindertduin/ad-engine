@@ -4,7 +4,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-
 namespace gfx {
     class TextureImpl : public Texture2D {
     public:
@@ -12,9 +11,14 @@ namespace gfx {
             bgfx::destroy(mTextureHandle);
         }
 
-        explicit TextureImpl(const math::Size2D &size, unsigned char *data)
+        explicit TextureImpl(const math::Size2D &size, unsigned char const *data)
         {
-            mTextureHandle = bgfx::createTexture2D(size.width(), size.height(), false, 1, bgfx::TextureFormat::RGBA8, BGFX_TEXTURE_NONE, bgfx::makeRef(data, size.width() * size.height() * 4));
+            auto dataRef = bgfx::makeRef(data, size.width() * size.height() * 4, [](auto *imageData, [[maybe_unused]] auto *_) {
+                stbi_image_free(imageData);
+            }, nullptr);
+
+            mTextureHandle = bgfx::createTexture2D(static_cast<uint16_t>(size.width()), static_cast<uint16_t>(size.height()),
+                               false, 1, bgfx::TextureFormat::RGBA8, BGFX_TEXTURE_NONE, dataRef);
         }
 
         void render(bgfx::UniformHandle uniformHandle) override {

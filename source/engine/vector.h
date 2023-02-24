@@ -8,9 +8,7 @@ class Vector {
 public:
    explicit Vector(Allocator &allocator, const std::size_t initialCapacity = 0)
       : mAllocator(allocator)
-      , mData(nullptr)
       , mCapacity(initialCapacity)
-      , mSize(0)
    {
       if (mCapacity > 0) {
          mData = static_cast<T*>(mAllocator.allocate(mCapacity * sizeof(T), alignof(T)));
@@ -19,9 +17,7 @@ public:
 
    Vector(Vector &&rhs) noexcept
       : mAllocator(rhs.mAllocator)
-      , mData(nullptr)
       , mCapacity(0)
-      , mSize(0)
    {
        auto i = rhs.mCapacity;
        rhs.mCapacity = mCapacity;
@@ -109,11 +105,11 @@ public:
         }
    }
 
-protected:
+private:
     Allocator &mAllocator;
-    T *mData;
+    T *mData { nullptr };
     std::size_t mCapacity;
-    std::size_t mSize;
+    std::size_t mSize { 0 };
 
     void destructItems(int from = 0, int to = -1) {
         if (to == -1) {
