@@ -10,9 +10,13 @@
 namespace game {
     class SceneImpl : public Scene {
     public:
+        SceneImpl(Allocator &allocator)
+            : mAllocator(allocator)
+        {
+        }
 
         void initialize() override {
-            mRenderWorld = std::make_unique<RenderWorld>(*this, Application::instance()->window().size());
+            mRenderWorld = std::make_unique<RenderWorld>(*this, mAllocator, Application::instance()->window().size());
 
             auto windowEventCallback = [this](const WindowEvent &value) {
                 if (value.type == WindowEvent::Type::Resize) {
@@ -48,13 +52,14 @@ namespace game {
         }
 
     private:
+        Allocator &mAllocator;
         Ecs mEcs;
         std::unique_ptr<RenderWorld> mRenderWorld;
 
         std::shared_ptr<Observer<WindowEvent>> mWindowEventObserver { nullptr };
     };
 
-    std::unique_ptr<Scene> Scene::createInstance() {
-        return std::make_unique<SceneImpl>();
+    std::unique_ptr<Scene> Scene::createInstance(Allocator &allocator) {
+        return std::make_unique<SceneImpl>(allocator);
     }
 }

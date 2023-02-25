@@ -12,7 +12,7 @@ namespace game {
 
     class RenderWorld {
     public:
-        explicit RenderWorld(Scene &scene, const math::Size2D &frameDimensions);
+        explicit RenderWorld(Scene &scene, Allocator &allocator, const math::Size2D &frameDimensions);
         void resize(const math::Size2D &frameDimensions);
         void render();
     private:

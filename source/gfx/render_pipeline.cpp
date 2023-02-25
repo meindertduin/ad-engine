@@ -69,8 +69,9 @@ namespace gfx {
 
     class RenderPipelineImpl : public RenderPipeline {
     public:
-        explicit RenderPipelineImpl(math::Size2D frameDimensions)
-            : mWidth(frameDimensions.width())
+        explicit RenderPipelineImpl(Allocator &allocator, math::Size2D frameDimensions)
+            : mRenderCommands(allocator)
+            , mWidth(frameDimensions.width())
             , mHeight(frameDimensions.height())
         {
         }
@@ -107,6 +108,10 @@ namespace gfx {
             bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x443355FF, 1.0f, 0);
 
             bgfx::touch(0);
+        }
+
+        void addCommand(const RenderCommand &command) override {
+            mRenderCommands.push(command);
         }
 
         void beforeRender() override {
@@ -152,14 +157,15 @@ namespace gfx {
             component.texture()->render(mTextureUniform);
             bgfx::setState(BGFX_STATE_DEFAULT);
 
-            float params[8] = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-            bgfx::setUniform(mShaderParamsUniformHandle, params, MaxShaderParams);
+            std::array<float, 8> params = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+            bgfx::setUniform(mShaderParamsUniformHandle, params.data(), MaxShaderParams);
 
             component.material()->shader()->bind(0);
         }
 
         void afterRender() override {
             bgfx::frame();
+            mRenderCommands.clear();
         }
 
         void resize(math::Size2D frameDimensions) override {
@@ -184,9 +190,11 @@ namespace gfx {
 
         bgfx::UniformHandle mTextureUniform = BGFX_INVALID_HANDLE;
         bgfx::UniformHandle mShaderParamsUniformHandle = BGFX_INVALID_HANDLE;
+
+        Vector<RenderCommand> mRenderCommands;
     };
 
-    std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(math::Size2D frameDimensions) {
-        return std::make_unique<RenderPipelineImpl>(frameDimensions);
+    std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(Allocator &allocator, math::Size2D frameDimensions) {
+        return std::make_unique<RenderPipelineImpl>(allocator, frameDimensions);
     }
 }

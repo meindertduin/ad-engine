@@ -105,6 +105,11 @@ public:
         }
    }
 
+   void clear() {
+       destructItems();
+       mSize = 0;
+   }
+
 private:
     Allocator &mAllocator;
     T *mData { nullptr };

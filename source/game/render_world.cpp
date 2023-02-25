@@ -4,9 +4,9 @@
 #include "transform.h"
 
 namespace game {
-    RenderWorld::RenderWorld(Scene &scene, const math::Size2D &frameDimensions)
+    RenderWorld::RenderWorld(Scene &scene, Allocator &allocator, const math::Size2D &frameDimensions)
         : mScene(scene)
-        , mRenderPipeline(gfx::RenderPipeline::createInstance(frameDimensions))
+        , mRenderPipeline(gfx::RenderPipeline::createInstance(allocator, frameDimensions))
     {
         mRenderPipeline->initialize();
     }
