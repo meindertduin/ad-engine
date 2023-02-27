@@ -18,7 +18,7 @@ public:
         return T::ManagerType::instance().get(mId);
     }
 
-    T* get() const {
+    constexpr ALWAYS_INLINE T* get() const {
         return T::ManagerType::instance().get(mId);
     }
 private:

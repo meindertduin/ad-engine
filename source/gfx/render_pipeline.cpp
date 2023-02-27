@@ -142,8 +142,8 @@ namespace gfx {
             while (!mRenderCommands.empty()) {
                 auto const &command = mRenderCommands.front();
 
-                float mtx[16];
-                bx::mtxRotateY(mtx, 0.0f);
+                std::array<float, 16> mtx {};
+                bx::mtxRotateY(mtx.data(), 0.0f);
 
                 // position x,y,z
                 mtx[12] = command.transform->x();
@@ -151,7 +151,7 @@ namespace gfx {
                 mtx[14] = 0.0f;
 
                 // Set model matrix for rendering.
-                bgfx::setTransform(mtx);
+                bgfx::setTransform(mtx.data());
 
                 bgfx::setVertexBuffer(0, mVbh);
                 bgfx::setIndexBuffer(mIbh);
