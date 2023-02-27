@@ -15,10 +15,18 @@ namespace gfx {
         }
 
         MaterialHandle createMaterial(const Path &path);
-        Material* get(uint32_t id);
+
+        void cleanup() {
+            mMaterialPathsIdsMap.clear();
+            mMaterials.clear();
+        }
 
     private:
+        friend class Handle<Material>;
+
         MaterialManager() = default;
+
+        Material* get(uint32_t id);
 
         std::unordered_map<Path, uint32_t> mMaterialPathsIdsMap;
         std::unordered_map<uint32_t, std::unique_ptr<Material>> mMaterials;

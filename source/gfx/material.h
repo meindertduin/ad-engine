@@ -12,15 +12,13 @@ namespace gfx {
     class Material : public Resource<MaterialManager> {
     public:
         explicit Material(Allocator &allocator)
-            : mAllocator(allocator)
-            , mUniforms(allocator)
+            : mUniforms(allocator)
         {
         }
 
         void setShader(ShaderHandle shader);
         [[nodiscard]] constexpr ALWAYS_INLINE ShaderHandle shader() const { return mShader; }
     private:
-        Allocator &mAllocator;
         Vector<Uniform> mUniforms;
         ShaderHandle mShader;
     };

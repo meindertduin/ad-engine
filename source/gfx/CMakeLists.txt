@@ -7,4 +7,5 @@ set(GFX_SOURCES
         source/gfx/shader.cpp
         source/gfx/shader_manager.cpp
         source/gfx/material_manager.cpp
+        source/gfx/texture_manager.cpp
 )

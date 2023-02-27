@@ -132,7 +132,7 @@ namespace gfx {
             bgfx::setViewTransform(0, view, proj);
 
             // Set view 0 default viewport.
-            bgfx::setViewRect(0, 0, 0, mWidth, mHeight);
+            bgfx::setViewRect(0, 0, 0, static_cast<uint16_t>(mWidth), static_cast<uint16_t>(mHeight));
             bgfx::setViewFrameBuffer(0, mFbh);
 
             bgfx::touch(0);
@@ -176,7 +176,7 @@ namespace gfx {
 
             bgfx::reset(mWidth, mHeight, BGFX_RESET_VSYNC);
 
-            bgfx::setViewRect(0, 0, 0, mWidth, mHeight);
+            bgfx::setViewRect(0, 0, 0, static_cast<uint16_t>(mWidth), static_cast<uint16_t>(mHeight));
             bgfx::setViewFrameBuffer(0, mFbh);
 
             bgfx::touch(0);
