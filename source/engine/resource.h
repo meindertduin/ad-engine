@@ -17,6 +17,10 @@ public:
     T* operator->() const {
         return T::ManagerType::instance().get(mId);
     }
+
+    T* get() const {
+        return T::ManagerType::instance().get(mId);
+    }
 private:
     uint32_t mId;
 };

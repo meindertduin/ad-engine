@@ -2,6 +2,7 @@
 #include "ecs.h"
 #include "gfx/render_component.h"
 #include "transform.h"
+#include "gfx/material_manager.h"
 
 namespace game {
     RenderWorld::RenderWorld(Scene &scene, Allocator &allocator, const math::Size2D &frameDimensions)
@@ -21,11 +22,13 @@ namespace game {
             const auto &object = it.key();
             auto &component = it.value();
 
-            auto transform = transformComponentArray->get(object);
-            mRenderPipeline->renderObject(transform, component);
+            auto &transform = transformComponentArray->get(object);
+            gfx::RenderCommand command { 0, component.material().get(), component.texture().get(), &transform };
+
+            mRenderPipeline->renderCommand(command);
         }
 
-        mRenderPipeline->afterRender();
+        mRenderPipeline->renderFrame();
     }
 
     void RenderWorld::resize(const math::Size2D &frameDimensions) {

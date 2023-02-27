@@ -11,6 +11,8 @@ namespace gfx {
     struct RenderCommand {
         bgfx::ViewId viewId;
         Material *material;
+        Texture2D *texture;
+        game::Transform *transform;
     };
 
     class RenderPipeline {
@@ -20,9 +22,8 @@ namespace gfx {
         virtual void initialize() = 0;
 
         virtual void beforeRender() = 0;
-        virtual void renderObject(const game::Transform &transform, RenderComponent &component) = 0;
-        virtual void addCommand(const RenderCommand &command) = 0;
-        virtual void afterRender() = 0;
+        virtual void renderCommand(const RenderCommand &command) = 0;
+        virtual void renderFrame() = 0;
 
         virtual void resize(math::Size2D frameDimensions) = 0;
 

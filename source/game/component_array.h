@@ -41,7 +41,7 @@ namespace game {
             mSize--;
         }
 
-        T &get(Object object) {
+        T& get(Object object) {
             if (mComponents.find(object) == mComponents.end()) {
                 throw std::runtime_error("Component does not exist");
             }

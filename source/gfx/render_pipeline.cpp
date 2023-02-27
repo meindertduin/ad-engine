@@ -1,6 +1,7 @@
 #include <bx/math.h>
 #include <bgfx/bgfx.h>
 #include <fstream>
+#include <queue>
 
 #include "render_pipeline.h"
 #include "material_manager.h"
@@ -70,8 +71,7 @@ namespace gfx {
     class RenderPipelineImpl : public RenderPipeline {
     public:
         explicit RenderPipelineImpl(Allocator &allocator, math::Size2D frameDimensions)
-            : mRenderCommands(allocator)
-            , mWidth(frameDimensions.width())
+            : mWidth(frameDimensions.width())
             , mHeight(frameDimensions.height())
         {
         }
@@ -110,7 +110,7 @@ namespace gfx {
             bgfx::touch(0);
         }
 
-        void addCommand(const RenderCommand &command) override {
+        void renderCommand(const RenderCommand &command) override {
             mRenderCommands.push(command);
         }
 
@@ -138,34 +138,36 @@ namespace gfx {
             bgfx::touch(0);
         }
 
-        void renderObject(const game::Transform &transform, RenderComponent &component) override {
-            float mtx[16];
-            bx::mtxRotateY(mtx, 0.0f);
+        void renderFrame() override {
+            while (!mRenderCommands.empty()) {
+                auto const &command = mRenderCommands.front();
 
-            // position x,y,z
-            mtx[12] = transform.x();
-            mtx[13] = transform.y();
-            mtx[14] = 0.0f;
+                float mtx[16];
+                bx::mtxRotateY(mtx, 0.0f);
 
-            // Set model matrix for rendering.
-            bgfx::setTransform(mtx);
+                // position x,y,z
+                mtx[12] = command.transform->x();
+                mtx[13] = command.transform->y();
+                mtx[14] = 0.0f;
 
-            // Set vertex and index buffer.
-            bgfx::setVertexBuffer(0, mVbh);
-            bgfx::setIndexBuffer(mIbh);
+                // Set model matrix for rendering.
+                bgfx::setTransform(mtx);
 
-            component.texture()->render(mTextureUniform);
-            bgfx::setState(BGFX_STATE_DEFAULT);
+                bgfx::setVertexBuffer(0, mVbh);
+                bgfx::setIndexBuffer(mIbh);
 
-            std::array<float, 8> params = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-            bgfx::setUniform(mShaderParamsUniformHandle, params.data(), MaxShaderParams);
+                command.texture->render(mTextureUniform);
+                bgfx::setState(BGFX_STATE_DEFAULT);
 
-            component.material()->shader()->bind(0);
-        }
+                std::array<float, 8> params = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+                bgfx::setUniform(mShaderParamsUniformHandle, params.data(), MaxShaderParams);
 
-        void afterRender() override {
+                command.material->shader()->bind(command.viewId);
+
+                mRenderCommands.pop();
+            }
+
             bgfx::frame();
-            mRenderCommands.clear();
         }
 
         void resize(math::Size2D frameDimensions) override {
@@ -191,7 +193,7 @@ namespace gfx {
         bgfx::UniformHandle mTextureUniform = BGFX_INVALID_HANDLE;
         bgfx::UniformHandle mShaderParamsUniformHandle = BGFX_INVALID_HANDLE;
 
-        Vector<RenderCommand> mRenderCommands;
+        std::queue<RenderCommand> mRenderCommands;
     };
 
     std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(Allocator &allocator, math::Size2D frameDimensions) {
