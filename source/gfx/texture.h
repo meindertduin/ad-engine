@@ -12,7 +12,7 @@ namespace gfx {
 
     using TextureHandle = Handle<Texture2D>;
 
-    class Texture2D : public Resource<Texture2D> {
+    class Texture2D : public Resource<TextureManager> {
     public:
         virtual ~Texture2D() = default;
 

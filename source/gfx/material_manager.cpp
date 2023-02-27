@@ -4,6 +4,7 @@
 #include "engine/file_reader.h"
 #include "lua/helpers.h"
 #include "shader_manager.h"
+#include "texture_manager.h"
 
 namespace gfx {
     namespace luaApi {
@@ -12,6 +13,15 @@ namespace gfx {
             auto material = lua::convertType<Material*>(L, -1);
             lua_pop(L, 1);
             return material;
+        }
+
+        static int addTexture(lua_State *L) {
+            auto material = getMaterial(L);
+            auto texturePath = lua::checkArg<const char*>(L, 1);
+            auto texture = TextureManager::instance().createTexture(Path { texturePath });
+            material->addTexture(texture);
+
+            return 0;
         }
 
         static int setShader(lua_State *L) {
@@ -34,6 +44,9 @@ namespace gfx {
 
                 lua_pushcfunction(L, luaApi::setShader);
                 lua_setglobal(L, "setShader");
+
+                lua_pushcfunction(L, luaApi::addTexture);
+                lua_setglobal(L, "addTexture");
             }
 
             return L;

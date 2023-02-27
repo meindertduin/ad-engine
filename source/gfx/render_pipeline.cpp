@@ -4,10 +4,11 @@
 #include <queue>
 
 #include "render_pipeline.h"
-#include "material_manager.h"
 #include "game/transform.h"
 #include "texture.h"
 #include "shader_manager.h"
+#include "texture_manager.h"
+#include "material_manager.h"
 
 namespace gfx {
     constexpr int MaxShaderParams = 16;
@@ -156,7 +157,8 @@ namespace gfx {
                 bgfx::setVertexBuffer(0, mVbh);
                 bgfx::setIndexBuffer(mIbh);
 
-                command.texture->render(mTextureUniform);
+                auto &textures = command.material->textures();
+                textures[0]->render(mTextureUniform);
                 bgfx::setState(BGFX_STATE_DEFAULT);
 
                 std::array<float, 8> params = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
