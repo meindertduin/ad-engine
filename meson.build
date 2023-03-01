@@ -1,19 +1,22 @@
 project('ad-enine', 'cpp',
     version: '0.1.0',
-    default_options: ['cpp_std=c++20'])
+    default_options: ['cpp_std=c++20', 'default_library=static'])
 
 project_sources = []
 project_header_files = []
 
 inc = [
     include_directories('source'),
+    include_directories('external/xxh3'),
+    include_directories('external/stb'),
 ]
+
+sdl2_dep = dependency('sdl2')
+lua_dep = dependency('lua')
 
 subdir('source')
 
-executable('adengine', main_source,
-    include_directories: inc)
+executable('adengine', project_sources,
+    include_directories: inc,
+    dependencies: [sdl2_dep, lua_dep])
 
-e = executable('sample_cpp_project_bin',
-  main_source,
-  include_directories : inc)

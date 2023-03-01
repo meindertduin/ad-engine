@@ -1,6 +1,5 @@
 #include "helpers.h"
 
-
 namespace lua {
     bool execute(lua_State* L, const std::string &script, const std::string &name, int resultsCount) {
         if(luaL_loadbuffer(L, script.c_str(), script.length(), name.c_str()) != 0) {
