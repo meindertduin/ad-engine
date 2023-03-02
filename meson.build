@@ -13,10 +13,12 @@ inc = [
 
 sdl2_dep = dependency('sdl2')
 lua_dep = dependency('lua')
+glm_dep = dependency('glm')
+glew_dep = dependency('glew')
 
 subdir('source')
 
 executable('adengine', project_sources,
     include_directories: inc,
-    dependencies: [sdl2_dep, lua_dep])
+    dependencies: [sdl2_dep, lua_dep, glm_dep, glew_dep])
 

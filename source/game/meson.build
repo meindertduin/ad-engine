@@ -5,4 +5,4 @@ game_sources = files(
 )
 project_sources += game_sources
 
-engine_lib = static_library('lua', game_sources, include_directories: inc)
+engine_lib = static_library('engine', game_sources, include_directories: inc)

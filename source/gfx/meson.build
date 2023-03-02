@@ -11,4 +11,4 @@ gfx_sources = files(
 )
 project_sources += gfx_sources
 
-gfx_lib = static_library('lua', gfx_sources, include_directories: inc)
+gfx_lib = static_library('gfx', gfx_sources, include_directories: inc)
