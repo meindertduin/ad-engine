@@ -1,5 +1,5 @@
 gfx_sources = files(
-    'render_pipeline.cpp',
+    #'render_pipeline.cpp',
     'render_component.cpp',
     'texture.cpp',
     'material.cpp',

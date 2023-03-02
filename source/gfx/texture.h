@@ -3,7 +3,6 @@
 #include <string>
 #include <memory>
 
-#include <bgfx/bgfx.h>
 #include "engine/resource.h"
 
 namespace gfx {
@@ -17,6 +16,6 @@ namespace gfx {
         virtual ~Texture2D() = default;
 
         static std::unique_ptr<Texture2D> loadFromFile(const std::string& path);
-        virtual void render(bgfx::UniformHandle uniformHandle) = 0;
+        virtual void render(uint32_t uniformHandle) = 0;
     };
 }

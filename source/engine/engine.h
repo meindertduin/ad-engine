@@ -3,7 +3,6 @@
 #include "allocator.h"
 #include "platform/gcc.h"
 
-
 class Engine {
 public:
     static Engine& instance() {

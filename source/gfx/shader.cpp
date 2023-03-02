@@ -1,10 +1,13 @@
+#include <GL/glew.h>
 #include "shader.h"
+#include "engine/logging.h"
 
 namespace gfx {
     Shader::~Shader() {
         if (compiled()) {
-            bgfx::destroy(mParamsUniformHandle);
-            bgfx::destroy(mProgramHandle);
+            glDeleteShader(mVertexShaderHandle);
+            glDeleteShader(mFragmentShaderHandle);
+            glDeleteProgram(mProgramHandle);
         }
     }
 
@@ -14,23 +17,54 @@ namespace gfx {
 
     void Shader::compile() {
         for (auto &stage : mStages) {
+            auto data = reinterpret_cast<const GLchar *const *>(stage.data.data());
+
+            int success;
+            char infoLog[512];
             if (stage.type == ShaderType::Vertex) {
-                mVertexShaderHandle = bgfx::createShader(bgfx::makeRef(stage.data.data(), stage.data.size()));
-                bgfx::setName(mVertexShaderHandle, stage.path.value().c_str());
+                mVertexShaderHandle = glCreateShader(GL_VERTEX_SHADER);
+                glShaderSource(mVertexShaderHandle, 1, data, nullptr);
+                glCompileShader(mVertexShaderHandle);
+
+                glGetShaderiv(mVertexShaderHandle, GL_COMPILE_STATUS, &success);
+                if (!success)
+                {
+                    glGetShaderInfoLog(mVertexShaderHandle, 512, nullptr, infoLog);
+                    Logger::error("ERROR::SHADER::VERTEX::COMPILATION_FAILED");
+                }
             } else if (stage.type == ShaderType::Fragment) {
-                mFragmentShaderHandle = bgfx::createShader(bgfx::makeRef(stage.data.data(), stage.data.size()));
-                bgfx::setName(mFragmentShaderHandle, stage.path.value().c_str());
+                mFragmentShaderHandle = glCreateShader(GL_FRAGMENT_SHADER);
+                glShaderSource(mFragmentShaderHandle, 1, data, nullptr);
+                glCompileShader(mFragmentShaderHandle);
+
+                glGetShaderiv(mFragmentShaderHandle, GL_COMPILE_STATUS, &success);
+                if (!success)
+                {
+                    glGetShaderInfoLog(mFragmentShaderHandle, 512, nullptr, infoLog);
+                    Logger::error("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED");
+                }
             }
         }
 
-        mProgramHandle = bgfx::createProgram(mVertexShaderHandle, mFragmentShaderHandle, mDestroyShaders);
-        mParamsUniformHandle = bgfx::createUniform("u_params", bgfx::UniformType::Vec4, 12);
+        mProgramHandle = glCreateProgram();
+        glAttachShader(mProgramHandle, mVertexShaderHandle);
+        glAttachShader(mProgramHandle, mFragmentShaderHandle);
+        glLinkProgram(mProgramHandle);
+
+        int success;
+        char infoLog[512];
+
+        glGetProgramiv(mProgramHandle, GL_LINK_STATUS, &success);
+        if (!success) {
+            glGetProgramInfoLog(mProgramHandle, 512, NULL, infoLog);
+            Logger::error("ERROR::SHADER::PROGRAM::LINKING_FAILED");
+        }
 
         mCompiled = true;
     }
 
-    void Shader::bind(uint16_t viewId) const {
-        bgfx::submit(viewId, mProgramHandle);
+    void Shader::bind() const {
+        glUseProgram(mProgramHandle);
     }
 
     void Shader::addUniform(const Uniform &uniform) {

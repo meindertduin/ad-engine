@@ -3,9 +3,9 @@ engine_sources = files(
     'hash.cpp',
     'window.cpp',
     'file_reader.cpp',
-    #'allocator.cpp',
-    #'engine.cpp',
-    #'application.cpp',
+    'allocator.cpp',
+    'engine.cpp',
+    'application.cpp',
 )
 project_sources += engine_sources
 

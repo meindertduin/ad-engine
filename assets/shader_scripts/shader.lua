@@ -1,4 +1,4 @@
-addStage("Vertex", "shaders/build/v_simple.bin")
-addStage("Fragment", "shaders/build/f_simple.bin")
+addStage("Vertex", "shaders/simple.vert")
+addStage("Fragment", "shaders/simple.frag")
 
 addUniform("Constant", "Vec4")

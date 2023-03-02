@@ -1,5 +1,3 @@
-#include <bx/math.h>
-#include <bgfx/bgfx.h>
 #include <fstream>
 #include <queue>
 
