@@ -74,10 +74,10 @@ namespace gpu {
         // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
         glBindVertexArray(mVAO);
 
-        glBindBuffer(GL_ARRAY_BUFFER, mVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, mVBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVAO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -95,7 +95,7 @@ namespace gpu {
     }
 
     void RenderTarget::renderTest() {
-        glClearColor(1, 0, 0, 0);
+        glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // draw our first triangle
