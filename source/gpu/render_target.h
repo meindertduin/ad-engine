@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include "gfx/shader.h"
 
 namespace gpu {
     class RenderTarget {
@@ -13,9 +14,7 @@ namespace gpu {
 
         void renderTest();
     private:
-        uint32_t mVertexShader;
-        uint32_t mFragmentShader;
-        uint32_t mShaderProgram;
+        gfx::ShaderHandle mShader;
 
         uint32_t mVAO;
         uint32_t mVBO;

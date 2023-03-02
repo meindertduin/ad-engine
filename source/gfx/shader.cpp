@@ -16,14 +16,15 @@ namespace gfx {
     }
 
     void Shader::compile() {
-        for (auto &stage : mStages) {
-            auto data = reinterpret_cast<const GLchar *const *>(stage.data.data());
+        int success;
+        char infoLog[512];
 
-            int success;
-            char infoLog[512];
+        for (auto &stage : mStages) {
+            const char* data =  stage.data.data();
+
             if (stage.type == ShaderType::Vertex) {
                 mVertexShaderHandle = glCreateShader(GL_VERTEX_SHADER);
-                glShaderSource(mVertexShaderHandle, 1, data, nullptr);
+                glShaderSource(mVertexShaderHandle, 1, &data, nullptr);
                 glCompileShader(mVertexShaderHandle);
 
                 glGetShaderiv(mVertexShaderHandle, GL_COMPILE_STATUS, &success);
@@ -34,7 +35,7 @@ namespace gfx {
                 }
             } else if (stage.type == ShaderType::Fragment) {
                 mFragmentShaderHandle = glCreateShader(GL_FRAGMENT_SHADER);
-                glShaderSource(mFragmentShaderHandle, 1, data, nullptr);
+                glShaderSource(mFragmentShaderHandle, 1, &data, nullptr);
                 glCompileShader(mFragmentShaderHandle);
 
                 glGetShaderiv(mFragmentShaderHandle, GL_COMPILE_STATUS, &success);
@@ -51,12 +52,9 @@ namespace gfx {
         glAttachShader(mProgramHandle, mFragmentShaderHandle);
         glLinkProgram(mProgramHandle);
 
-        int success;
-        char infoLog[512];
-
         glGetProgramiv(mProgramHandle, GL_LINK_STATUS, &success);
         if (!success) {
-            glGetProgramInfoLog(mProgramHandle, 512, NULL, infoLog);
+            glGetProgramInfoLog(mProgramHandle, 512, nullptr, infoLog);
             Logger::error("ERROR::SHADER::PROGRAM::LINKING_FAILED");
         }
 
