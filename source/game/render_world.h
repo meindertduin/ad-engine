@@ -6,6 +6,7 @@
 #include "scene.h"
 
 #include "math/size.h"
+#include "gfx/render_pipeline.h"
 
 namespace game {
 
@@ -16,6 +17,6 @@ namespace game {
         void render();
     private:
         Scene &mScene;
-        // std::unique_ptr<gfx::RenderPipeline> mRenderPipeline;
+        std::unique_ptr<gfx::RenderPipeline> mRenderPipeline;
     };
 }

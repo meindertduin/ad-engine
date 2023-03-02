@@ -46,6 +46,8 @@ void Application::run() {
         mWindow.pollEvents();
 
         mScene->render();
+
+        mWindow.swapBuffers();
     }
 }
 

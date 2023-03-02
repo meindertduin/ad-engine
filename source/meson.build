@@ -1,4 +1,4 @@
-main_source = files('test.cpp')
+main_source = files('main.cpp')
 project_sources += main_source
 
 subdir('game')

@@ -4,8 +4,6 @@
 
 namespace gpu {
     RenderTarget::RenderTarget() {
-        mShader = gfx::ShaderManager::instance().createShader(Path { "assets/shader_scripts/shader.lua" });
-
         // set up vertex data (and buffer(s)) and configure vertex attributes
         // ------------------------------------------------------------------
         float vertices[] = {

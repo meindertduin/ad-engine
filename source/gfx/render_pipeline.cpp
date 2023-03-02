@@ -1,5 +1,8 @@
 #include <fstream>
 #include <queue>
+#include <GL/glew.h>
+#include "glm/glm.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "render_pipeline.h"
 #include "game/transform.h"
@@ -11,45 +14,12 @@
 namespace gfx {
     constexpr int MaxShaderParams = 16;
 
-    bgfx::ShaderHandle loadShader(const char* _name) {
-        char data[2048];
-        std::ifstream file;
-        uint32_t fileSize;
-
-        file.open(_name);
-
-        if(file.is_open()) {
-            file.seekg(0, std::ios::end);
-            fileSize = file.tellg();
-            file.seekg(0, std::ios::beg);
-            file.read(data, fileSize);
-            file.close();
-        }
-
-        const bgfx::Memory* mem = bgfx::copy(data, fileSize+1);
-        mem->data[mem->size-1] = '\0';
-        bgfx::ShaderHandle handle = bgfx::createShader(mem);
-        bgfx::setName(handle, _name);
-
-        return handle;
-    }
-
     struct PosTextVertex {
         float x;
         float y;
         float z;
         float tx;
         float ty;
-
-        static void init() {
-            ms_decl
-                .begin()
-                .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-                .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-                .end();
-        };
-
-        static inline bgfx::VertexLayout ms_decl;
     };
 
     constexpr PosTextVertex sCubeVertices[] =
@@ -76,37 +46,36 @@ namespace gfx {
         }
 
         ~RenderPipelineImpl() override {
-            bgfx::destroy(mTextureUniform);
-
-            bgfx::destroy(mIbh);
-            bgfx::destroy(mVbh);
+            glDeleteVertexArrays(1, &mVAO);
+            glDeleteBuffers(1, &mVBO);
+            glDeleteBuffers(1, &mEBO);
         }
 
         void initialize() override {
-            PosTextVertex::init();
+            glGenVertexArrays(1, &mVAO);
+            glGenBuffers(1, &mVBO);
+            glGenBuffers(1, &mEBO);
+            // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+            glBindVertexArray(mVAO);
 
-            mShaderParamsUniformHandle = bgfx::createUniform("u_params", bgfx::UniformType::Vec4, MaxShaderParams);
-            mTextureUniform = bgfx::createUniform("v_texCoord0", bgfx::UniformType::Sampler);
+            glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(sCubeVertices), sCubeVertices, GL_STATIC_DRAW);
 
-            mVbh = bgfx::createVertexBuffer(
-                bgfx::makeRef(sCubeVertices, sizeof(sCubeVertices)),
-                PosTextVertex::ms_decl
-            );
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(sCubeTriList), sCubeTriList, GL_STATIC_DRAW);
 
-            mIbh = bgfx::createIndexBuffer(bgfx::makeRef(sCubeTriList, sizeof(sCubeTriList)));
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
 
-            mFbh.idx = bgfx::kInvalidHandle;
+            // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-            // Reset window
-            bgfx::reset(mWidth, mHeight, BGFX_RESET_VSYNC);
+            // remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
+            //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-            // Enable debug text.
-            bgfx::setDebug(BGFX_DEBUG_TEXT /*| BGFX_DEBUG_STATS*/);
-
-            bgfx::setViewRect(0, 0, 0, uint16_t(mWidth), uint16_t(mHeight));
-            bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x443355FF, 1.0f, 0);
-
-            bgfx::touch(0);
+            // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
+            // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
+            glBindVertexArray(0);
         }
 
         void renderCommand(const RenderCommand &command) override {
@@ -114,84 +83,72 @@ namespace gfx {
         }
 
         void beforeRender() override {
-            constexpr bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
-            constexpr bx::Vec3 eye = { 0.0f, 0.0f, 10.0f };
+            constexpr glm::vec3 at = { 0.0f, 0.0f, 0.0f };
+            constexpr glm::vec3 eye = { 0.0f, 0.0f, 0.0f };
 
             // Set view and projection matrix for view 0.
-            float view[16];
-            bx::mtxLookAt(view, eye, at);
-
-            float proj[16];
+            mView = glm::lookAt(eye, at, glm::vec3(0.0f, 1.0f, 0.0f));
 
             auto halfWidth = float(mWidth) / 2.0f;
             auto halfHeight = float(mHeight) / 2.0f;
 
-            bx::mtxOrtho(proj, -halfWidth, halfWidth, -halfHeight, halfHeight, 0.1f, 1000.0f, 0.0f, bgfx::getCaps()->homogeneousDepth);
-
-            bgfx::setViewTransform(0, view, proj);
-
-            // Set view 0 default viewport.
-            bgfx::setViewRect(0, 0, 0, static_cast<uint16_t>(mWidth), static_cast<uint16_t>(mHeight));
-            bgfx::setViewFrameBuffer(0, mFbh);
-
-            bgfx::touch(0);
+            mProjection = glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.0f, 1000.0f);
         }
 
         void renderFrame() override {
+            glClearColor(0, 0, 0, 0);
+            glClear(GL_COLOR_BUFFER_BIT);
+
             while (!mRenderCommands.empty()) {
                 auto const &command = mRenderCommands.front();
 
-                std::array<float, 16> mtx {};
-                bx::mtxRotateY(mtx.data(), 0.0f);
+                command.material->shader()->bind();
 
-                // position x,y,z
-                mtx[12] = command.transform->x();
-                mtx[13] = command.transform->y();
-                mtx[14] = 0.0f;
+                // std::array<float, 16> mtx {};
+                // bx::mtxRotateY(mtx.data(), 0.0f);
 
-                // Set model matrix for rendering.
-                bgfx::setTransform(mtx.data());
+                // // position x,y,z
+                // mtx[12] = command.transform->x();
+                // mtx[13] = command.transform->y();
+                // mtx[14] = 0.0f;
 
-                bgfx::setVertexBuffer(0, mVbh);
-                bgfx::setIndexBuffer(mIbh);
+                // // Set model matrix for rendering.
+                // bgfx::setTransform(mtx.data());
 
-                auto &textures = command.material->textures();
-                textures[0]->render(mTextureUniform);
-                bgfx::setState(BGFX_STATE_DEFAULT);
+                // bgfx::setVertexBuffer(0, mVbh);
+                // bgfx::setIndexBuffer(mIbh);
 
-                std::array<float, 8> params = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-                bgfx::setUniform(mShaderParamsUniformHandle, params.data(), MaxShaderParams);
+                // auto &textures = command.material->textures();
+                // textures[0]->render(mTextureUniform);
+                // bgfx::setState(BGFX_STATE_DEFAULT);
 
-                command.material->shader()->bind(command.viewId);
+                // std::array<float, 8> params = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+                // bgfx::setUniform(mShaderParamsUniformHandle, params.data(), MaxShaderParams);
+
+                glBindVertexArray(mVAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
                 mRenderCommands.pop();
             }
-
-            bgfx::frame();
         }
 
         void resize(math::Size2D frameDimensions) override {
-           mWidth = frameDimensions.width();
-           mHeight = frameDimensions.height();
+            mWidth = frameDimensions.width();
+            mHeight = frameDimensions.height();
 
-            bgfx::reset(mWidth, mHeight, BGFX_RESET_VSYNC);
-
-            bgfx::setViewRect(0, 0, 0, static_cast<uint16_t>(mWidth), static_cast<uint16_t>(mHeight));
-            bgfx::setViewFrameBuffer(0, mFbh);
-
-            bgfx::touch(0);
+            glViewport(0, 0, mWidth, mHeight);
         }
 
     private:
         uint32_t mWidth;
         uint32_t mHeight;
 
-        bgfx::VertexBufferHandle mVbh;
-        bgfx::IndexBufferHandle mIbh;
-        bgfx::FrameBufferHandle mFbh;
+        uint32_t mVAO;
+        uint32_t mVBO;
+        uint32_t mEBO;
 
-        bgfx::UniformHandle mTextureUniform = BGFX_INVALID_HANDLE;
-        bgfx::UniformHandle mShaderParamsUniformHandle = BGFX_INVALID_HANDLE;
+        glm::mat4x4 mView;
+        glm::mat4x4 mProjection;
 
         std::queue<RenderCommand> mRenderCommands;
     };

@@ -9,7 +9,6 @@ namespace game { class Transform; }
 
 namespace gfx {
     struct RenderCommand {
-        bgfx::ViewId viewId;
         Material *material;
         Texture2D *texture;
         game::Transform *transform;
