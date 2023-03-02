@@ -29,8 +29,8 @@ public:
     ~AdWindow();
 
     bool initialize();
+    void swapBuffers();
     void pollEvents();
-
 
     [[nodiscard]] constexpr ALWAYS_INLINE math::Size2D size() const {
         return mSize;
