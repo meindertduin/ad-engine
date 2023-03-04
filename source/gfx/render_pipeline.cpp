@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include "glm/glm.hpp"
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "render_pipeline.h"
 #include "game/transform.h"
@@ -47,10 +48,10 @@ namespace gfx {
     // };
 
     float vertices[] = {
-            0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // top right
-            0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // bottom right
-            -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
-            -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left
+            50.0f,  50.0f, 0.0f,   1.0f, 1.0f, // top right
+            50.0f, -50.0f, 0.0f,   1.0f, 0.0f, // bottom right
+            -50.0f, -50.0f, 0.0f,   0.0f, 0.0f, // bottom left
+            -50.0f,  50.0f, 0.0f,   0.0f, 1.0f  // top left
     };
 
     unsigned int indices[] = {  // note that we start from 0!
@@ -123,14 +124,21 @@ namespace gfx {
 
                 command.material->shader()->bind();
 
-                auto  mtx = glm::identity<glm::mat4x4>();
-                mtx = glm::translate(mtx, glm::vec3(0, 0, 0));
+                auto model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3(command.transform->x(), command.transform->y(), 0.0f));
 
-                // position x,y,z
-                glm::translate(mtx, glm::vec3(command.transform->x(), command.transform->y(), 0.0f));
+                auto view = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+                auto projection = glm::mat4(1.0f);
 
-                // glUniformMatrix4fv(glGetUniformLocation(command.material->shader()->programHandle(), "model"), 1, GL_FALSE, glm::value_ptr(mtx));
-                // glUniformMatrix4fv(glGetUniformLocation(command.material->shader()->programHandle(), "view"), 1, GL_FALSE, glm::value_ptr(mView));
+                auto halfWidth = float(mWidth) / 2.0f;
+                auto halfHeight = float(mHeight) / 2.0f;
+
+                projection = glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.0f, 1000.0f);
+                view       = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
+
+                glUniformMatrix4fv(glGetUniformLocation(command.material->shader()->programHandle(), "model"), 1, GL_FALSE, glm::value_ptr(model));
+                glUniformMatrix4fv(glGetUniformLocation(command.material->shader()->programHandle(), "view"), 1, GL_FALSE, glm::value_ptr(view));
+                glUniformMatrix4fv(glGetUniformLocation(command.material->shader()->programHandle(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
                 glBindVertexArray(mVAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
                 glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
