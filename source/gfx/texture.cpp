@@ -13,19 +13,20 @@ namespace gfx {
         }
 
         explicit TextureImpl(const math::Size2D &size, unsigned char const *data) {
+            glGenTextures(1, &mTextureId);
             glBindTexture(GL_TEXTURE_2D, mTextureId);
-
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, size.width(), size.height(), 0, GL_RED, GL_UNSIGNED_BYTE, data);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.width(), size.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         }
 
         void render(uint32_t uniformHandle) override {
-            glActiveTexture(GL_TEXTURE0 + uniformHandle);
+            glActiveTexture(GL_TEXTURE0+ uniformHandle);
             glBindTexture(GL_TEXTURE_2D, mTextureId);
         }
 
@@ -35,7 +36,7 @@ namespace gfx {
 
     std::unique_ptr<Texture2D> Texture2D::loadFromFile(const std::string &path) {
         int width, height, channels;
-        auto data = stbi_load(path.c_str(), &width, &height, &channels, 4);
+        auto data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 
         if (!data) {
             return nullptr;

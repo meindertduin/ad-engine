@@ -4,6 +4,7 @@
 
 namespace gpu {
     RenderTarget::RenderTarget() {
+        mShader = gfx::ShaderManager::instance().createShader(Path { "assets/shader_scripts/shader.lua" });
         // set up vertex data (and buffer(s)) and configure vertex attributes
         // ------------------------------------------------------------------
         float vertices[] = {
@@ -43,7 +44,7 @@ namespace gpu {
     }
 
     void RenderTarget::renderTest() {
-        glClearColor(0, 0, 0, 0);
+        glClearColor(1, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // draw our first triangle

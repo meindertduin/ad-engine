@@ -12,6 +12,7 @@ namespace game {
     }
 
     void RenderWorld::render() {
+        // mRenderTarget.renderTest();
         mRenderPipeline->beforeRender();
 
         auto transformComponentArray = mScene.ecs().getComponentArray<Transform>();

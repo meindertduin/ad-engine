@@ -7,6 +7,7 @@
 
 #include "math/size.h"
 #include "gfx/render_pipeline.h"
+#include "gpu/render_target.h"
 
 namespace game {
 
@@ -17,6 +18,7 @@ namespace game {
         void render();
     private:
         Scene &mScene;
+        gpu::RenderTarget mRenderTarget;
         std::unique_ptr<gfx::RenderPipeline> mRenderPipeline;
     };
 }
