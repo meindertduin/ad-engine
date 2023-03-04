@@ -1,3 +1,3 @@
 setShader("assets/shader_scripts/shader.lua")
 
-addTexture("assets/container.jpg")
+addTexture("assets/bricks.png")

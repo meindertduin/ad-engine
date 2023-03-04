@@ -58,6 +58,16 @@ namespace gfx {
             Logger::error("ERROR::SHADER::PROGRAM::LINKING_FAILED");
         }
 
+        bind();
+        for (auto const &[name, value] : mUniformLocs) {
+            auto loc = glGetUniformLocation(mProgramHandle, name.c_str());
+            if (loc == -1) {
+                Logger::error("ERROR::SHADER::PROGRAM::UNIFORM::NOT_FOUND");
+            }
+            glUniform1i(loc, value);
+        }
+
+
         mCompiled = true;
     }
 
@@ -67,5 +77,9 @@ namespace gfx {
 
     void Shader::addUniform(const Uniform &uniform) {
         mUniforms.push(uniform);
+    }
+
+    void Shader::addUniformLocs(const std::string &name, int loc) {
+        mUniformLocs.insert({name, loc});
     }
 }

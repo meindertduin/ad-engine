@@ -18,7 +18,6 @@ namespace game {
         void render();
     private:
         Scene &mScene;
-        gpu::RenderTarget mRenderTarget;
         std::unique_ptr<gfx::RenderPipeline> mRenderPipeline;
     };
 }

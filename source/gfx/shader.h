@@ -8,6 +8,8 @@
 #include "engine/vector.h"
 #include "engine/resource.h"
 
+#include <unordered_map>
+
 #include <glm/glm.hpp>
 
 namespace gfx {
@@ -70,6 +72,7 @@ namespace gfx {
         }
 
         void addUniform(const Uniform &uniform);
+        void addUniformLocs(const std::string &name, int loc);
     private:
         uint32_t mProgramHandle;
 
@@ -81,5 +84,6 @@ namespace gfx {
 
         Vector<ShaderStage> mStages;
         Vector<Uniform> mUniforms;
+        std::unordered_map<std::string, int> mUniformLocs;
     };
 }

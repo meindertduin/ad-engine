@@ -47,12 +47,12 @@ namespace gfx {
     // };
 
     float vertices[] = {
-            // positions          // colors           // texture coords
-            0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-            0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-            -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-            -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
+            0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // top right
+            0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // bottom right
+            -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
+            -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left
     };
+
     unsigned int indices[] = {  // note that we start from 0!
             0, 1, 3,  // first Triangle
             1, 2, 3   // second Triangle
@@ -73,8 +73,6 @@ namespace gfx {
         }
 
         void initialize() override {
-            mShader = gfx::ShaderManager::instance().createShader(Path { "assets/shader_scripts/shader.lua" });
-
             glGenVertexArrays(1, &mVAO);
             glGenBuffers(1, &mVBO);
             glGenBuffers(1, &mEBO);
@@ -87,15 +85,11 @@ namespace gfx {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-            // position attribute
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
             glEnableVertexAttribArray(0);
-            // color attribute
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-            glEnableVertexAttribArray(1);
 
-            mShader->bind();
-            glUniform1i(glGetUniformLocation(mShader.id(), "texture1"), 0);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+            glEnableVertexAttribArray(1);
         }
 
         void renderCommand(const RenderCommand &command) override {
@@ -112,7 +106,7 @@ namespace gfx {
             auto halfWidth = float(mWidth) / 2.0f;
             auto halfHeight = float(mHeight) / 2.0f;
 
-            mProjection = glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.0f, 1000.0f);
+            mView *= glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.0f, 1000.0f);
         }
 
         void renderFrame() override {
@@ -124,7 +118,7 @@ namespace gfx {
 
                 int textureHandle = 0;
                 for (auto texture : command.material->textures()) {
-                    texture->render(textureHandle);
+                    texture->render(textureHandle++);
                 }
 
                 command.material->shader()->bind();
@@ -161,11 +155,8 @@ namespace gfx {
         uint32_t mEBO;
 
         glm::mat4x4 mView;
-        glm::mat4x4 mProjection;
 
         std::queue<RenderCommand> mRenderCommands;
-
-        ShaderHandle mShader;
     };
 
     std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(Allocator &allocator, math::Size2D frameDimensions) {

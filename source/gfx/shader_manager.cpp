@@ -12,6 +12,15 @@ namespace gfx {
             return shader;
         }
 
+        static int setUniformLoc(lua_State *L) {
+            auto shader = getShader(L);
+            auto name = std::string { lua::checkArg<const char*>(L, 1) };
+            auto loc = lua::checkArg<int>(L, 2);
+
+            shader->addUniformLocs(name, loc);
+            return 0;
+        }
+
         static int addStage(lua_State *L) {
             auto shader = getShader(L);
             auto shaderType = std::string { lua::checkArg<const char*>(L, 1) };
@@ -86,6 +95,9 @@ namespace gfx {
 
                 lua_pushcfunction(L, luaApi::addStage);
                 lua_setglobal(L, "addStage");
+
+                lua_pushcfunction(L, luaApi::setUniformLoc);
+                lua_setglobal(L, "setUniformLoc");
 
                 lua_pushcfunction(L, luaApi::addUniform);
                 lua_setglobal(L, "addUniform");
