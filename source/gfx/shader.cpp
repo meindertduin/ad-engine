@@ -1,13 +1,11 @@
-#include <GL/glew.h>
 #include "shader.h"
 #include "engine/logging.h"
+#include "gpu/gpu.h"
 
 namespace gfx {
     Shader::~Shader() {
         if (compiled()) {
-            glDeleteShader(mVertexShaderHandle);
-            glDeleteShader(mFragmentShaderHandle);
-            glDeleteProgram(mProgramHandle);
+            gpu::destroyShaderProgram(mProgramHandle);
         }
     }
 
@@ -16,63 +14,31 @@ namespace gfx {
     }
 
     void Shader::compile() {
-        int success;
-        char infoLog[512];
+        gpu::ShaderHandle vertexShader;
+        gpu::ShaderHandle fragmentShader;
 
         for (auto &stage : mStages) {
             const char* data =  stage.data.data();
 
             if (stage.type == ShaderType::Vertex) {
-                mVertexShaderHandle = glCreateShader(GL_VERTEX_SHADER);
-                glShaderSource(mVertexShaderHandle, 1, &data, nullptr);
-                glCompileShader(mVertexShaderHandle);
-
-                glGetShaderiv(mVertexShaderHandle, GL_COMPILE_STATUS, &success);
-                if (!success)
-                {
-                    glGetShaderInfoLog(mVertexShaderHandle, 512, nullptr, infoLog);
-                    Logger::error("ERROR::SHADER::VERTEX::COMPILATION_FAILED");
-                }
+                vertexShader = gpu::createShader(gpu::ShaderType::Vertex, data, stage.path.value());
             } else if (stage.type == ShaderType::Fragment) {
-                mFragmentShaderHandle = glCreateShader(GL_FRAGMENT_SHADER);
-                glShaderSource(mFragmentShaderHandle, 1, &data, nullptr);
-                glCompileShader(mFragmentShaderHandle);
-
-                glGetShaderiv(mFragmentShaderHandle, GL_COMPILE_STATUS, &success);
-                if (!success)
-                {
-                    glGetShaderInfoLog(mFragmentShaderHandle, 512, nullptr, infoLog);
-                    Logger::error("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED");
-                }
+                fragmentShader = gpu::createShader(gpu::ShaderType::Fragment, data, stage.path.value());
             }
         }
 
-        mProgramHandle = glCreateProgram();
-        glAttachShader(mProgramHandle, mVertexShaderHandle);
-        glAttachShader(mProgramHandle, mFragmentShaderHandle);
-        glLinkProgram(mProgramHandle);
-
-        glGetProgramiv(mProgramHandle, GL_LINK_STATUS, &success);
-        if (!success) {
-            glGetProgramInfoLog(mProgramHandle, 512, nullptr, infoLog);
-            Logger::error("ERROR::SHADER::PROGRAM::LINKING_FAILED");
-        }
+        mProgramHandle = gpu::createShaderProgram(vertexShader, fragmentShader, true);
 
         bind();
         for (auto const &[name, value] : mUniformLocs) {
-            auto loc = glGetUniformLocation(mProgramHandle, name.c_str());
-            if (loc == -1) {
-                Logger::error("ERROR::SHADER::PROGRAM::UNIFORM::NOT_FOUND");
-            }
-            glUniform1i(loc, value);
+            gpu::setUniform(mProgramHandle, name, value);
         }
-
 
         mCompiled = true;
     }
 
     void Shader::bind() const {
-        glUseProgram(mProgramHandle);
+        gpu::bindShaderProgram(mProgramHandle);
     }
 
     void Shader::addUniform(const Uniform &uniform) {
@@ -80,6 +46,6 @@ namespace gfx {
     }
 
     void Shader::addUniformLocs(const std::string &name, int loc) {
-        mUniformLocs.insert({name, loc});
+        mUniformLocs.try_emplace(name, loc);
     }
 }

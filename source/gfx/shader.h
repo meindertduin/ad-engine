@@ -76,9 +76,6 @@ namespace gfx {
     private:
         uint32_t mProgramHandle;
 
-        uint32_t mVertexShaderHandle;
-        uint32_t mFragmentShaderHandle;
-
         bool mCompiled { false };
         bool mDestroyShaders { true };
 

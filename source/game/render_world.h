@@ -7,7 +7,6 @@
 
 #include "math/size.h"
 #include "gfx/render_pipeline.h"
-#include "gpu/render_target.h"
 
 namespace game {
 
