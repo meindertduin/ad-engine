@@ -17,6 +17,14 @@ namespace gfx {
     struct PosTextVertex {
         float x, y, z;
         float u, v;
+
+        static void init() {
+            layout
+                .addAttribute(gpu::Attribute::Position, gpu::AttributeType::Vec3, false)
+                .addAttribute(gpu::Attribute::TexCoord, gpu::AttributeType::Vec2, false);
+        }
+
+        static inline gpu::VertexLayout layout;
     };
 
     PosTextVertex vertices[] = {
@@ -40,29 +48,17 @@ namespace gfx {
         }
 
         ~RenderPipelineImpl() override {
-            glDeleteVertexArrays(1, &mVAO);
-            glDeleteBuffers(1, &mVBO);
             glDeleteBuffers(1, &mEBO);
         }
 
         void initialize() override {
-            glGenVertexArrays(1, &mVAO);
-            glGenBuffers(1, &mVBO);
+            PosTextVertex::init();
+
             glGenBuffers(1, &mEBO);
-
-            glBindVertexArray(mVAO);
-
-            glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            mVertexBuffer = std::make_unique<gpu::VertexBuffer>(vertices, sizeof(vertices), PosTextVertex::layout);
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-            glEnableVertexAttribArray(0);
-
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-            glEnableVertexAttribArray(1);
         }
 
         void renderCommand(const RenderCommand &command) override {
@@ -112,8 +108,7 @@ namespace gfx {
                 gpu::setUniform(command.material->shader()->programHandle(), "view", view);
                 gpu::setUniform(command.material->shader()->programHandle(), "projection", projection);
 
-                glBindVertexArray(mVAO);
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+                mVertexBuffer->draw();
 
                 mRenderCommands.pop();
             }
@@ -130,9 +125,9 @@ namespace gfx {
         uint32_t mWidth;
         uint32_t mHeight;
 
-        uint32_t mVAO;
-        uint32_t mVBO;
         uint32_t mEBO;
+
+        std::unique_ptr<gpu::VertexBuffer> mVertexBuffer;
 
         glm::mat4x4 mView;
 
