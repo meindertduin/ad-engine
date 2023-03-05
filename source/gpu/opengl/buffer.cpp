@@ -92,4 +92,31 @@ namespace gpu {
     std::unique_ptr<VertexBuffer> VertexBuffer::create(const void *data, uint32_t size, const VertexLayout &layout) {
         return std::make_unique<VertexBufferImpl>(data, size, layout);
     }
+
+    class IndexBufferImpl : public IndexBuffer {
+    public:
+        IndexBufferImpl(const uint32_t *data, uint32_t size)
+        {
+            glGenBuffers(1, &mIndexBufferHandle);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferHandle);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+        }
+
+        ~IndexBufferImpl() override {
+            glDeleteBuffers(1, &mIndexBufferHandle);
+        }
+
+        IndexBufferImpl(const IndexBufferImpl&) = delete;
+        IndexBufferImpl& operator=(const IndexBufferImpl&) = delete;
+
+        void bind() const override {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferHandle);
+        }
+    private:
+        uint32_t mIndexBufferHandle { 0 };
+    };
+
+    std::unique_ptr<IndexBuffer> IndexBuffer::create(const uint32_t *data, uint32_t size) {
+        return std::make_unique<IndexBufferImpl>(data, size);
+    }
 }

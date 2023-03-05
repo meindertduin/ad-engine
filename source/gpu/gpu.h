@@ -54,6 +54,13 @@ namespace gpu {
         virtual void draw() const = 0;
     };
 
+    class IndexBuffer {
+    public:
+        static std::unique_ptr<IndexBuffer> create(const uint32_t *data, uint32_t size);
+        virtual ~IndexBuffer() = default;
+
+        virtual void bind() const = 0;
+    };
 
     using ShaderProgramHandle = uint32_t;
     using ShaderHandle = uint32_t;
@@ -70,4 +77,7 @@ namespace gpu {
     void setUniform(ShaderProgramHandle handle, const std::string &name, const glm::vec4 &value);
     void setUniform(ShaderProgramHandle handle, const std::string &name, const glm::mat3 &value);
     void setUniform(ShaderProgramHandle handle, const std::string &name, const glm::mat4 &value);
+
+    void clear();
+    void setViewport(int x, int y, int width, int height);
 }

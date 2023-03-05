@@ -109,4 +109,12 @@ namespace gpu {
         glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
     }
 
+    void clear() {
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
+
+    void setViewport(int x, int y, int width, int height) {
+        glViewport(x, y, width, height);
+    }
 }

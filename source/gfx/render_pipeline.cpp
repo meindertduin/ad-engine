@@ -1,6 +1,5 @@
 #include <fstream>
 #include <queue>
-#include <GL/glew.h>
 #include "glm/glm.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -47,18 +46,11 @@ namespace gfx {
         {
         }
 
-        ~RenderPipelineImpl() override {
-            glDeleteBuffers(1, &mEBO);
-        }
-
         void initialize() override {
             PosTextVertex::init();
 
-            glGenBuffers(1, &mEBO);
             mVertexBuffer = gpu::VertexBuffer::create(vertices, sizeof(vertices), PosTextVertex::layout);
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+            mIndexBuffer = gpu::IndexBuffer::create(indices, sizeof(indices));
         }
 
         void renderCommand(const RenderCommand &command) override {
@@ -79,8 +71,7 @@ namespace gfx {
         }
 
         void renderFrame() override {
-            glClearColor(0, 0, 0, 0);
-            glClear(GL_COLOR_BUFFER_BIT);
+            gpu::clear();
 
             while (!mRenderCommands.empty()) {
                 auto const &command = mRenderCommands.front();
@@ -118,16 +109,15 @@ namespace gfx {
             mWidth = frameDimensions.width();
             mHeight = frameDimensions.height();
 
-            glViewport(0, 0, mWidth, mHeight);
+            gpu::setViewport(0, 0, mWidth, mHeight);
         }
 
     private:
         uint32_t mWidth;
         uint32_t mHeight;
 
-        uint32_t mEBO;
-
         std::unique_ptr<gpu::VertexBuffer> mVertexBuffer;
+        std::unique_ptr<gpu::IndexBuffer> mIndexBuffer;
 
         glm::mat4x4 mView;
 
