@@ -1,10 +1,11 @@
 #include "shader.h"
+#include "engine/logging.h"
+#include "gpu/gpu.h"
 
 namespace gfx {
     Shader::~Shader() {
         if (compiled()) {
-            bgfx::destroy(mParamsUniformHandle);
-            bgfx::destroy(mProgramHandle);
+            gpu::destroyShaderProgram(mProgramHandle);
         }
     }
 
@@ -13,27 +14,38 @@ namespace gfx {
     }
 
     void Shader::compile() {
+        gpu::ShaderHandle vertexShader;
+        gpu::ShaderHandle fragmentShader;
+
         for (auto &stage : mStages) {
+            const char* data =  stage.data.data();
+
             if (stage.type == ShaderType::Vertex) {
-                mVertexShaderHandle = bgfx::createShader(bgfx::makeRef(stage.data.data(), stage.data.size()));
-                bgfx::setName(mVertexShaderHandle, stage.path.value().c_str());
+                vertexShader = gpu::createShader(gpu::ShaderType::Vertex, data, stage.path.value());
             } else if (stage.type == ShaderType::Fragment) {
-                mFragmentShaderHandle = bgfx::createShader(bgfx::makeRef(stage.data.data(), stage.data.size()));
-                bgfx::setName(mFragmentShaderHandle, stage.path.value().c_str());
+                fragmentShader = gpu::createShader(gpu::ShaderType::Fragment, data, stage.path.value());
             }
         }
 
-        mProgramHandle = bgfx::createProgram(mVertexShaderHandle, mFragmentShaderHandle, mDestroyShaders);
-        mParamsUniformHandle = bgfx::createUniform("u_params", bgfx::UniformType::Vec4, 12);
+        mProgramHandle = gpu::createShaderProgram(vertexShader, fragmentShader, true);
+
+        bind();
+        for (auto const &[name, value] : mUniformLocs) {
+            gpu::setUniform(mProgramHandle, name, value);
+        }
 
         mCompiled = true;
     }
 
-    void Shader::bind(uint16_t viewId) const {
-        bgfx::submit(viewId, mProgramHandle);
+    void Shader::bind() const {
+        gpu::bindShaderProgram(mProgramHandle);
     }
 
     void Shader::addUniform(const Uniform &uniform) {
         mUniforms.push(uniform);
+    }
+
+    void Shader::addUniformLocs(const std::string &name, int loc) {
+        mUniformLocs.try_emplace(name, loc);
     }
 }

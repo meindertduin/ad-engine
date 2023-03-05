@@ -2,12 +2,13 @@
 
 #include <string>
 #include <vector>
-#include <bgfx/bgfx.h>
 #include "platform/gcc.h"
 #include "engine/path.h"
 
 #include "engine/vector.h"
 #include "engine/resource.h"
+
+#include <unordered_map>
 
 #include <glm/glm.hpp>
 
@@ -56,9 +57,9 @@ namespace gfx {
 
         void addStage(gfx::ShaderStage&& stage);
         void compile();
-        void bind(uint16_t viewId) const;
+        void bind() const;
 
-        [[nodiscard]] constexpr ALWAYS_INLINE bgfx::ProgramHandle programHandle() const {
+        [[nodiscard]] constexpr ALWAYS_INLINE uint32_t programHandle() const {
             return mProgramHandle;
         }
 
@@ -71,18 +72,15 @@ namespace gfx {
         }
 
         void addUniform(const Uniform &uniform);
+        void addUniformLocs(const std::string &name, int loc);
     private:
-        bgfx::ProgramHandle mProgramHandle = BGFX_INVALID_HANDLE;
-
-        bgfx::ShaderHandle mVertexShaderHandle = BGFX_INVALID_HANDLE;
-        bgfx::ShaderHandle mFragmentShaderHandle = BGFX_INVALID_HANDLE;
+        uint32_t mProgramHandle;
 
         bool mCompiled { false };
         bool mDestroyShaders { true };
 
         Vector<ShaderStage> mStages;
         Vector<Uniform> mUniforms;
-
-        bgfx::UniformHandle mParamsUniformHandle = BGFX_INVALID_HANDLE;
+        std::unordered_map<std::string, int> mUniformLocs;
     };
 }

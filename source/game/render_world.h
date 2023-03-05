@@ -5,8 +5,8 @@
 #include "gfx/sprite.h"
 #include "scene.h"
 
-#include "gfx/render_pipeline.h"
 #include "math/size.h"
+#include "gfx/render_pipeline.h"
 
 namespace game {
 

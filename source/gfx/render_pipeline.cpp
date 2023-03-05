@@ -1,7 +1,7 @@
-#include <bx/math.h>
-#include <bgfx/bgfx.h>
 #include <fstream>
 #include <queue>
+#include "glm/glm.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "render_pipeline.h"
 #include "game/transform.h"
@@ -10,63 +10,32 @@
 #include "texture_manager.h"
 #include "material_manager.h"
 
+#include "gpu/gpu.h"
+
 namespace gfx {
-    constexpr int MaxShaderParams = 16;
-
-    bgfx::ShaderHandle loadShader(const char* _name) {
-        char data[2048];
-        std::ifstream file;
-        uint32_t fileSize;
-
-        file.open(_name);
-
-        if(file.is_open()) {
-            file.seekg(0, std::ios::end);
-            fileSize = file.tellg();
-            file.seekg(0, std::ios::beg);
-            file.read(data, fileSize);
-            file.close();
-        }
-
-        const bgfx::Memory* mem = bgfx::copy(data, fileSize+1);
-        mem->data[mem->size-1] = '\0';
-        bgfx::ShaderHandle handle = bgfx::createShader(mem);
-        bgfx::setName(handle, _name);
-
-        return handle;
-    }
-
     struct PosTextVertex {
-        float x;
-        float y;
-        float z;
-        float tx;
-        float ty;
+        float x, y, z;
+        float u, v;
 
         static void init() {
-            ms_decl
-                .begin()
-                .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-                .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-                .end();
-        };
+            layout
+                .addAttribute(gpu::Attribute::Position, gpu::AttributeType::Vec3, false)
+                .addAttribute(gpu::Attribute::TexCoord, gpu::AttributeType::Vec2, false);
+        }
 
-        static inline bgfx::VertexLayout ms_decl;
+        static inline gpu::VertexLayout layout;
     };
 
-    constexpr PosTextVertex sCubeVertices[] =
-    {
-        // x       y     z     tx    ty
-        {  50.0f,  50.0f, 0.0f, 1.0f, 1.0f },
-        {  50.0f, -50.0f, 0.0f, 1.0f, 0.0f },
-        { -50.0f, -50.0f, 0.0f, 0.0f, 0.0f },
-        { -50.0f,  50.0f, 0.0f, 0.0f, 1.0f }
+    PosTextVertex vertices[] = {
+        { 50.0f,  50.0f, 0.0f, 1.0f, 1.0f, }, // top right
+        { 50.0f, -50.0f, 0.0f, 1.0f, 0.0f, }, // bottom right
+        { -50.0f, -50.0f, 0.0f, 0.0f, 0.0f, }, // bottom left
+        { -50.0f,  50.0f, 0.0f, 0.0f, 1.0f }, // top left
     };
 
-    constexpr uint16_t sCubeTriList[] =
-    {
-        0,1,3,
-        1,2,3
+    unsigned int indices[] = {  // note that we start from 0!
+            0, 1, 3,  // first Triangle
+            1, 2, 3   // second Triangle
     };
 
     class RenderPipelineImpl : public RenderPipeline {
@@ -77,38 +46,11 @@ namespace gfx {
         {
         }
 
-        ~RenderPipelineImpl() override {
-            bgfx::destroy(mTextureUniform);
-
-            bgfx::destroy(mIbh);
-            bgfx::destroy(mVbh);
-        }
-
         void initialize() override {
             PosTextVertex::init();
 
-            mShaderParamsUniformHandle = bgfx::createUniform("u_params", bgfx::UniformType::Vec4, MaxShaderParams);
-            mTextureUniform = bgfx::createUniform("v_texCoord0", bgfx::UniformType::Sampler);
-
-            mVbh = bgfx::createVertexBuffer(
-                bgfx::makeRef(sCubeVertices, sizeof(sCubeVertices)),
-                PosTextVertex::ms_decl
-            );
-
-            mIbh = bgfx::createIndexBuffer(bgfx::makeRef(sCubeTriList, sizeof(sCubeTriList)));
-
-            mFbh.idx = bgfx::kInvalidHandle;
-
-            // Reset window
-            bgfx::reset(mWidth, mHeight, BGFX_RESET_VSYNC);
-
-            // Enable debug text.
-            bgfx::setDebug(BGFX_DEBUG_TEXT /*| BGFX_DEBUG_STATS*/);
-
-            bgfx::setViewRect(0, 0, 0, uint16_t(mWidth), uint16_t(mHeight));
-            bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x443355FF, 1.0f, 0);
-
-            bgfx::touch(0);
+            mVertexBuffer = gpu::VertexBuffer::create(vertices, sizeof(vertices), PosTextVertex::layout);
+            mIndexBuffer = gpu::IndexBuffer::create(indices, sizeof(indices));
         }
 
         void renderCommand(const RenderCommand &command) override {
@@ -116,84 +58,68 @@ namespace gfx {
         }
 
         void beforeRender() override {
-            constexpr bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
-            constexpr bx::Vec3 eye = { 0.0f, 0.0f, 10.0f };
+            constexpr glm::vec3 at = { 0.0f, 0.0f, 0.0f };
+            constexpr glm::vec3 eye = { 0.0f, 0.0f, 10.0f };
 
             // Set view and projection matrix for view 0.
-            float view[16];
-            bx::mtxLookAt(view, eye, at);
-
-            float proj[16];
+            mView = glm::lookAt(eye, at, glm::vec3(0.0f, 1.0f, 0.0f));
 
             auto halfWidth = float(mWidth) / 2.0f;
             auto halfHeight = float(mHeight) / 2.0f;
 
-            bx::mtxOrtho(proj, -halfWidth, halfWidth, -halfHeight, halfHeight, 0.1f, 1000.0f, 0.0f, bgfx::getCaps()->homogeneousDepth);
-
-            bgfx::setViewTransform(0, view, proj);
-
-            // Set view 0 default viewport.
-            bgfx::setViewRect(0, 0, 0, static_cast<uint16_t>(mWidth), static_cast<uint16_t>(mHeight));
-            bgfx::setViewFrameBuffer(0, mFbh);
-
-            bgfx::touch(0);
+            mView *= glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.0f, 1000.0f);
         }
 
         void renderFrame() override {
+            gpu::clear();
+
             while (!mRenderCommands.empty()) {
                 auto const &command = mRenderCommands.front();
 
-                std::array<float, 16> mtx {};
-                bx::mtxRotateY(mtx.data(), 0.0f);
+                int textureHandle = 0;
+                for (auto texture : command.material->textures()) {
+                    texture->render(textureHandle++);
+                }
 
-                // position x,y,z
-                mtx[12] = command.transform->x();
-                mtx[13] = command.transform->y();
-                mtx[14] = 0.0f;
+                command.material->shader()->bind();
 
-                // Set model matrix for rendering.
-                bgfx::setTransform(mtx.data());
+                auto model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3(command.transform->x(), command.transform->y(), 0.0f));
 
-                bgfx::setVertexBuffer(0, mVbh);
-                bgfx::setIndexBuffer(mIbh);
+                auto view = glm::mat4(1.0f);
+                auto projection = glm::mat4(1.0f);
 
-                auto &textures = command.material->textures();
-                textures[0]->render(mTextureUniform);
-                bgfx::setState(BGFX_STATE_DEFAULT);
+                auto halfWidth = float(mWidth) / 2.0f;
+                auto halfHeight = float(mHeight) / 2.0f;
 
-                std::array<float, 8> params = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-                bgfx::setUniform(mShaderParamsUniformHandle, params.data(), MaxShaderParams);
+                projection = glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.0f, 1000.0f);
+                view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
 
-                command.material->shader()->bind(command.viewId);
+                gpu::setUniform(command.material->shader()->programHandle(), "model", model);
+                gpu::setUniform(command.material->shader()->programHandle(), "view", view);
+                gpu::setUniform(command.material->shader()->programHandle(), "projection", projection);
+
+                mVertexBuffer->draw();
 
                 mRenderCommands.pop();
             }
-
-            bgfx::frame();
         }
 
         void resize(math::Size2D frameDimensions) override {
-           mWidth = frameDimensions.width();
-           mHeight = frameDimensions.height();
+            mWidth = frameDimensions.width();
+            mHeight = frameDimensions.height();
 
-            bgfx::reset(mWidth, mHeight, BGFX_RESET_VSYNC);
-
-            bgfx::setViewRect(0, 0, 0, static_cast<uint16_t>(mWidth), static_cast<uint16_t>(mHeight));
-            bgfx::setViewFrameBuffer(0, mFbh);
-
-            bgfx::touch(0);
+            gpu::setViewport(0, 0, mWidth, mHeight);
         }
 
     private:
         uint32_t mWidth;
         uint32_t mHeight;
 
-        bgfx::VertexBufferHandle mVbh;
-        bgfx::IndexBufferHandle mIbh;
-        bgfx::FrameBufferHandle mFbh;
+        std::unique_ptr<gpu::VertexBuffer> mVertexBuffer;
+        std::unique_ptr<gpu::IndexBuffer> mIndexBuffer;
 
-        bgfx::UniformHandle mTextureUniform = BGFX_INVALID_HANDLE;
-        bgfx::UniformHandle mShaderParamsUniformHandle = BGFX_INVALID_HANDLE;
+        glm::mat4x4 mView;
 
         std::queue<RenderCommand> mRenderCommands;
     };
