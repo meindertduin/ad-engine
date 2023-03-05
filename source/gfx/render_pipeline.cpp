@@ -55,7 +55,7 @@ namespace gfx {
             PosTextVertex::init();
 
             glGenBuffers(1, &mEBO);
-            mVertexBuffer = std::make_unique<gpu::VertexBuffer>(vertices, sizeof(vertices), PosTextVertex::layout);
+            mVertexBuffer = gpu::VertexBuffer::create(vertices, sizeof(vertices), PosTextVertex::layout);
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);

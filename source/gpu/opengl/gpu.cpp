@@ -108,4 +108,5 @@ namespace gpu {
         }
         glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
     }
+
 }

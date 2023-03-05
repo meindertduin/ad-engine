@@ -1,4 +1,6 @@
 #include <GL/glew.h>
+
+#include <utility>
 #include "gpu/gpu.h"
 
 namespace gpu {
@@ -45,39 +47,49 @@ namespace gpu {
         }
     }
 
-    VertexBuffer::VertexBuffer(const void *data, uint32_t size, const VertexLayout &layout)
-        : mLayout(layout)
-    {
-        glGenVertexArrays(1, &mVertexArrayHandle);
-        glGenBuffers(1, &mVertexBufferHandle);
+    class VertexBufferImpl : public VertexBuffer {
+    public:
+        VertexBufferImpl(const void *data, uint32_t size, VertexLayout layout)
+            : mLayout(std::move(layout))
+        {
+            glGenVertexArrays(1, &mVertexArrayHandle);
+            glGenBuffers(1, &mVertexBufferHandle);
 
-        glBindVertexArray(mVertexArrayHandle);
+            glBindVertexArray(mVertexArrayHandle);
 
-        glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferHandle);
-        glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferHandle);
+            glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 
-        // glEnableVertexAttribArray(0);
-        // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+            mLayout.bind();
+        }
 
-        // glEnableVertexAttribArray(1);
-        // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-        bind();
-    }
+        ~VertexBufferImpl() override {
+            glDeleteBuffers(1, &mVertexBufferHandle);
+            glDeleteVertexArrays(1, &mVertexArrayHandle);
+        }
 
-    void VertexBuffer::bind() const {
-        glBindVertexArray(mVertexArrayHandle);
-        glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferHandle);
+        VertexBufferImpl(const VertexBufferImpl&) = delete;
+        VertexBufferImpl& operator=(const VertexBufferImpl&) = delete;
 
-        mLayout.bind();
-    }
+        void bind() const override {
+            glBindVertexArray(mVertexArrayHandle);
+            glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferHandle);
 
-    void VertexBuffer::draw() const {
-        glBindVertexArray(mVertexArrayHandle);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    }
+            mLayout.bind();
+        }
 
-    VertexBuffer::~VertexBuffer() {
-        glDeleteBuffers(1, &mVertexBufferHandle);
-        glDeleteVertexArrays(1, &mVertexArrayHandle);
+        void draw() const override {
+            glBindVertexArray(mVertexArrayHandle);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
+
+    private:
+        uint32_t mVertexArrayHandle { 0 };
+        uint32_t mVertexBufferHandle { 0 };
+        VertexLayout mLayout;
+    };
+
+    std::unique_ptr<VertexBuffer> VertexBuffer::create(const void *data, uint32_t size, const VertexLayout &layout) {
+        return std::make_unique<VertexBufferImpl>(data, size, layout);
     }
 }

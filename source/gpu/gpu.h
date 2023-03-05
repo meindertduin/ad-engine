@@ -4,6 +4,7 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <vector>
+#include <memory>
 
 namespace gpu {
     enum class ShaderType {
@@ -46,19 +47,13 @@ namespace gpu {
 
     class VertexBuffer {
     public:
-        VertexBuffer(const void *data, uint32_t size, const VertexLayout &layout);
-        ~VertexBuffer();
+        static std::unique_ptr<VertexBuffer> create(const void *data, uint32_t size, const VertexLayout &layout);
+        virtual ~VertexBuffer() = default;
 
-        VertexBuffer(const VertexBuffer&) = delete;
-        VertexBuffer& operator=(const VertexBuffer&) = delete;
-
-        void bind() const;
-        void draw() const;
-    private:
-        uint32_t mVertexArrayHandle { 0 };
-        uint32_t mVertexBufferHandle { 0 };
-        VertexLayout mLayout;
+        virtual void bind() const = 0;
+        virtual void draw() const = 0;
     };
+
 
     using ShaderProgramHandle = uint32_t;
     using ShaderHandle = uint32_t;
