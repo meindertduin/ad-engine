@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <memory>
+#include <functional>
+#include "math/size.h"
 
 namespace gpu {
     enum class ShaderType {
@@ -64,6 +66,9 @@ namespace gpu {
 
     using ShaderProgramHandle = uint32_t;
     using ShaderHandle = uint32_t;
+    using TextureHandle = uint32_t;
+
+    // SHADER
 
     ShaderHandle createShader(ShaderType type, const char *data, const std::string &shaderName);
     ShaderProgramHandle createShaderProgram(ShaderHandle vertexShader, ShaderHandle fragmentShader, bool destroyShaders);
@@ -78,6 +83,13 @@ namespace gpu {
     void setUniform(ShaderProgramHandle handle, const std::string &name, const glm::mat3 &value);
     void setUniform(ShaderProgramHandle handle, const std::string &name, const glm::mat4 &value);
 
+    // TEXTURE
+    TextureHandle createTexture2D(unsigned short *data, math::Size2D size, int flags, std::function<void(unsigned short *imageData)> cleanup);
+    void destroyTexture(TextureHandle handle);
+    void bindTexture(TextureHandle handle, int slot);
+
     void clear();
     void setViewport(int x, int y, int width, int height);
+
+    bool initialize();
 }

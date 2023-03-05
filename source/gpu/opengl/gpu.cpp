@@ -117,4 +117,43 @@ namespace gpu {
     void setViewport(int x, int y, int width, int height) {
         glViewport(x, y, width, height);
     }
+
+    bool initialize() {
+        glewExperimental = GL_TRUE;
+        GLenum glewError = glewInit();
+
+        if(glewError != GLEW_OK) {
+            Logger::error("Failed to initialize GLEW: {}", (const char*)glewGetErrorString(glewError));
+            return false;
+        }
+
+        return true;
+    }
+
+    TextureHandle createTexture2D(unsigned short *data, math::Size2D size, int flags, std::function<void(unsigned short *imageData)> cleanup) {
+        TextureHandle texture { 0 };
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.width(), size.height(), 0, GL_RGBA, GL_UNSIGNED_SHORT, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        cleanup(data);
+
+        return texture;
+    }
+
+    void destroyTexture(TextureHandle handle) {
+        glDeleteTextures(1, &handle);
+    }
+
+    void bindTexture(TextureHandle handle, int slot) {
+        glActiveTexture(GL_TEXTURE0 + slot);
+        glBindTexture(GL_TEXTURE_2D, handle);
+    }
 }

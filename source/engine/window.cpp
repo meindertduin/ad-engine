@@ -4,7 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
-#include "GL/glew.h"
+#include "gpu/gpu.h"
 
 AdWindow::AdWindow(const WindowOptions &options)
     : mSize(options.size)
@@ -39,12 +39,7 @@ bool AdWindow::initialize() {
         return false;
     }
 
-    glewExperimental = GL_TRUE;
-    GLenum glewError = glewInit();
-    if(glewError != GLEW_OK) {
-        Logger::error("Failed to initialize GLEW: {}", (const char*)glewGetErrorString(glewError));
-        return false;
-    }
+    gpu::initialize();
 
     SDL_SysWMinfo wmi;
     SDL_VERSION(&wmi.version)
