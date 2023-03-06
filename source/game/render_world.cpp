@@ -12,8 +12,6 @@ namespace game {
     }
 
     void RenderWorld::render() {
-        mRenderPipeline->beforeRender();
-
         auto transformComponentArray = mScene.ecs().getComponentArray<Transform>();
 
         auto componentArray = mScene.ecs().getComponentArray<gfx::RenderComponent>();

@@ -20,7 +20,6 @@ namespace gfx {
 
         virtual void initialize() = 0;
 
-        virtual void beforeRender() = 0;
         virtual void renderCommand(const RenderCommand &command) = 0;
         virtual void renderFrame() = 0;
 

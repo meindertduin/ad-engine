@@ -7,7 +7,8 @@ gfx_sources = files(
     'shader.cpp',
     'shader_manager.cpp',
     'material_manager.cpp',
-    'texture_manager.cpp'
+    'texture_manager.cpp',
+    'camera.cpp'
 )
 project_sources += gfx_sources
 

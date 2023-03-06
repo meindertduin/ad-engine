@@ -11,6 +11,7 @@
 #include "material_manager.h"
 
 #include "gpu/gpu.h"
+#include "camera.h"
 
 namespace gfx {
     struct PosTextVertex {
@@ -27,10 +28,10 @@ namespace gfx {
     };
 
     PosTextVertex vertices[] = {
-        { 50.0f,  50.0f, 0.0f, 1.0f, 1.0f, }, // top right
-        { 50.0f, -50.0f, 0.0f, 1.0f, 0.0f, }, // bottom right
-        { -50.0f, -50.0f, 0.0f, 0.0f, 0.0f, }, // bottom left
-        { -50.0f,  50.0f, 0.0f, 0.0f, 1.0f }, // top left
+        { 1.0f,  1.0f, 0.0f, 1.0f, 1.0f, }, // top right
+        { 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, }, // bottom right
+        { -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, }, // bottom left
+        { -1.0f,  1.0f, 0.0f, 0.0f, 1.0f }, // top left
     };
 
     unsigned int indices[] = {  // note that we start from 0!
@@ -43,6 +44,7 @@ namespace gfx {
         explicit RenderPipelineImpl(Allocator &allocator, math::Size2D frameDimensions)
             : mWidth(frameDimensions.width())
             , mHeight(frameDimensions.height())
+            , mCamera(frameDimensions)
         {
         }
 
@@ -55,19 +57,6 @@ namespace gfx {
 
         void renderCommand(const RenderCommand &command) override {
             mRenderCommands.push(command);
-        }
-
-        void beforeRender() override {
-            constexpr glm::vec3 at = { 0.0f, 0.0f, 0.0f };
-            constexpr glm::vec3 eye = { 0.0f, 0.0f, 10.0f };
-
-            // Set view and projection matrix for view 0.
-            mView = glm::lookAt(eye, at, glm::vec3(0.0f, 1.0f, 0.0f));
-
-            auto halfWidth = float(mWidth) / 2.0f;
-            auto halfHeight = float(mHeight) / 2.0f;
-
-            mView *= glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.0f, 1000.0f);
         }
 
         void renderFrame() override {
@@ -84,20 +73,13 @@ namespace gfx {
                 command.material->shader()->bind();
 
                 auto model = glm::mat4(1.0f);
+                model = glm::scale(model, glm::vec3(5.0f));
                 model = glm::translate(model, glm::vec3(command.transform->x(), command.transform->y(), 0.0f));
-
-                auto view = glm::mat4(1.0f);
-                auto projection = glm::mat4(1.0f);
-
-                auto halfWidth = float(mWidth) / 2.0f;
-                auto halfHeight = float(mHeight) / 2.0f;
-
-                projection = glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.0f, 1000.0f);
-                view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
+                model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
                 gpu::setUniform(command.material->shader()->programHandle(), "model", model);
-                gpu::setUniform(command.material->shader()->programHandle(), "view", view);
-                gpu::setUniform(command.material->shader()->programHandle(), "projection", projection);
+                gpu::setUniform(command.material->shader()->programHandle(), "view", mCamera.view());
+                gpu::setUniform(command.material->shader()->programHandle(), "projection", mCamera.projection());
 
                 mVertexBuffer->draw();
 
@@ -106,6 +88,8 @@ namespace gfx {
         }
 
         void resize(math::Size2D frameDimensions) override {
+            mCamera.resize(frameDimensions);
+
             mWidth = frameDimensions.width();
             mHeight = frameDimensions.height();
 
@@ -120,6 +104,7 @@ namespace gfx {
         std::unique_ptr<gpu::IndexBuffer> mIndexBuffer;
 
         glm::mat4x4 mView;
+        Camera mCamera;
 
         std::queue<RenderCommand> mRenderCommands;
     };
