@@ -9,13 +9,13 @@ public:
 
     explicit Path(const std::string &path)
         : mValue{path}
-        , mHash{path}
+        , mHash{Hash64(path)}
     {}
 
     explicit Path(const std::string &&path)
         : mValue{path}
+        , mHash{Hash64(path)}
     {
-        mHash = Hash64{mValue};
     }
 
     [[nodiscard]] constexpr ALWAYS_INLINE const std::string& value() const { return mValue; }
