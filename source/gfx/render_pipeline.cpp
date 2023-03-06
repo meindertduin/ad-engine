@@ -103,7 +103,6 @@ namespace gfx {
         std::unique_ptr<gpu::VertexBuffer> mVertexBuffer;
         std::unique_ptr<gpu::IndexBuffer> mIndexBuffer;
 
-        glm::mat4x4 mView;
         Camera mCamera;
 
         std::queue<RenderCommand> mRenderCommands;

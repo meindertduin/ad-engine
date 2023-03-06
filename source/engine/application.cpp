@@ -33,13 +33,13 @@ bool Application::initialize() {
 void Application::run() {
     auto object = mScene->createObject();
     Logger::info("Object: {}", object);
-    object.addComponent(gfx::RenderComponent{Path{"assets/material_scripts/material.lua"}, Path{"assets/bricks.png"}});
+    object.addComponent(gfx::RenderComponent{Path{"assets/material_scripts/material.lua"}});
     object.addComponent(game::Transform{0.0f, 0.0f});
 
     auto secondObject = mScene->createObject();
     Logger::info("SecondObject: {} \n", secondObject);
     secondObject.addComponent(
-            gfx::RenderComponent{Path{"assets/material_scripts/material.lua"}, Path{"assets/bricks.png"}});
+            gfx::RenderComponent{Path{"assets/material_scripts/material.lua"}});
     secondObject.addComponent(game::Transform{200.0f, 100.0f});
 
     while (!mWindow.closed()) {

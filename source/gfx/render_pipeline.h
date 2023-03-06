@@ -10,7 +10,6 @@ namespace game { class Transform; }
 namespace gfx {
     struct RenderCommand {
         Material *material;
-        Texture2D *texture;
         game::Transform *transform;
     };
 

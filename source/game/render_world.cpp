@@ -20,7 +20,7 @@ namespace game {
             auto &component = it.value();
 
             auto &transform = transformComponentArray->get(object);
-            gfx::RenderCommand command { component.material().get(), component.texture().get(), &transform };
+            gfx::RenderCommand command { component.material().get(), &transform };
 
             mRenderPipeline->renderCommand(command);
         }
