@@ -15,10 +15,11 @@ sdl2_dep = dependency('sdl2')
 lua_dep = dependency('lua')
 glm_dep = dependency('glm')
 glew_dep = dependency('glew')
+jsoncpp_dep = dependency('jsoncpp')
 
 subdir('source')
 
 executable('adengine', project_sources,
     include_directories: inc,
-    dependencies: [sdl2_dep, lua_dep, glm_dep, glew_dep])
+    dependencies: [sdl2_dep, lua_dep, glm_dep, glew_dep, jsoncpp_dep])
 
