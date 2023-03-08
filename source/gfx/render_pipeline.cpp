@@ -12,6 +12,7 @@
 
 #include "gpu/gpu.h"
 #include "camera.h"
+#include "game/terrain.h"
 
 namespace gfx {
     struct PosTextVertex {
@@ -50,6 +51,7 @@ namespace gfx {
 
         void initialize() override {
             PosTextVertex::init();
+            mTerrain.initialize();
 
             mVertexBuffer = gpu::VertexBuffer::create(vertices, sizeof(vertices), PosTextVertex::layout);
             mIndexBuffer = gpu::IndexBuffer::create(indices, sizeof(indices));
@@ -106,6 +108,7 @@ namespace gfx {
         Camera mCamera;
 
         std::queue<RenderCommand> mRenderCommands;
+        game::Terrain mTerrain;
     };
 
     std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(Allocator &allocator, math::Size2D frameDimensions) {

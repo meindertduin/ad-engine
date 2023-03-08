@@ -1,0 +1,10 @@
+{
+  "grass": {
+    "name": "grass",
+    "texture": "assets/grass.png",
+  },
+  "brick": {
+    "name": "brick",
+    "texture": "assets/bricks.png",
+  }
+}
