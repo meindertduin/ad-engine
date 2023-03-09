@@ -40,8 +40,9 @@ namespace wfc {
         }
     };
 
-    std::unordered_map<ushort, Pattern<ushort>> readBitmapPatterns(ushort *data, const math::Size2D &size) {
-        std::unordered_map<ushort, Pattern<ushort>> patterns;
+    template<typename T>
+    std::unordered_map<T, Pattern<T>> readBitmapPatterns(T *data, const math::Size2D &size) {
+        std::unordered_map<T, Pattern<T>> patterns;
 
         auto bufferSize = size.width() * size.height();
 
@@ -165,7 +166,7 @@ namespace wfc {
     static inline std::mt19937 gen(rd());
 
     template<typename T>
-    const Pattern<T>* getRandomPattern(const WaveElement<T> &element, std::unordered_map<ushort, Pattern<T>> &patterns) {
+    const Pattern<T>* getRandomPattern(const WaveElement<T> &element, std::unordered_map<T, Pattern<T>> &patterns) {
         // Possible patterns
         std::vector<Pattern<T>*> possiblePatterns;
 
@@ -184,7 +185,7 @@ namespace wfc {
     }
 
     template<typename T>
-    const Pattern<T>* getSinglePossibleValue(const WaveElement<T> &element, std::unordered_map<ushort, Pattern<T>> &patterns) {
+    const Pattern<T>* getSinglePossibleValue(const WaveElement<T> &element, std::unordered_map<T, Pattern<T>> &patterns) {
         // Get all possible patterns
         for (auto &[value, pattern] : patterns) {
             if (element.possible[pattern.id]) {
@@ -196,7 +197,7 @@ namespace wfc {
     }
 
     template<typename T>
-    bool propagateElement(WaveElement<T> &inputElement, WaveFunctionOutput<T> &output, std::unordered_map<ushort, Pattern<T>> &patterns) {
+    bool propagateElement(WaveElement<T> &inputElement, WaveFunctionOutput<T> &output, std::unordered_map<T, Pattern<T>> &patterns) {
         std::stack<WaveElement<T>*> elementsStack;
         elementsStack.push(&inputElement);
 
@@ -271,7 +272,7 @@ namespace wfc {
     }
 
     template<typename T>
-    bool collapseElement(WaveElement<T> *element, WaveFunctionOutput<T> &output, std::unordered_map<ushort, Pattern<T>> &patterns) {
+    bool collapseElement(WaveElement<T> *element, WaveFunctionOutput<T> &output, std::unordered_map<T, Pattern<T>> &patterns) {
         // Collapse the element
         auto pattern = getRandomPattern(*element, patterns);
         if (!element->collapse(pattern)) {
@@ -343,21 +344,21 @@ namespace game {
         int width, height, channels;
 
         stbi_set_flip_vertically_on_load(false);
-        auto data = stbi_load_16("assets/city.png", &width, &height, &channels, 0);
+        auto data = stbi_load("assets/city.png", &width, &height, &channels, 0);
 
         if (!data) {
             throw std::runtime_error("Failed to load texture");
         }
 
-        auto patterns = wfc::readBitmapPatterns((ushort*)data, { width, height });
+        auto patterns = wfc::readBitmapPatterns((unsigned char*)data, { width, height });
         stbi_image_free(data);
 
         auto output = wfc::output(patterns, { 32, 32 });
-        auto outputData = new ushort[output.outputSize.width() * output.outputSize.height()];
+        auto outputData = new unsigned char[output.outputSize.width() * output.outputSize.height()];
         for (auto i = 0u; i < output.elements.size(); i++) {
             outputData[i] = output.elements[i].value.value();
         }
-        stbi_write_png("assets/output.png", output.outputSize.width(), output.outputSize.height(), 1, outputData, output.outputSize.width());
+        stbi_write_png("output.png", output.outputSize.width(), output.outputSize.height(), 1, outputData, output.outputSize.width());
 
         delete[] outputData;
     }
