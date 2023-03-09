@@ -11,6 +11,10 @@
 #include <unordered_map>
 #include <stb_image.h>
 #include <stack>
+#include <random>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stbi_image_write.h>
 
 namespace wfc {
     static constexpr uint32_t Dimensions = 2;
@@ -103,14 +107,15 @@ namespace wfc {
 
     template<typename T>
     struct WaveElement {
-        glm::vec2 position;
+        glm::ivec2 position;
         std::bitset<BitsetSize> possible;
         std::size_t possibleCount;
         std::optional<T> value = std::nullopt; // is nullopt when not collapsed
 
-        bool collapse(const T &inputValue) {
-            this->value = inputValue;
+        bool collapse(const Pattern<T>* pattern) {
+            this->value = pattern->value;
             possible.reset();
+            possible.set(pattern->id);
             possibleCount = 1;
 
             return true;
@@ -141,7 +146,7 @@ namespace wfc {
         math::Size2D outputSize;
         uint32_t collapsedCount { 0 };
 
-        explicit WaveFunctionOutput(const math::Size2D &size, uint32_t possibleCount)
+        WaveFunctionOutput(const math::Size2D &size, std::size_t possibleCount)
             : elements(size.width() * size.height())
             , outputSize(size)
         {
@@ -156,30 +161,34 @@ namespace wfc {
         }
     };
 
+    static inline std::random_device rd;
+    static inline std::mt19937 gen(rd());
+
     template<typename T>
-    Pattern<T>* getRandomPattern(const WaveElement<T> &element, const std::unordered_map<ushort, Pattern<T>> &patterns) {
+    const Pattern<T>* getRandomPattern(const WaveElement<T> &element, std::unordered_map<ushort, Pattern<T>> &patterns) {
         // Possible patterns
         std::vector<Pattern<T>*> possiblePatterns;
 
         // Get all possible patterns
-        for (auto i = 0u; i < patterns.size(); i++) {
-            if (element.possible[patterns[i].id]) {
-                possiblePatterns.push_back(&patterns[i]);
+        for (auto &[value, pattern] : patterns) {
+            if (element.possible[pattern.id]) {
+                possiblePatterns.push_back(&pattern);
             }
         }
 
         // Get a random pattern
-        auto randomIndex = rand() % possiblePatterns.size();
+        std::uniform_int_distribution<> dis(0, possiblePatterns.size() - 1);
+        auto randomIndex = dis(gen);
 
         return possiblePatterns[randomIndex];
     }
 
     template<typename T>
-    T& getSinglePossibleValue(const WaveElement<T> &element, const std::unordered_map<ushort, Pattern<T>> &patterns) {
+    const Pattern<T>* getSinglePossibleValue(const WaveElement<T> &element, std::unordered_map<ushort, Pattern<T>> &patterns) {
         // Get all possible patterns
-        for (auto i = 0u; i < patterns.size(); i++) {
-            if (element.possible[patterns[i].id]) {
-                return patterns[i].value;
+        for (auto &[value, pattern] : patterns) {
+            if (element.possible[pattern.id]) {
+                return &pattern;
             }
         }
 
@@ -187,7 +196,7 @@ namespace wfc {
     }
 
     template<typename T>
-    bool propagateElement(const WaveElement<T> &inputElement, WaveFunctionOutput<T> &output, const std::unordered_map<ushort, Pattern<T>> &patterns) {
+    bool propagateElement(WaveElement<T> &inputElement, WaveFunctionOutput<T> &output, std::unordered_map<ushort, Pattern<T>> &patterns) {
         std::stack<WaveElement<T>*> elementsStack;
         elementsStack.push(&inputElement);
 
@@ -198,7 +207,8 @@ namespace wfc {
             elementsStack.pop();
 
             // Get non-collapsed neighbours
-            std::vector<WaveElement<T>*> neighbours;
+            std::vector<std::pair<uint32_t, WaveElement<T>*>> neighbours;
+
             for (auto i = 0; i < Dimensions * 2; i++) {
                 auto neighbourPosition = element.position;
                 if (i == LeftDimension) {
@@ -220,29 +230,35 @@ namespace wfc {
 
                 auto &neighbour = output.elements[neighbourPosition.y * output.outputSize.width() + neighbourPosition.x];
                 if (!neighbour.collapsed()) {
-                    neighbours.push_back(&neighbour);
+                    neighbours.push_back(std::make_pair(i, &neighbour));
                 }
             }
 
-            for (WaveElement<T>* neighbor : neighbours) {
-                auto oldPossibleCount = neighbor->possibleCount;
+            // Loop through non-collapsed neighbors
+            for (std::pair<uint32_t, WaveElement<T>*> neighborPair : neighbours) {
+                auto neighbor = neighborPair.second;
 
-                neighbor->apply(element.possible);
+                // Apply possible patterns for neighbor
+                auto elementPattern = patterns[element.value.value()];
 
-                if (neighbor->possibleCount != oldPossibleCount) {
-                    if (neighbor->possibleCount == 0) {
+                if (!neighbor->apply(elementPattern.neighbouring[neighborPair.first])) {
+                    // Contradiction
+                    contradiction = true;
+                    break;
+                }
+
+                if (neighbor->possibleCount == 0) {
+                    contradiction = true;
+                    break;
+                } else if (neighbor->possibleCount == 1) {
+                    if (!neighbor->collapse(getSinglePossibleValue(*neighbor, patterns))) {
                         contradiction = true;
                         break;
-                    } else if (neighbor->possibleCount == 1) {
-                        auto collapseSucceeded = neighbor->collapse(getSinglePossibleValue(*neighbor, patterns));
-
-                        if (!collapseSucceeded) {
-                            contradiction = true;
-                            break;
-                        }
-
-                        elementsStack.push(neighbor);
                     }
+
+                    output.collapsedCount++;
+
+                    elementsStack.push(neighbor);
                 }
             }
         }
@@ -255,71 +271,67 @@ namespace wfc {
     }
 
     template<typename T>
-    bool collapseElement(WaveElement<T> &element, WaveFunctionOutput<T> &output, const std::unordered_map<ushort, Pattern<T>> &patterns) {
-        output.collapsedCount++;
-
-        auto elementPosIndex = element.position.y * output.outputSize.width() + element.position.x;
-
+    bool collapseElement(WaveElement<T> *element, WaveFunctionOutput<T> &output, std::unordered_map<ushort, Pattern<T>> &patterns) {
         // Collapse the element
-        auto pattern = getRandomPattern(element, patterns);
-
-        // propagate collapse
-
-        // Collapse the left element
-        if (element.position.x > 0) {
-            auto &leftElement = output.elements[elementPosIndex - 1];
-            if (!leftElement.collapsed()) {
-                leftElement.possible &= pattern->neighbouring[LeftDimension];
-                leftElement.possibleCount = leftElement.possible.count();
-            }
+        auto pattern = getRandomPattern(*element, patterns);
+        if (!element->collapse(pattern)) {
+            Logger::error("Failed to collapse element");
+            return false;
         }
 
-        // Collapse the top element
-        if (element.position.y > 0) {
-            auto &topElement = output.elements[elementPosIndex - output.outputSize.width()];
-            if (!topElement.collapsed()) {
-                topElement.possible &= pattern->neighbouring[TopDimension];
-                topElement.possibleCount = topElement.possible.count();
-            }
+        if (element->collapsed()) {
+            output.collapsedCount++;
         }
 
-        // Collapse the right element
-        if (element.position.x < output.outputSize.width() - 1) {
-            auto &rightElement = output.elements[elementPosIndex + 1];
-            if (!rightElement.collapsed()) {
-                rightElement.possible &= pattern->neighbouring[RightDimension];
-                rightElement.possibleCount = rightElement.possible.count();
-            }
+        // Propagate the collapsed element
+        if (!propagateElement(*element, output, patterns)) {
+            Logger::error("Failed to propagate element");
+            return false;
         }
 
-        // Collapse the bottom element
-        if (element.position.y < output.outputSize.height() - 1) {
-            auto &bottomElement = output.elements[elementPosIndex + output.outputSize.width()];
-            if (!bottomElement.collapsed()) {
-                bottomElement.possible &= pattern->neighbouring[BottmDimension];
-                bottomElement.possibleCount = bottomElement.possible.count();
-            }
-        }
+        return true;
     }
 
     template<typename T>
-    WaveFunctionOutput<T> output(const std::unordered_map<T, Pattern<T>> patterns, math::Size2D outputSize) {
-        WaveFunctionOutput<T> output { outputSize, patterns.size() };
+    WaveElement<T>* getNextElement(WaveFunctionOutput<T> &output) {
+        std::size_t min = std::numeric_limits<uint32_t>::max();
+        WaveElement<T>* next = nullptr;
 
-        // Get the middle element
-        auto middle = outputSize.width() * outputSize.height() / 2;
-        auto middleElement = output.elements[middle];
-
-        // Collapse the middle element
-        while (output.collapsedCount != outputSize.width() * outputSize.height()) {
-            // Collapse the middle element
-            if (collapseElement(middleElement, output, patterns)) {
-                output.collapsedCount++;
+        for (auto &element : output.elements) {
+            if (element.collapsed()) {
                 continue;
             }
 
-            Logger::error("Failed to collapse element");
-            break;
+            if (element.possibleCount < min) {
+                min = element.possibleCount;
+                next = &element;
+            }
+        }
+
+        if (next == nullptr) {
+            throw std::runtime_error("No next element");
+        }
+
+        return next;
+    }
+
+    template<typename T>
+    WaveFunctionOutput<T> output(std::unordered_map<T, Pattern<T>> patterns, math::Size2D outputSize) {
+        WaveFunctionOutput<T> output { outputSize, patterns.size() };
+
+        // Start with top left element
+        auto nextElement = &output.elements[0];
+
+        // Collapse the middle element
+        while (output.collapsedCount != outputSize.width() * outputSize.height()) {
+            if (!collapseElement(nextElement, output, patterns)) {
+                break;
+            }
+
+            // Find the next element to collapse
+            if (output.collapsedCount != outputSize.width() * outputSize.height()) {
+                nextElement = getNextElement(output);
+            }
         }
 
         return output;
@@ -339,5 +351,14 @@ namespace game {
 
         auto patterns = wfc::readBitmapPatterns((ushort*)data, { width, height });
         stbi_image_free(data);
+
+        auto output = wfc::output(patterns, { 32, 32 });
+        auto outputData = new ushort[output.outputSize.width() * output.outputSize.height()];
+        for (auto i = 0u; i < output.elements.size(); i++) {
+            outputData[i] = output.elements[i].value.value();
+        }
+        stbi_write_png("assets/output.png", output.outputSize.width(), output.outputSize.height(), 1, outputData, output.outputSize.width());
+
+        delete[] outputData;
     }
 }
