@@ -46,6 +46,9 @@ namespace wfc {
 
         auto bufferSize = size.width() * size.height();
 
+        auto middle = size.width() / 2 + size.height() / 2 * size.width();
+        auto middleValue = data[middle];
+
         uint32_t id = 0;
         for (auto i = 0u; i < bufferSize; i++) {
             auto x = i % size.width();
@@ -350,16 +353,15 @@ namespace game {
             throw std::runtime_error("Failed to load texture");
         }
 
-        auto patterns = wfc::readBitmapPatterns((unsigned char*)data, { width, height });
+        auto patterns = wfc::readBitmapPatterns(reinterpret_cast<uint32_t*>(data), { width, height });
         stbi_image_free(data);
 
         auto output = wfc::output(patterns, { 32, 32 });
-        auto outputData = new unsigned char[output.outputSize.width() * output.outputSize.height()];
+        auto outputData = new uint32_t [output.outputSize.width() * output.outputSize.height()];
         for (auto i = 0u; i < output.elements.size(); i++) {
             outputData[i] = output.elements[i].value.value();
         }
-        stbi_write_png("output.png", output.outputSize.width(), output.outputSize.height(), 1, outputData, output.outputSize.width());
-
+        stbi_write_png("assets/output.png", output.outputSize.width(), output.outputSize.height(), channels, outputData, output.outputSize.width() * channels);
         delete[] outputData;
     }
 }
