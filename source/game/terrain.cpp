@@ -20,16 +20,22 @@ namespace wfc {
     static constexpr uint32_t Dimensions = 2;
     static constexpr uint32_t BitsetSize = 8;
 
+    static constexpr uint32_t TotalDimensions = 8;
+
     constexpr uint32_t LeftDimension = 0;
-    constexpr uint32_t TopDimension = 1;
-    constexpr uint32_t RightDimension = 2;
-    constexpr uint32_t BottmDimension = 3;
+    constexpr uint32_t TopLeftDimension = 1;
+    constexpr uint32_t TopDimension = 2;
+    constexpr uint32_t TopRightDimension = 3;
+    constexpr uint32_t RightDimension = 4;
+    constexpr uint32_t BottomRightDimension = 5;
+    constexpr uint32_t BottomDimension = 6;
+    constexpr uint32_t BottomLeftDimension = 7;
 
     template<typename T>
     struct Pattern {
         uint32_t id;
         T value;
-        std::array<std::bitset<8>, 2 * Dimensions> neighbouring;
+        std::array<std::bitset<8>, TotalDimensions> neighbouring;
 
         auto operator==(const Pattern<T>& other) const {
             return id == other.id;
@@ -72,6 +78,17 @@ namespace wfc {
                 patterns[left].neighbouring[RightDimension].set(patterns[value].id);
             }
 
+            // Check for top left pattern
+            if (x > 0 && y > 0) {
+                auto topLeft = data[i - 1 - size.width()];
+                if (!patterns.contains(topLeft)) {
+                    patterns[topLeft] = { id++, topLeft, {} };
+                }
+
+                patterns[value].neighbouring[TopLeftDimension].set(patterns[topLeft].id);
+                patterns[topLeft].neighbouring[BottomRightDimension].set(patterns[value].id);
+            }
+
             // Check for top pattern
             if (y > 0) {
                 auto top = data[i - size.width()];
@@ -80,7 +97,18 @@ namespace wfc {
                 }
 
                 patterns[value].neighbouring[TopDimension].set(patterns[top].id);
-                patterns[top].neighbouring[BottmDimension].set(patterns[value].id);
+                patterns[top].neighbouring[BottomDimension].set(patterns[value].id);
+            }
+
+            // Check for top right pattern
+            if (x < size.width() - 1 && y > 0) {
+                auto topRight = data[i + 1 - size.width()];
+                if (!patterns.contains(topRight)) {
+                    patterns[topRight] = { id++, topRight, {} };
+                }
+
+                patterns[value].neighbouring[TopRightDimension].set(patterns[topRight].id);
+                patterns[topRight].neighbouring[BottomLeftDimension].set(patterns[value].id);
             }
 
             // Check for right pattern
@@ -94,6 +122,17 @@ namespace wfc {
                 patterns[right].neighbouring[LeftDimension].set(patterns[value].id);
             }
 
+            // Check for bottom right pattern
+            if (x < size.width() - 1 && y < size.height() - 1) {
+                auto bottomRight = data[i + 1 + size.width()];
+                if (!patterns.contains(bottomRight)) {
+                    patterns[bottomRight] = { id++, bottomRight, {} };
+                }
+
+                patterns[value].neighbouring[BottomRightDimension].set(patterns[bottomRight].id);
+                patterns[bottomRight].neighbouring[TopLeftDimension].set(patterns[value].id);
+            }
+
             // Check for bottom pattern
             if (y < size.height() - 1) {
                 auto bottom = data[i + size.width()];
@@ -101,8 +140,19 @@ namespace wfc {
                     patterns[bottom] = { id++, bottom, {} };
                 }
 
-                patterns[value].neighbouring[BottmDimension].set(patterns[bottom].id);
+                patterns[value].neighbouring[BottomDimension].set(patterns[bottom].id);
                 patterns[bottom].neighbouring[TopDimension].set(patterns[value].id);
+            }
+
+            // Check for bottom left pattern
+            if (x > 0 && y < size.height() - 1) {
+                auto bottomLeft = data[i - 1 + size.width()];
+                if (!patterns.contains(bottomLeft)) {
+                    patterns[bottomLeft] = { id++, bottomLeft, {} };
+                }
+
+                patterns[value].neighbouring[BottomLeftDimension].set(patterns[bottomLeft].id);
+                patterns[bottomLeft].neighbouring[TopRightDimension].set(patterns[value].id);
             }
         }
 
@@ -213,15 +263,27 @@ namespace wfc {
             // Get non-collapsed neighbours
             std::vector<std::pair<uint32_t, WaveElement<T>*>> neighbours;
 
-            for (auto i = 0; i < Dimensions * 2; i++) {
+            for (auto i = 0; i < TotalDimensions; i++) {
                 auto neighbourPosition = element.position;
                 if (i == LeftDimension) {
                     neighbourPosition.x -= 1;
+                } else if (i == TopLeftDimension) {
+                    neighbourPosition.x -= 1;
+                    neighbourPosition.y -= 1;
                 } else if (i == TopDimension) {
+                    neighbourPosition.y -= 1;
+                } else if (i == TopRightDimension) {
+                    neighbourPosition.x += 1;
                     neighbourPosition.y -= 1;
                 } else if (i == RightDimension) {
                     neighbourPosition.x += 1;
-                } else if (i == BottmDimension) {
+                } else if (i == BottomRightDimension) {
+                    neighbourPosition.x += 1;
+                    neighbourPosition.y += 1;
+                } else if (i == BottomDimension) {
+                    neighbourPosition.y += 1;
+                } else if (i == BottomLeftDimension) {
+                    neighbourPosition.x -= 1;
                     neighbourPosition.y += 1;
                 }
 
@@ -347,7 +409,7 @@ namespace game {
         int width, height, channels;
 
         stbi_set_flip_vertically_on_load(false);
-        auto data = stbi_load("assets/city.png", &width, &height, &channels, 0);
+        auto data = stbi_load("assets/lake.png", &width, &height, &channels, 0);
 
         if (!data) {
             throw std::runtime_error("Failed to load texture");
@@ -356,7 +418,7 @@ namespace game {
         auto patterns = wfc::readBitmapPatterns(reinterpret_cast<uint32_t*>(data), { width, height });
         stbi_image_free(data);
 
-        auto output = wfc::output(patterns, { 32, 32 });
+        auto output = wfc::output(patterns, { 18, 18 });
         auto outputData = new uint32_t [output.outputSize.width() * output.outputSize.height()];
         for (auto i = 0u; i < output.elements.size(); i++) {
             outputData[i] = output.elements[i].value.value();
