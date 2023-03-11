@@ -33,9 +33,16 @@ namespace wfc {
 
     template<typename T>
     struct Pattern {
-        uint32_t id;
+        uint32_t id { 0 };
+        float frequency { 0 };
         T value;
         std::array<std::bitset<8>, TotalDimensions> neighbouring;
+
+        Pattern() = default;
+        Pattern(uint32_t id, T value)
+            : id(id)
+            , value(value)
+        {}
 
         auto operator==(const Pattern<T>& other) const {
             return id == other.id;
@@ -55,6 +62,8 @@ namespace wfc {
         auto middle = size.width() / 2 + size.height() / 2 * size.width();
         auto middleValue = data[middle];
 
+        std::unordered_map<T, float> frequencies;
+
         uint32_t id = 0;
         for (auto i = 0u; i < bufferSize; i++) {
             auto x = i % size.width();
@@ -62,16 +71,19 @@ namespace wfc {
 
             auto value = data[i];
 
+            // Increment frequency
+            frequencies[value] += 1.0f;
+
             // Add the pattern if it doesn't exist
             if (!patterns.contains(value)) {
-                patterns[value] = { id++, value, {} };
+                patterns.emplace(value, Pattern<T>(id++, value));
             }
 
             // Check for left pattern
             if (x > 0) {
                 auto left = data[i - 1];
                 if (!patterns.contains(left)) {
-                    patterns[left] = { id++, left, {} };
+                    patterns.emplace(left, Pattern<T>(id++, left));
                 }
 
                 patterns[value].neighbouring[LeftDimension].set(patterns[left].id);
@@ -82,7 +94,7 @@ namespace wfc {
             if (x > 0 && y > 0) {
                 auto topLeft = data[i - 1 - size.width()];
                 if (!patterns.contains(topLeft)) {
-                    patterns[topLeft] = { id++, topLeft, {} };
+                    patterns.emplace(topLeft, Pattern<T>(id++, topLeft));
                 }
 
                 patterns[value].neighbouring[TopLeftDimension].set(patterns[topLeft].id);
@@ -93,7 +105,7 @@ namespace wfc {
             if (y > 0) {
                 auto top = data[i - size.width()];
                 if (!patterns.contains(top)) {
-                    patterns[top] = { id++, top, {} };
+                    patterns.emplace(top, Pattern<T>(id++, top));
                 }
 
                 patterns[value].neighbouring[TopDimension].set(patterns[top].id);
@@ -104,7 +116,7 @@ namespace wfc {
             if (x < size.width() - 1 && y > 0) {
                 auto topRight = data[i + 1 - size.width()];
                 if (!patterns.contains(topRight)) {
-                    patterns[topRight] = { id++, topRight, {} };
+                    patterns.emplace(topRight, Pattern<T>(id++, topRight));
                 }
 
                 patterns[value].neighbouring[TopRightDimension].set(patterns[topRight].id);
@@ -115,7 +127,7 @@ namespace wfc {
             if (x < size.width() - 1) {
                 auto right = data[i + 1];
                 if (!patterns.contains(right)) {
-                    patterns[right] = { id++, right, {} };
+                    patterns.emplace(right, Pattern<T>(id++, right));
                 }
 
                 patterns[value].neighbouring[RightDimension].set(patterns[right].id);
@@ -126,7 +138,7 @@ namespace wfc {
             if (x < size.width() - 1 && y < size.height() - 1) {
                 auto bottomRight = data[i + 1 + size.width()];
                 if (!patterns.contains(bottomRight)) {
-                    patterns[bottomRight] = { id++, bottomRight, {} };
+                    patterns.emplace(bottomRight, Pattern<T>(id++, bottomRight));
                 }
 
                 patterns[value].neighbouring[BottomRightDimension].set(patterns[bottomRight].id);
@@ -137,7 +149,7 @@ namespace wfc {
             if (y < size.height() - 1) {
                 auto bottom = data[i + size.width()];
                 if (!patterns.contains(bottom)) {
-                    patterns[bottom] = { id++, bottom, {} };
+                    patterns.emplace(bottom, Pattern<T>(id++, bottom));
                 }
 
                 patterns[value].neighbouring[BottomDimension].set(patterns[bottom].id);
@@ -148,12 +160,27 @@ namespace wfc {
             if (x > 0 && y < size.height() - 1) {
                 auto bottomLeft = data[i - 1 + size.width()];
                 if (!patterns.contains(bottomLeft)) {
-                    patterns[bottomLeft] = { id++, bottomLeft, {} };
+                    patterns.emplace(bottomLeft, Pattern<T>(id++, bottomLeft));
                 }
 
                 patterns[value].neighbouring[BottomLeftDimension].set(patterns[bottomLeft].id);
                 patterns[bottomLeft].neighbouring[TopRightDimension].set(patterns[value].id);
             }
+        }
+
+        // Calculate frequencies
+        for (auto& [value, frequency] : frequencies) {
+            patterns[value].frequency = frequency;
+        }
+
+        // Normalize frequencies
+        auto totalFrequency = 0.0f;
+        for (auto& [value, pattern] : patterns) {
+            totalFrequency += pattern.frequency;
+        }
+
+        for (auto& [value, pattern] : patterns) {
+            pattern.frequency /= totalFrequency;
         }
 
         return patterns;
@@ -222,19 +249,30 @@ namespace wfc {
     const Pattern<T>* getRandomPattern(const WaveElement<T> &element, std::unordered_map<T, Pattern<T>> &patterns) {
         // Possible patterns
         std::vector<Pattern<T>*> possiblePatterns;
+        std::vector<float> possibleFrequencies;
+        float totalFrequency = 0.0f;
 
         // Get all possible patterns
         for (auto &[value, pattern] : patterns) {
             if (element.possible[pattern.id]) {
                 possiblePatterns.push_back(&pattern);
+                possibleFrequencies.push_back(pattern.frequency);
+                totalFrequency += pattern.frequency;
             }
         }
 
         // Get a random pattern
-        std::uniform_int_distribution<> dis(0, possiblePatterns.size() - 1);
+        std::uniform_real_distribution<> dis(0.0f, totalFrequency);
         auto randomIndex = dis(gen);
+        float acc = 0.0f;
+        for (auto i = 0u; i < possiblePatterns.size(); i++) {
+            acc += possibleFrequencies[i];
+            if (acc >= randomIndex) {
+                return possiblePatterns[i];
+            }
+        }
 
-        return possiblePatterns[randomIndex];
+        throw std::runtime_error("Could not get random pattern");
     }
 
     template<typename T>
