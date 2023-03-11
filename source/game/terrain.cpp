@@ -15,31 +15,85 @@
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stbi_image_write.h>
+#include <algorithm>
 
 namespace wfc {
     static constexpr uint32_t Dimensions = 2;
     static constexpr uint32_t BitsetSize = 8;
+    static constexpr uint32_t PatternSize = 1;
+    static constexpr uint32_t PatternSizeSquared = PatternSize * PatternSize;
 
-    static constexpr uint32_t TotalDimensions = 8;
+    static constexpr uint32_t TotalDimensions = 4;
 
     constexpr uint32_t LeftDimension = 0;
-    constexpr uint32_t TopLeftDimension = 1;
-    constexpr uint32_t TopDimension = 2;
-    constexpr uint32_t TopRightDimension = 3;
-    constexpr uint32_t RightDimension = 4;
-    constexpr uint32_t BottomRightDimension = 5;
-    constexpr uint32_t BottomDimension = 6;
-    constexpr uint32_t BottomLeftDimension = 7;
+    constexpr uint32_t TopDimension = 1;
+    constexpr uint32_t RightDimension = 2;
+    constexpr uint32_t BottomDimension = 3;
+
+    float getRandomFloat(float min, float max)
+    {
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        std::uniform_real_distribution<> dis(min, max);
+
+        return dis(gen);
+    }
+
+    template<typename T, std::size_t V>
+    struct PatternValue {
+        std::array<T, V> data;
+
+        PatternValue() = default;
+        explicit PatternValue(std::array<T, V> values)
+            : data(values)
+        {
+        }
+
+        auto operator==(const PatternValue<T, V>& other) const {
+            return (*this) == other ? std::strong_ordering::equal : this->hash() <=> other.hash();
+        }
+
+        auto operator<=>(const PatternValue<T, V>& other) const {
+            return hash() <=> other.hash();
+        }
+
+        uint64_t hash() {
+            if (_hash) {
+                return _hash;
+            }
+
+            uint64_t v = 0x12345;
+            for (const auto &x : data) {
+                v ^= x + 0x9e3779b9 + (v << 6) + (v >> 2);
+            }
+
+            return _hash = v;
+        }
+    private:
+        mutable uint64_t _hash { 0 };
+    };
+
+    template<typename T>
+    struct Pattern;
+
+    template<typename T>
+    using SizedPatternValue = PatternValue<T, PatternSizeSquared>;
+
+    template<typename T>
+    using SizedPattern = Pattern<uint32_t>;
+
+    template<typename T>
+    using SizedPatternMap = std::unordered_map<uint64_t, SizedPattern<T>>;
 
     template<typename T>
     struct Pattern {
         uint32_t id { 0 };
         float frequency { 0 };
-        T value;
+        SizedPatternValue<T> value;
         std::array<std::bitset<8>, TotalDimensions> neighbouring;
 
         Pattern() = default;
-        Pattern(uint32_t id, T value)
+        Pattern(uint32_t id, const SizedPatternValue<T> &value)
             : id(id)
             , value(value)
         {}
@@ -54,123 +108,107 @@ namespace wfc {
     };
 
     template<typename T>
-    std::unordered_map<T, Pattern<T>> readBitmapPatterns(T *data, const math::Size2D &size) {
-        std::unordered_map<T, Pattern<T>> patterns;
+    std::vector<SizedPatternValue<T>> getPatternValues(T *data, const math::Size2D &size) {
+        std::vector<SizedPatternValue<T>> patternValues;
 
         auto bufferSize = size.width() * size.height();
+        if (bufferSize % PatternSizeSquared != 0) {
+            throw std::runtime_error("Invalid buffer size");
+        }
 
-        auto middle = size.width() / 2 + size.height() / 2 * size.width();
-        auto middleValue = data[middle];
+        auto patternCount = bufferSize / PatternSizeSquared;
+        patternValues.reserve(patternCount);
 
-        std::unordered_map<T, float> frequencies;
+        for (auto i = 0; i < bufferSize; i += PatternSizeSquared) {
+            std::array<T, PatternSizeSquared> values {};
+            auto startX = i % size.width();
+            auto startY = i / size.width();
+
+            for (auto y = 0; y < PatternSize; y++) {
+                for (auto x = 0; x < PatternSize; x++) {
+                    auto index = (startY + y) * size.width() + (startX + x);
+                    values[y * PatternSize + x] = data[index];
+                }
+            }
+
+            auto patternValue = PatternValue<T, PatternSizeSquared>(values);
+            patternValues.push_back(patternValue);
+        }
+
+        return patternValues;
+    }
+
+    template<typename T>
+    SizedPatternMap<T> readBitmapPatterns(T *data, const math::Size2D &size) {
+        auto patternValues = getPatternValues(data, size);
+        SizedPatternMap<T> patterns;
+        std::unordered_map<uint64_t, int> frequencies;
+
+        auto valuesSize = patternValues.size();
 
         uint32_t id = 0;
-        for (auto i = 0u; i < bufferSize; i++) {
+        for (auto i = 0u; i < valuesSize; i++) {
             auto x = i % size.width();
             auto y = i / size.width();
 
-            auto value = data[i];
+            auto value = patternValues[i];
 
             // Increment frequency
-            frequencies[value] += 1.0f;
+            frequencies[value.hash()]++;
 
             // Add the pattern if it doesn't exist
-            if (!patterns.contains(value)) {
-                patterns.emplace(value, Pattern<T>(id++, value));
+            if (!patterns.contains(value.hash())) {
+                patterns[value.hash()] = SizedPattern<T>(id++, value);
             }
 
             // Check for left pattern
             if (x > 0) {
-                auto left = data[i - 1];
-                if (!patterns.contains(left)) {
-                    patterns.emplace(left, Pattern<T>(id++, left));
+                auto left = patternValues[i - 1];
+                if (!patterns.contains(left.hash())) {
+                    patterns[left.hash()] = SizedPattern<T>(id++, left);
                 }
 
-                patterns[value].neighbouring[LeftDimension].set(patterns[left].id);
-                patterns[left].neighbouring[RightDimension].set(patterns[value].id);
-            }
-
-            // Check for top left pattern
-            if (x > 0 && y > 0) {
-                auto topLeft = data[i - 1 - size.width()];
-                if (!patterns.contains(topLeft)) {
-                    patterns.emplace(topLeft, Pattern<T>(id++, topLeft));
-                }
-
-                patterns[value].neighbouring[TopLeftDimension].set(patterns[topLeft].id);
-                patterns[topLeft].neighbouring[BottomRightDimension].set(patterns[value].id);
+                patterns[value.hash()].neighbouring[LeftDimension].set(patterns[left.hash()].id);
+                patterns[left.hash()].neighbouring[RightDimension].set(patterns[value.hash()].id);
             }
 
             // Check for top pattern
             if (y > 0) {
-                auto top = data[i - size.width()];
-                if (!patterns.contains(top)) {
-                    patterns.emplace(top, Pattern<T>(id++, top));
+                auto top = patternValues[i - size.width()];
+                if (!patterns.contains(top.hash())) {
+                    patterns[top.hash()] = SizedPattern<T>(id++, top);
                 }
 
-                patterns[value].neighbouring[TopDimension].set(patterns[top].id);
-                patterns[top].neighbouring[BottomDimension].set(patterns[value].id);
-            }
-
-            // Check for top right pattern
-            if (x < size.width() - 1 && y > 0) {
-                auto topRight = data[i + 1 - size.width()];
-                if (!patterns.contains(topRight)) {
-                    patterns.emplace(topRight, Pattern<T>(id++, topRight));
-                }
-
-                patterns[value].neighbouring[TopRightDimension].set(patterns[topRight].id);
-                patterns[topRight].neighbouring[BottomLeftDimension].set(patterns[value].id);
+                patterns[value.hash()].neighbouring[TopDimension].set(patterns[top.hash()].id);
+                patterns[top.hash()].neighbouring[BottomDimension].set(patterns[value.hash()].id);
             }
 
             // Check for right pattern
             if (x < size.width() - 1) {
-                auto right = data[i + 1];
-                if (!patterns.contains(right)) {
-                    patterns.emplace(right, Pattern<T>(id++, right));
+                auto right = patternValues[i + 1];
+                if (!patterns.contains(right.hash())) {
+                    patterns[right.hash()] = SizedPattern<T>(id++, right);
                 }
 
-                patterns[value].neighbouring[RightDimension].set(patterns[right].id);
-                patterns[right].neighbouring[LeftDimension].set(patterns[value].id);
-            }
-
-            // Check for bottom right pattern
-            if (x < size.width() - 1 && y < size.height() - 1) {
-                auto bottomRight = data[i + 1 + size.width()];
-                if (!patterns.contains(bottomRight)) {
-                    patterns.emplace(bottomRight, Pattern<T>(id++, bottomRight));
-                }
-
-                patterns[value].neighbouring[BottomRightDimension].set(patterns[bottomRight].id);
-                patterns[bottomRight].neighbouring[TopLeftDimension].set(patterns[value].id);
+                patterns[value.hash()].neighbouring[RightDimension].set(patterns[right.hash()].id);
+                patterns[right.hash()].neighbouring[LeftDimension].set(patterns[value.hash()].id);
             }
 
             // Check for bottom pattern
             if (y < size.height() - 1) {
-                auto bottom = data[i + size.width()];
-                if (!patterns.contains(bottom)) {
-                    patterns.emplace(bottom, Pattern<T>(id++, bottom));
+                auto bottom = patternValues[i + size.width()];
+                if (!patterns.contains(bottom.hash())) {
+                    patterns[bottom.hash()] = SizedPattern<T>(id++, bottom);
                 }
 
-                patterns[value].neighbouring[BottomDimension].set(patterns[bottom].id);
-                patterns[bottom].neighbouring[TopDimension].set(patterns[value].id);
-            }
-
-            // Check for bottom left pattern
-            if (x > 0 && y < size.height() - 1) {
-                auto bottomLeft = data[i - 1 + size.width()];
-                if (!patterns.contains(bottomLeft)) {
-                    patterns.emplace(bottomLeft, Pattern<T>(id++, bottomLeft));
-                }
-
-                patterns[value].neighbouring[BottomLeftDimension].set(patterns[bottomLeft].id);
-                patterns[bottomLeft].neighbouring[TopRightDimension].set(patterns[value].id);
+                patterns[value.hash()].neighbouring[BottomDimension].set(patterns[bottom.hash()].id);
+                patterns[bottom.hash()].neighbouring[TopDimension].set(patterns[value.hash()].id);
             }
         }
 
         // Calculate frequencies
-        for (auto& [value, frequency] : frequencies) {
-            patterns[value].frequency = frequency;
+        for (const auto& [hash, frequency] : frequencies) {
+            patterns[hash].frequency = static_cast<float>(frequency);
         }
 
         // Normalize frequencies
@@ -187,36 +225,88 @@ namespace wfc {
     }
 
     template<typename T>
+    SizedPattern<T>& findPatternWithId(SizedPatternMap<T>& patterns, uint32_t id) {
+        for (auto& [value, pattern] : patterns) {
+            if (pattern.id == id) {
+                return pattern;
+            }
+        }
+
+        throw std::runtime_error("Pattern not found");
+    }
+
+    template<typename T>
     struct WaveElement {
         glm::ivec2 position;
         std::bitset<BitsetSize> possible;
         std::size_t possibleCount;
-        std::optional<T> value = std::nullopt; // is nullopt when not collapsed
+        std::optional<SizedPatternValue<T>> value = std::nullopt; // is nullopt when not collapsed
 
-        bool collapse(const Pattern<T>* pattern) {
-            this->value = pattern->value;
+        float sumWeights = 0.0f;
+        float sumWeightsLogWeights = 0.0f;
+        float entropy = 0.0f;
+
+        void initialize(std::size_t possibleCount, SizedPatternMap<T> &patterns) {
+            for (auto i = 0u; i < possibleCount; i++) {
+                possible.set(i);
+            }
+
+            this->possibleCount = possibleCount;
+
+            for (auto i = 0u; i < BitsetSize; i++) {
+                if (possible[i]) {
+                    auto &pattern = findPatternWithId<T>(patterns, i);
+
+                    const auto weight = pattern.frequency;
+                    sumWeights += weight;
+                    sumWeightsLogWeights += weight * std::log(weight);
+                }
+            }
+        }
+
+        bool apply(const std::bitset<BitsetSize> &mask, SizedPatternMap<T> &patterns) {
+            auto const diff = possible & mask;
+
+            if (diff == possible) {
+                return true;
+            }
+
+            possible &= mask;
+
+            for (auto i = 0u; i < BitsetSize; i++) {
+                if (diff[i]) {
+                    auto &pattern = findPatternWithId<T>(patterns, i);
+
+                    const auto weight = pattern.frequency;
+                    sumWeights -= weight;
+                    sumWeightsLogWeights -= weight * std::log(weight);
+                }
+            }
+
+            entropy = std::log(sumWeights) - sumWeightsLogWeights / sumWeights;
+            possibleCount = possible.count();
+
+            return possibleCount !=0;
+        }
+
+        bool collapse(const SizedPattern<T>* pattern) {
+            if (!possible[pattern->id]) {
+                return false;
+            }
+
+            value = pattern->value;
             possible.reset();
             possible.set(pattern->id);
             possibleCount = 1;
+            sumWeights = 0.0f;
+            sumWeightsLogWeights = 0.0f;
+            entropy = 0.0f;
 
             return true;
         }
 
         [[nodiscard]] constexpr bool collapsed() const {
             return value.has_value();
-        }
-
-        bool apply(const std::bitset<BitsetSize> &mask) {
-            auto const diff = possible & mask;
-
-            if (diff.none()) {
-                return true;
-            }
-
-            possible &= mask;
-            possibleCount = possible.count();
-
-            return possible.count() !=0;
         }
     };
 
@@ -227,28 +317,31 @@ namespace wfc {
         math::Size2D outputSize;
         uint32_t collapsedCount { 0 };
 
-        WaveFunctionOutput(const math::Size2D &size, std::size_t possibleCount)
-            : elements(size.width() * size.height())
-            , outputSize(size)
+        WaveFunctionOutput(const math::Size2D &size, std::size_t possibleCount, SizedPatternMap<T> &patterns)
+            : outputSize(size)
         {
-            for (auto y = 0u; y < size.height(); y++) {
-                for (auto x = 0u; x < size.width(); x++) {
-                    auto index = y * size.width() + x;
-                    elements[index].position = { x, y };
-                    elements[index].possible.set();
-                    elements[index].possibleCount = possibleCount;
-                }
+            auto totalSize = size.width() * size.height();
+            elements = std::vector<WaveElement<T>>(totalSize);
+
+            if (size.width() % PatternSize != 0 || size.height() % PatternSize != 0) {
+                throw std::runtime_error("Size must be a multiple of pattern size");
+            }
+
+            for (auto i = 0; i < totalSize; i += PatternSizeSquared) {
+                auto startX = i % size.width();
+                auto startY = i / size.width();
+
+                auto index = startY / PatternSize * (size.width() / PatternSize) + startX / PatternSize;
+                elements[index].position = { startX, startY };
+                elements[index].initialize(possibleCount, patterns);
             }
         }
     };
 
-    static inline std::random_device rd;
-    static inline std::mt19937 gen(rd());
-
     template<typename T>
-    const Pattern<T>* getRandomPattern(const WaveElement<T> &element, std::unordered_map<T, Pattern<T>> &patterns) {
+    const SizedPattern<T>* getRandomPattern(const WaveElement<T> &element, SizedPatternMap<T> &patterns) {
         // Possible patterns
-        std::vector<Pattern<T>*> possiblePatterns;
+        std::vector<SizedPattern<T>*> possiblePatterns;
         std::vector<float> possibleFrequencies;
         float totalFrequency = 0.0f;
 
@@ -262,8 +355,7 @@ namespace wfc {
         }
 
         // Get a random pattern
-        std::uniform_real_distribution<> dis(0.0f, totalFrequency);
-        auto randomIndex = dis(gen);
+        auto randomIndex = getRandomFloat(0.0f, totalFrequency);
         float acc = 0.0f;
         for (auto i = 0u; i < possiblePatterns.size(); i++) {
             acc += possibleFrequencies[i];
@@ -276,7 +368,7 @@ namespace wfc {
     }
 
     template<typename T>
-    const Pattern<T>* getSinglePossibleValue(const WaveElement<T> &element, std::unordered_map<T, Pattern<T>> &patterns) {
+    const SizedPattern<T>* getSinglePossibleValue(const WaveElement<T> &element, SizedPatternMap<T> &patterns) {
         // Get all possible patterns
         for (auto &[value, pattern] : patterns) {
             if (element.possible[pattern.id]) {
@@ -284,11 +376,11 @@ namespace wfc {
             }
         }
 
-        throw std::runtime_error("No possible values");
+        throw std::runtime_error("No possible data");
     }
 
     template<typename T>
-    bool propagateElement(WaveElement<T> &inputElement, WaveFunctionOutput<T> &output, std::unordered_map<T, Pattern<T>> &patterns) {
+    bool propagateElement(WaveElement<T> &inputElement, WaveFunctionOutput<T> &output, SizedPatternMap<T> &patterns) {
         std::stack<WaveElement<T>*> elementsStack;
         elementsStack.push(&inputElement);
 
@@ -305,23 +397,11 @@ namespace wfc {
                 auto neighbourPosition = element.position;
                 if (i == LeftDimension) {
                     neighbourPosition.x -= 1;
-                } else if (i == TopLeftDimension) {
-                    neighbourPosition.x -= 1;
-                    neighbourPosition.y -= 1;
                 } else if (i == TopDimension) {
-                    neighbourPosition.y -= 1;
-                } else if (i == TopRightDimension) {
-                    neighbourPosition.x += 1;
                     neighbourPosition.y -= 1;
                 } else if (i == RightDimension) {
                     neighbourPosition.x += 1;
-                } else if (i == BottomRightDimension) {
-                    neighbourPosition.x += 1;
-                    neighbourPosition.y += 1;
                 } else if (i == BottomDimension) {
-                    neighbourPosition.y += 1;
-                } else if (i == BottomLeftDimension) {
-                    neighbourPosition.x -= 1;
                     neighbourPosition.y += 1;
                 }
 
@@ -343,9 +423,9 @@ namespace wfc {
                 auto neighbor = neighborPair.second;
 
                 // Apply possible patterns for neighbor
-                auto elementPattern = patterns[element.value.value()];
+                auto elementPattern = patterns[element.value.value().hash()];
 
-                if (!neighbor->apply(elementPattern.neighbouring[neighborPair.first])) {
+                if (!neighbor->apply(elementPattern.neighbouring[neighborPair.first], patterns)) {
                     // Contradiction
                     contradiction = true;
                     break;
@@ -375,7 +455,7 @@ namespace wfc {
     }
 
     template<typename T>
-    bool collapseElement(WaveElement<T> *element, WaveFunctionOutput<T> &output, std::unordered_map<T, Pattern<T>> &patterns) {
+    bool collapseElement(WaveElement<T> *element, WaveFunctionOutput<T> &output, SizedPatternMap<T> &patterns) {
         // Collapse the element
         auto pattern = getRandomPattern(*element, patterns);
         if (!element->collapse(pattern)) {
@@ -398,7 +478,7 @@ namespace wfc {
 
     template<typename T>
     WaveElement<T>* getNextElement(WaveFunctionOutput<T> &output) {
-        std::size_t min = std::numeric_limits<uint32_t>::max();
+        float min = 1e4;
         WaveElement<T>* next = nullptr;
 
         for (auto &element : output.elements) {
@@ -406,8 +486,9 @@ namespace wfc {
                 continue;
             }
 
-            if (element.possibleCount < min) {
-                min = element.possibleCount;
+            auto noise = getRandomFloat(0.0f, 1e-6f);
+            if (element.entropy + noise < min) {
+                min = element.entropy + noise;
                 next = &element;
             }
         }
@@ -420,11 +501,12 @@ namespace wfc {
     }
 
     template<typename T>
-    WaveFunctionOutput<T> output(std::unordered_map<T, Pattern<T>> patterns, math::Size2D outputSize) {
-        WaveFunctionOutput<T> output { outputSize, patterns.size() };
+    WaveFunctionOutput<T> output(SizedPatternMap<T> patterns, math::Size2D outputSize) {
+        WaveFunctionOutput<T> output { outputSize, patterns.size(), patterns };
 
         // Start with top left element
-        auto nextElement = &output.elements[0];
+        auto middle = outputSize.width() * outputSize.height() / 2;
+        auto nextElement = &output.elements[middle];
 
         // Collapse the middle element
         while (output.collapsedCount != outputSize.width() * outputSize.height()) {
@@ -456,11 +538,26 @@ namespace game {
         auto patterns = wfc::readBitmapPatterns(reinterpret_cast<uint32_t*>(data), { width, height });
         stbi_image_free(data);
 
-        auto output = wfc::output(patterns, { 18, 18 });
+        auto output = wfc::output<uint32_t>(patterns, { 18, 18 });
+
         auto outputData = new uint32_t [output.outputSize.width() * output.outputSize.height()];
         for (auto i = 0u; i < output.elements.size(); i++) {
-            outputData[i] = output.elements[i].value.value();
+            auto &element = output.elements[i];
+            outputData[i] = element.value.value().data[0];
         }
+
+        for (auto &element : output.elements) {
+            auto startX = element.position.x;
+            auto startY = element.position.y;
+
+            for (auto y = 0; y < wfc::PatternSize; y++) {
+                for (auto x = 0; x < wfc::PatternSize; x++) {
+                    auto index = (startY * wfc::PatternSize + y) * output.outputSize.width() * wfc::PatternSize + startX * wfc::PatternSize + x;
+                    outputData[index] = element.value.value().data[y * wfc::PatternSize + x];
+                }
+            }
+        }
+
         stbi_write_png("assets/output.png", output.outputSize.width(), output.outputSize.height(), channels, outputData, output.outputSize.width() * channels);
         delete[] outputData;
     }
