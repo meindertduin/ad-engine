@@ -1,8 +1,0 @@
-{
-  "grass": {
-    "negbouring": {
-      "grass": 0.5,
-      "water": 0.5
-    }
-  }
-}

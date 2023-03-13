@@ -1,0 +1,230 @@
+{
+  "name": "Rooms",
+  "tiles": [
+    {
+      "name": "bend",
+      "symmetry": "L",
+      "weight": 0.5,
+      "neighbors": [
+        {
+          "right": "bend",
+          "rightOrientation": 1
+        }
+      ]
+    },
+    {
+      "name": "corner",
+      "symmetry": "L",
+      "weight": 0.5,
+      "neighbors": [
+        {
+          "orientation": 1,
+          "right": "corner"
+        },
+        {
+          "orientation": 2,
+          "right": "corner"
+        },
+        {
+          "right": "door"
+        },
+        {
+          "right": "side",
+          "rightOrientation": 2
+        },
+        {
+          "orientation": 1,
+          "right": "side",
+          "rightOrientation": 1
+        },
+        {
+          "orientation": 1,
+          "right": "t",
+          "rightOrientation": 1
+        },
+        {
+          "orientation": 1,
+          "right": "turn"
+        },
+        {
+          "orientation": 2,
+          "right": "turn"
+        },
+        {
+          "right": "bend",
+          "rightOrientation": 2
+        }
+      ]
+    },
+    {
+      "name": "corridor",
+      "symmetry": "I",
+      "weight": 1.0,
+      "neighbors": [
+        {
+          "orientation": 1,
+          "right": "corridor",
+          "rightOrientation": 1
+        },
+        {
+          "orientation": 1,
+          "right": "door",
+          "rightOrientation": 3
+        },
+        {
+          "right": "side",
+          "rightOrientation": 1
+        },
+        {
+          "orientation": 1,
+          "right": "t"
+        },
+        {
+          "orientation": 1,
+          "right": "t",
+          "rightOrientation": 3
+        },
+        {
+          "orientation": 1,
+          "right": "turn",
+          "rightOrientation": 1
+        },
+        {
+          "right": "wall"
+        }
+      ]
+    },
+    {
+      "name": "door",
+      "symmetry": "T",
+      "weight": 0.5,
+      "neighbors": [
+        {
+          "orientation": 1,
+          "right": "door",
+          "rightOrientation": 3
+        },
+        {
+          "orientation": 3,
+          "right": "empty"
+        },
+        {
+          "right": "side",
+          "rightOrientation": 2
+        },
+        {
+          "orientation": 1,
+          "right": "t"
+        },
+        {
+          "orientation": 1,
+          "right": "t",
+          "rightOrientation": 3
+        },
+        {
+          "orientation": 1,
+          "right": "turn",
+          "rightOrientation": 1
+        },
+        {
+          "right": "bend",
+          "rightOrientation": 2
+        }
+      ]
+    },
+    {
+      "name": "empty",
+      "symmetry": "X",
+      "neighbors": [
+        {
+          "right": "bend"
+        },
+        {
+          "right": "empty"
+        },
+        {
+          "right": "side",
+          "rightOrientation": 3
+        }
+      ]
+    },
+    {
+      "name": "side",
+      "symmetry": "T",
+      "weight": 2.0,
+      "neighbors": [
+        {
+          "right": "side"
+        },
+        {
+          "orientation": 3,
+          "right": "side",
+          "rightOrientation": 1
+        },
+        {
+          "orientation": 3,
+          "right": "t",
+          "rightOrientation": 1
+        },
+        {
+          "orientation": 3,
+          "right": "turn"
+        },
+        {
+          "orientation": 3,
+          "right": "wall"
+        },
+        {
+          "right": "bend",
+          "rightOrientation": 1
+        }
+      ]
+    },
+    {
+      "name": "t",
+      "symmetry": "T",
+      "weight": 0.5,
+      "neighbors": [
+        {
+          "right": "t",
+          "rightOrientation": 2
+        },
+        {
+          "right": "turn",
+          "rightOrientation": 1
+        },
+        {
+          "orientation": 3,
+          "right": "wall"
+        }
+      ]
+    },
+    {
+      "name": "turn",
+      "symmetry": "L",
+      "weight": 0.25,
+      "neighbors": [
+        {
+          "right": "turn",
+          "rightOrientation": 2
+        },
+        {
+          "orientation": 1,
+          "right": "wall"
+        }
+      ]
+    },
+    {
+      "name": "wall",
+      "symmetry": "X",
+      "neighbors": [
+        {
+          "right": "corner"
+        },
+        {
+          "right": "wall"
+        }
+      ]
+    }
+  ]
+}

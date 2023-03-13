@@ -2,7 +2,8 @@ game_sources = files(
     'scene.cpp',
     'render_world.cpp',
     'transform.cpp',
-    'terrain.cpp'
+    'terrain.cpp',
+    'terrain_generator.cpp'
 )
 project_sources += game_sources
 
