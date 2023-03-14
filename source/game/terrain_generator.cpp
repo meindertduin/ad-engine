@@ -28,14 +28,70 @@ namespace std {
 }
 
 namespace game {
-    Json::Value readJsonFile() {
-        FileReader fileReader("assets/terrain/rooms/data.json");
+    struct TiledData {
+        struct Tile {
+            struct Neighbor {
+                uint32_t leftOrientation;
+                uint32_t rightOrientation;
+                std::string right;
+            };
+
+            std::string name;
+            Symmetry symmetry;
+            double weight;
+            std::vector<Neighbor> neighbors;
+        };
+
+        std::string name;
+        std::unordered_map<std::string, Tile> tiles;
+    };
+
+    TiledData readJsonData(const std::string &directory) {
+        TiledData tiledData;
+        FileReader fileReader(directory + "/data.json");
         Json::Reader reader;
         Json::Value obj;
 
         reader.parse(fileReader.getFileContent(), obj);
 
-        return obj;
+        tiledData.name = obj["name"].asString();
+        const auto& tiles = obj["tiles"];
+
+        auto getSymmetry = [](const Json::Value &value) {
+            std::unordered_map<std::string, Symmetry> symmetries = {
+                    { "X", Symmetry::X },
+                    { "T", Symmetry::T },
+                    { "I", Symmetry::I },
+                    { "L", Symmetry::L },
+                    { "\\", Symmetry::backslash },
+                    { "p", Symmetry::P },
+            };
+
+            return symmetries[value["symmetry"].asString()];
+        };
+
+        for (const auto& tile : tiles) {
+            TiledData::Tile resultTile;
+            resultTile.name = tile["name"].asString();
+            resultTile.symmetry = getSymmetry(tile);
+            resultTile.weight = tile["weight"].isNull() ? 1.0f : tile["weight"].asDouble();
+
+            auto const& neighbors = tile["neighbors"];
+            for (const auto& neighbor : neighbors) {
+                TiledData::Tile::Neighbor resultNeighbor;
+
+                resultNeighbor.leftOrientation = neighbor["orientation"].isNull() ? 0 : neighbor["orientation"].asUInt();
+
+                resultNeighbor.right = neighbor["right"].asString();
+                resultNeighbor.rightOrientation = neighbor["rightOrientation"].isNull() ? 0 : neighbor["rightOrientation"].asUInt();
+
+                resultTile.neighbors.push_back(resultNeighbor);
+            }
+
+            tiledData.tiles[resultTile.name] = resultTile;
+        }
+
+        return tiledData;
     }
 
     std::optional<Array2D<Color>> readImage(const std::string &filePath) {
@@ -62,38 +118,6 @@ namespace game {
     }
 
     void generate() {
-        auto getSymmetry = [](const Json::Value &value) {
-            std::unordered_map<std::string, Symmetry> symmetries = {
-                { "X", Symmetry::X },
-                { "T", Symmetry::T },
-                { "I", Symmetry::I },
-                { "L", Symmetry::L },
-                { "\\", Symmetry::backslash },
-                { "p", Symmetry::P },
-            };
-
-            return symmetries[value["symmetry"].asString()];
-        };
-
-        auto readNeighbors = [](const std::string &leftName, const Json::Value &value) {
-            std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>> result;
-
-            for (const auto &neighbor : value["neighbors"]) {
-                auto orientation = neighbor["orientation"].isNull() ? 0 : neighbor["orientation"].asUInt();
-
-                auto rightName = neighbor["right"].asString();
-                auto rightOrientation = neighbor["rightOrientation"].isNull() ? 0 : neighbor["rightOrientation"].asUInt();
-
-                result.emplace_back(leftName, orientation, rightName, rightOrientation);
-            }
-
-            return result;
-        };
-
-        auto object = readJsonFile();
-        auto name = object["name"].asString();
-        const auto& tiles = object["tiles"];
-
         std::unordered_map<std::string, Tile<Color>> colorTiles;
         std::unordered_map<std::string, uint32_t> tileIds;
         std::vector<Tile<Color>> tileList;
@@ -101,23 +125,20 @@ namespace game {
         std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>> neighbors;
         std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t>> neighborIds;
 
-        for (const auto& tile : tiles) {
-            auto tileName = tile["name"].asString();
-            auto symmetry = getSymmetry(tile);
-            auto weight = tile["weight"].isNull() ? 1.0f : tile["weight"].asDouble();
-            auto imagePath = "assets/terrain/rooms/" + tileName + ".png";
+        auto tiledData = readJsonData("assets/terrain/rooms");
 
+        for (const auto &[tileName, tile] : tiledData.tiles) {
+            auto imagePath = "assets/terrain/rooms/" + tileName + ".png";
             auto image = readImage(imagePath);
 
             if (!image.has_value()) {
                 throw std::runtime_error("Failed to load image");
             }
 
-            Tile colorTile = { *image, symmetry, weight };
-            colorTiles.try_emplace(tileName, colorTile);
+            colorTiles.try_emplace(tileName, *image, tile.symmetry, tile.weight);
 
-            for (const auto& neighbor : readNeighbors(tileName, tile)) {
-                neighbors.push_back(neighbor);
+            for (const auto &neighbor : tile.neighbors) {
+                neighbors.emplace_back(tileName, neighbor.leftOrientation, neighbor.right, neighbor.rightOrientation);
             }
         }
 
