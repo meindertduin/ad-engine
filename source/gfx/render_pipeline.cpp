@@ -29,15 +29,13 @@ namespace gfx {
     };
 
     PosTextVertex vertices[] = {
-        { 1.0f,  1.0f, 0.0f, 1.0f, 1.0f, }, // top right
-        { 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, }, // bottom right
-        { -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, }, // bottom left
-        { -1.0f,  1.0f, 0.0f, 0.0f, 1.0f }, // top left
-    };
+        { 1.0f,  1.0f, 0.0f, 1.0f, 1.0f, }, // 0
+        { 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, }, // 1
+        { -1.0f,  1.0f, 0.0f, 0.0f, 1.0f }, // 3
 
-    unsigned int indices[] = {  // note that we start from 0!
-            0, 1, 3,  // first Triangle
-            1, 2, 3   // second Triangle
+        { 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, }, // 1
+        { -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, }, // 2
+        { -1.0f,  1.0f, 0.0f, 0.0f, 1.0f }, // 3
     };
 
     class RenderPipelineImpl : public RenderPipeline {
@@ -54,7 +52,6 @@ namespace gfx {
             mTerrain.initialize();
 
             mVertexBuffer = gpu::VertexBuffer::create(vertices, sizeof(vertices), PosTextVertex::layout);
-            mIndexBuffer = gpu::IndexBuffer::create(indices, sizeof(indices));
         }
 
         void renderCommand(const RenderCommand &command) override {
@@ -103,7 +100,6 @@ namespace gfx {
         uint32_t mHeight;
 
         std::unique_ptr<gpu::VertexBuffer> mVertexBuffer;
-        std::unique_ptr<gpu::IndexBuffer> mIndexBuffer;
 
         Camera mCamera;
 

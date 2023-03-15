@@ -49,8 +49,9 @@ namespace gpu {
 
     class VertexBufferImpl : public VertexBuffer {
     public:
-        VertexBufferImpl(const void *data, uint32_t size, VertexLayout layout)
-            : mLayout(std::move(layout))
+        VertexBufferImpl(const void *data, uint32_t totalSize, VertexLayout layout)
+            : mVertexCount(totalSize / layout.totalSize())
+            , mLayout(std::move(layout))
         {
             glGenVertexArrays(1, &mVertexArrayHandle);
             glGenBuffers(1, &mVertexBufferHandle);
@@ -58,7 +59,7 @@ namespace gpu {
             glBindVertexArray(mVertexArrayHandle);
 
             glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferHandle);
-            glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, totalSize, data, GL_STATIC_DRAW);
 
             mLayout.bind();
         }
@@ -80,12 +81,13 @@ namespace gpu {
 
         void draw() const override {
             glBindVertexArray(mVertexArrayHandle);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glDrawArrays(GL_TRIANGLES, 0, mVertexCount);
         }
 
     private:
         uint32_t mVertexArrayHandle { 0 };
         uint32_t mVertexBufferHandle { 0 };
+        uint32_t mVertexCount { 0 };
         VertexLayout mLayout;
     };
 

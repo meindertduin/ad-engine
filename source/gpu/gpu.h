@@ -33,6 +33,7 @@ namespace gpu {
 
         VertexLayout& addAttribute(Attribute attribute, AttributeType type, bool normalized = false);
         void bind() const;
+        [[nodiscard]] constexpr int totalSize() const { return mTotalSize; }
     private:
         int mTotalSize { 0 };
 
