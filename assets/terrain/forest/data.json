@@ -1,0 +1,15 @@
+{
+  "name": "forest",
+  "tiles": [
+    {
+      "name": "grass",
+      "symmetry": "L",
+      "weight": 0.5,
+      "neighbors": [
+        {
+          "right": "grass",
+        }
+      ]
+    },
+  }
+}

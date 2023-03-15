@@ -3,6 +3,6 @@
 
 namespace game {
     void Terrain::initialize() {
-        generate();
+        // generateWfcImage("assets/terrain/forest");
     }
 }

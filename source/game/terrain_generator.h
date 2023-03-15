@@ -1,5 +1,12 @@
 #pragma once
 
+#include <string>
+
 namespace game {
-    void generate();
+
+    class TerrainGenerator {
+    public:
+        void generateTerrainMesh(std::string &folder);
+
+    };
 }

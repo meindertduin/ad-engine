@@ -1,8 +1,8 @@
 #include "terrain_generator.h"
+
 #include "engine/file_reader.h"
 #include <fastwfc/tiling_wfc.hpp>
 #include <json/json.h>
-#include <string>
 #include <unordered_map>
 
 #include "stb_image.h"
@@ -117,7 +117,7 @@ namespace game {
         stbi_write_png(filePath.c_str(), static_cast<int>(m.width), static_cast<int>(m.height), 3, (const unsigned char*)m.data.data(), 0);
     }
 
-    void generate() {
+    Array2D<Color> generateWfcImage(const std::string &folder) {
         std::unordered_map<std::string, Tile<Color>> colorTiles;
         std::unordered_map<std::string, uint32_t> tileIds;
         std::vector<Tile<Color>> tileList;
@@ -125,10 +125,10 @@ namespace game {
         std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>> neighbors;
         std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t>> neighborIds;
 
-        auto tiledData = readJsonData("assets/terrain/rooms");
+        auto tiledData = readJsonData(folder);
 
         for (const auto &[tileName, tile] : tiledData.tiles) {
-            auto imagePath = "assets/terrain/rooms/" + tileName + ".png";
+            auto imagePath = folder + "/" + tileName + ".png";
             auto image = readImage(imagePath);
 
             if (!image.has_value()) {
@@ -158,12 +158,15 @@ namespace game {
 
             TilingWFC<Color> wfc(tileList, neighborIds, 60, 60, { true }, seed);
             if (auto success = wfc.run(); success.has_value()) {
-                writeImagePng("assets/output.png", *success);
-                Logger::info("Success");
-                break;
+                return *success;
             }
 
             Logger::info("Failure");
         }
+    }
+
+    void TerrainGenerator::generateTerrainMesh(std::string &folder) {
+        auto output = generateWfcImage(folder);
+
     }
 }

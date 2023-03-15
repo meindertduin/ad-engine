@@ -13,11 +13,12 @@
 #include "gpu/gpu.h"
 #include "camera.h"
 #include "game/terrain.h"
+#include "mesh.h"
 
 namespace gfx {
     struct PosTextVertex {
-        float x, y, z;
-        float u, v;
+        glm::vec3 position;
+        glm::vec2 texCoords;
 
         static void init() {
             layout
@@ -28,14 +29,13 @@ namespace gfx {
         static inline gpu::VertexLayout layout;
     };
 
-    PosTextVertex vertices[] = {
-        { 1.0f,  1.0f, 0.0f, 1.0f, 1.0f, }, // 0
-        { 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, }, // 1
-        { -1.0f,  1.0f, 0.0f, 0.0f, 1.0f }, // 3
-
-        { 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, }, // 1
-        { -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, }, // 2
-        { -1.0f,  1.0f, 0.0f, 0.0f, 1.0f }, // 3
+    Vertex vertices[] = {
+            { glm::vec3(1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f) }, // 0
+            { glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f) }, // 1
+            { glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f) }, // 3
+            { glm::vec3(1.0f, -1.0f, 0.0f),  glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f) }, // 1
+            { glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) }, // 2
+            { glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f) }, // 3
     };
 
     class RenderPipelineImpl : public RenderPipeline {
@@ -51,7 +51,7 @@ namespace gfx {
             PosTextVertex::init();
             mTerrain.initialize();
 
-            mVertexBuffer = gpu::VertexBuffer::create(vertices, sizeof(vertices), PosTextVertex::layout);
+            mMesh = std::make_unique<Mesh>(vertices, sizeof(vertices));
         }
 
         void renderCommand(const RenderCommand &command) override {
@@ -80,7 +80,7 @@ namespace gfx {
                 gpu::setUniform(command.material->shader()->programHandle(), "view", mCamera.view());
                 gpu::setUniform(command.material->shader()->programHandle(), "projection", mCamera.projection());
 
-                mVertexBuffer->draw();
+                mMesh->draw();
 
                 mRenderCommands.pop();
             }
@@ -99,7 +99,7 @@ namespace gfx {
         uint32_t mWidth;
         uint32_t mHeight;
 
-        std::unique_ptr<gpu::VertexBuffer> mVertexBuffer;
+        std::unique_ptr<Mesh> mMesh;
 
         Camera mCamera;
 
