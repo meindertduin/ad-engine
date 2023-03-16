@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "gfx/mesh.h"
+
 namespace game {
     struct TerrainTile {
         uint32_t tileId;
@@ -15,8 +17,8 @@ namespace game {
         Terrain& operator=(const Terrain &other) = delete;
 
         void initialize();
+
     private:
-        constexpr static uint32_t kTerrainWidth = 8;
-        TerrainTile mTerrainFile[kTerrainWidth][kTerrainWidth];
+        std::unique_ptr<gfx::Mesh> mTerrainMesh;
     };
 }

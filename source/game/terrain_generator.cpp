@@ -18,7 +18,8 @@ struct Color {
 };
 
 namespace std {
-    template <> class hash<Color> {
+    template <>
+    class hash<Color> {
     public:
         size_t operator()(const Color &c) const {
             return (size_t)c.r + (size_t)256 * (size_t)c.g +
@@ -44,6 +45,17 @@ namespace game {
 
         std::string name;
         std::unordered_map<std::string, Tile> tiles;
+    };
+
+    struct TilesMapData {
+        struct Tile {
+            Color color;
+            glm::vec2 textCoordinatesPos;
+            glm::vec2 textureSize;
+        };
+
+        std::string textureMap;
+        std::unordered_map<Color, Tile> tiles;
     };
 
     TiledData readJsonData(const std::string &directory) {
@@ -165,8 +177,67 @@ namespace game {
         }
     }
 
-    void TerrainGenerator::generateTerrainMesh(std::string &folder) {
-        auto output = generateWfcImage(folder);
+    TilesMapData readMap(const std::string &directory) {
+        TilesMapData result;
 
+        FileReader fileReader(directory + "/map.json");
+        Json::Reader reader;
+        Json::Value obj;
+
+        reader.parse(fileReader.getFileContent(), obj);
+
+        result.textureMap = obj["textureMap"].asString();
+
+        for (const auto& tile : obj["tiles"]) {
+            TilesMapData::Tile tileData {
+                .color = { static_cast<uint8_t>(tile["r"].asInt()), static_cast<uint8_t>(tile["g"].asInt()), static_cast<uint8_t>(tile["b"].asInt()) },
+                .textCoordinatesPos = {tile["x"].asInt(), tile["y"].asInt() },
+                .textureSize = { tile["width"].asInt(), tile["height"].asInt() },
+            };
+
+            result.tiles[tileData.color] = tileData;
+        }
+
+        return result;
+    }
+
+    std::unique_ptr<gfx::Mesh> TerrainGenerator::generateTerrainMesh(const std::string &folder) {
+        auto output = generateWfcImage(folder);
+        auto map = readMap(folder);
+
+        auto getCubeVertices = [](float x, float z, float tileSize, const TilesMapData::Tile &tile) {
+            std::vector<gfx::Vertex> vertices;
+
+            gfx::Vertex rightTop = { { x + tileSize, 0.0f, z }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f } };
+            gfx::Vertex rightBottom = { { x + tileSize, 0.0f, z + tileSize }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 1.0f } };
+            gfx::Vertex leftBottom = { { x, 0.0f, z + tileSize }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f } };
+            gfx::Vertex leftTop = { { x, 0.0f, z }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } };
+
+            vertices.push_back(rightTop);
+            vertices.push_back(rightBottom);
+            vertices.push_back(leftTop);
+
+            vertices.push_back(rightBottom);
+            vertices.push_back(leftBottom);
+            vertices.push_back(leftTop);
+
+            return vertices;
+        };
+
+        std::vector<gfx::Vertex> meshVertices;
+        constexpr auto TileSize = 1.0f;
+
+        for (unsigned i = 0; i < output.height; i++) {
+            for (unsigned j = 0; j < output.width; j++) {
+                auto color = output.data[i * output.width + j];
+
+                auto tile = map.tiles[color];
+
+                auto vertices = getCubeVertices(static_cast<float>(j) * TileSize, static_cast<float>(i) * TileSize, TileSize, tile);
+                meshVertices.insert(meshVertices.end(), vertices.begin(), vertices.end());
+            }
+        }
+
+        return std::make_unique<gfx::Mesh>(meshVertices);
     }
 }

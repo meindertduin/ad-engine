@@ -3,6 +3,7 @@
 
 namespace game {
     void Terrain::initialize() {
-        // generateWfcImage("assets/terrain/forest");
+        TerrainGenerator generator;
+        mTerrainMesh = generator.generateTerrainMesh("assets/terrain/forest");
     }
 }
