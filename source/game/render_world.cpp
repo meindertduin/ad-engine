@@ -4,14 +4,29 @@
 #include "gfx/material_manager.h"
 
 namespace game {
+    gfx::Vertex vertices[] = {
+            { glm::vec3(1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f) }, // 0
+            { glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f) }, // 1
+            { glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f) }, // 3
+            { glm::vec3(1.0f, -1.0f, 0.0f),  glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f) }, // 1
+            { glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) }, // 2
+            { glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f) }, // 3
+    };
+
     RenderWorld::RenderWorld(Scene &scene, Allocator &allocator, const math::Size2D &frameDimensions)
         : mScene(scene)
         , mRenderPipeline(gfx::RenderPipeline::createInstance(allocator, frameDimensions))
     {
         mRenderPipeline->initialize();
+
+        mMesh = std::make_unique<gfx::Mesh>(vertices, sizeof(vertices));
+        mTerrain.initialize();
     }
 
     void RenderWorld::render() {
+        // Render terrain
+
+        // Render objects
         auto transformComponentArray = mScene.ecs().getComponentArray<Transform>();
 
         auto componentArray = mScene.ecs().getComponentArray<gfx::RenderComponent>();
@@ -20,7 +35,7 @@ namespace game {
             auto &component = it.value();
 
             auto &transform = transformComponentArray->get(object);
-            gfx::RenderCommand command { component.material().get(), &transform };
+            gfx::RenderCommand command { component.material().get(), &transform, mMesh.get() };
 
             mRenderPipeline->renderCommand(command);
         }

@@ -12,8 +12,6 @@
 
 #include "gpu/gpu.h"
 #include "camera.h"
-#include "game/terrain.h"
-#include "mesh.h"
 
 namespace gfx {
     struct PosTextVertex {
@@ -29,15 +27,6 @@ namespace gfx {
         static inline gpu::VertexLayout layout;
     };
 
-    Vertex vertices[] = {
-            { glm::vec3(1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f) }, // 0
-            { glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f) }, // 1
-            { glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f) }, // 3
-            { glm::vec3(1.0f, -1.0f, 0.0f),  glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f) }, // 1
-            { glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) }, // 2
-            { glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f) }, // 3
-    };
-
     class RenderPipelineImpl : public RenderPipeline {
     public:
         explicit RenderPipelineImpl(Allocator &allocator, math::Size2D frameDimensions)
@@ -49,9 +38,6 @@ namespace gfx {
 
         void initialize() override {
             PosTextVertex::init();
-            mTerrain.initialize();
-
-            mMesh = std::make_unique<Mesh>(vertices, sizeof(vertices));
         }
 
         void renderCommand(const RenderCommand &command) override {
@@ -80,7 +66,7 @@ namespace gfx {
                 gpu::setUniform(command.material->shader()->programHandle(), "view", mCamera.view());
                 gpu::setUniform(command.material->shader()->programHandle(), "projection", mCamera.projection());
 
-                mMesh->draw();
+                command.mesh->draw();
 
                 mRenderCommands.pop();
             }
@@ -99,12 +85,9 @@ namespace gfx {
         uint32_t mWidth;
         uint32_t mHeight;
 
-        std::unique_ptr<Mesh> mMesh;
-
         Camera mCamera;
 
         std::queue<RenderCommand> mRenderCommands;
-        game::Terrain mTerrain;
     };
 
     std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(Allocator &allocator, math::Size2D frameDimensions) {

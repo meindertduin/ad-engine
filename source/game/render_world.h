@@ -7,9 +7,9 @@
 
 #include "math/size.h"
 #include "gfx/render_pipeline.h"
+#include "terrain.h"
 
 namespace game {
-
     class RenderWorld {
     public:
         explicit RenderWorld(Scene &scene, Allocator &allocator, const math::Size2D &frameDimensions);
@@ -17,6 +17,8 @@ namespace game {
         void render();
     private:
         Scene &mScene;
+        Terrain mTerrain;
+        std::unique_ptr<gfx::Mesh> mMesh;
         std::unique_ptr<gfx::RenderPipeline> mRenderPipeline;
     };
 }

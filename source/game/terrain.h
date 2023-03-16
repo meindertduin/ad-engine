@@ -5,9 +5,6 @@
 #include "gfx/mesh.h"
 
 namespace game {
-    struct TerrainTile {
-        uint32_t tileId;
-    };
 
     class Terrain {
     public:
@@ -18,6 +15,7 @@ namespace game {
 
         void initialize();
 
+        void render();
     private:
         std::unique_ptr<gfx::Mesh> mTerrainMesh;
     };

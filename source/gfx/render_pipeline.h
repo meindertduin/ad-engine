@@ -4,6 +4,7 @@
 #include "texture.h"
 #include "render_component.h"
 #include "math/size.h"
+#include "mesh.h"
 
 namespace game { class Transform; }
 
@@ -11,6 +12,7 @@ namespace gfx {
     struct RenderCommand {
         Material *material;
         game::Transform *transform;
+        Mesh *mesh;
     };
 
     class RenderPipeline {
