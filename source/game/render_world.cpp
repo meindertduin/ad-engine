@@ -5,12 +5,12 @@
 
 namespace game {
     gfx::Vertex vertices[] = {
-            { glm::vec3(1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f) }, // 0
-            { glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f) }, // 1
-            { glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f) }, // 3
-            { glm::vec3(1.0f, -1.0f, 0.0f),  glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f) }, // 1
-            { glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) }, // 2
-            { glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f) }, // 3
+        { glm::vec3(1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f) }, // 0
+        { glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f) }, // 1
+        { glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f) }, // 3
+        { glm::vec3(1.0f, -1.0f, 0.0f),  glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f) }, // 1
+        { glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) }, // 2
+        { glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f) }, // 3
     };
 
     RenderWorld::RenderWorld(Scene &scene, Allocator &allocator, const math::Size2D &frameDimensions)
@@ -25,6 +25,9 @@ namespace game {
 
     void RenderWorld::render() {
         // Render terrain
+        auto terrainTransform = Transform(-20, 0, -180);
+        gfx::RenderCommand terrainRenderCommand { mTerrain.material().get(), &terrainTransform, mTerrain.mesh().get() };
+        mRenderPipeline->renderCommand(terrainRenderCommand);
 
         // Render objects
         auto transformComponentArray = mScene.ecs().getComponentArray<Transform>();

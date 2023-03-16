@@ -1,13 +1,12 @@
 #include "terrain.h"
 #include "terrain_generator.h"
 
+#include "gfx/material_manager.h"
+
 namespace game {
     void Terrain::initialize() {
         TerrainGenerator generator;
         mTerrainMesh = generator.generateTerrainMesh("assets/terrain/forest");
-    }
-
-    void Terrain::render() {
-        mTerrainMesh->draw();
+        mMaterial = gfx::MaterialManager::instance().createMaterial(Path {"assets/material_scripts/material.lua"});
     }
 }

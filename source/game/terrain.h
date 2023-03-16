@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "gfx/mesh.h"
+#include "gfx/material.h"
 
 namespace game {
 
@@ -15,8 +16,10 @@ namespace game {
 
         void initialize();
 
-        void render();
+        [[nodiscard]] gfx::MaterialHandle material() const { return mMaterial; }
+        std::unique_ptr<gfx::Mesh>& mesh() { return mTerrainMesh; }
     private:
         std::unique_ptr<gfx::Mesh> mTerrainMesh;
+        gfx::MaterialHandle mMaterial;
     };
 }
