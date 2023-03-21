@@ -227,6 +227,7 @@ namespace game {
         std::vector<gfx::Vertex> meshVertices;
         constexpr auto TileSize = 1.0f;
 
+        // setting all the vertices
         for (unsigned i = 0; i < output.height; i++) {
             for (unsigned j = 0; j < output.width; j++) {
                 auto color = output.data[i * output.width + j];
@@ -236,6 +237,17 @@ namespace game {
                 auto vertices = getCubeVertices(static_cast<float>(j) * TileSize, static_cast<float>(i) * TileSize, TileSize, tile);
                 meshVertices.insert(meshVertices.end(), vertices.begin(), vertices.end());
             }
+        }
+
+        for (auto i = 0; i < meshVertices.size(); i += 3) {
+            auto& v1 = meshVertices[i];
+            auto& v2 = meshVertices[i + 1];
+            auto& v3 = meshVertices[i + 2];
+
+            auto normal = glm::normalize(glm::cross(v3.position - v2.position, v3.position - v1.position));
+            v1.normal = normal;
+            v2.normal = normal;
+            v3.normal = normal;
         }
 
         return std::make_unique<gfx::Mesh>(meshVertices);

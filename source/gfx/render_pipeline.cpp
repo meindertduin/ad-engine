@@ -63,6 +63,7 @@ namespace gfx {
                 gpu::setUniform(command.material->shader()->programHandle(), "model", model);
                 gpu::setUniform(command.material->shader()->programHandle(), "view", mCamera.view());
                 gpu::setUniform(command.material->shader()->programHandle(), "projection", mCamera.projection());
+                gpu::setUniform(command.material->shader()->programHandle(), "invtransmodel", glm::inverse(glm::transpose(model)));
 
                 command.mesh->draw();
 
