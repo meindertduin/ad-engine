@@ -25,7 +25,7 @@ namespace game {
 
     void RenderWorld::render() {
         // Render terrain
-        auto terrainTransform = Transform(-20, 0, -180);
+        auto terrainTransform = Transform(-50, 0, -80);
         gfx::RenderCommand terrainRenderCommand { mTerrain.material().get(), &terrainTransform, mTerrain.mesh().get() };
         mRenderPipeline->renderCommand(terrainRenderCommand);
 
