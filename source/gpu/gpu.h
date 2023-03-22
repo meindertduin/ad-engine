@@ -95,19 +95,26 @@ namespace gpu {
             : mAlignment(alignment)
         {}
 
-        SharedBufferLayout& addAttribute(const std::string &name, AttributeType type, const BufferDataPointer &pointer) {
-            auto lastOffset = mAttributes.back().offset;
-            auto lastSize = mAttributes.back().size;
-            auto newOffset = lastOffset + lastSize;
+        SharedBufferLayout& addAttribute(const std::string &name, AttributeType type, uint32_t size) {
+            uint32_t lastOffset;
+            uint32_t lastSize;
+            if (mAttributes.empty()) {
+                lastOffset = 0;
+                lastSize = 0;
+            } else {
+                lastOffset = mAttributes.back().offset;
+                lastSize = mAttributes.back().size;
+            }
 
+            auto newOffset = lastOffset + lastSize;
             auto blockRemainder = newOffset % mAlignment;
 
             // Add padding to previous block
-            if (blockRemainder < pointer.size()) {
+            if (blockRemainder != 0 && blockRemainder < size) {
                 newOffset += mAlignment - blockRemainder;
             }
 
-            mAttributes.push_back({ newOffset, type, name, pointer.size() });
+            mAttributes.push_back({ newOffset, type, name, size });
 
             auto index = mAttributes.size() - 1;
             mAttributeIndices[name] = index;

@@ -139,14 +139,12 @@ namespace gpu {
             glDeleteBuffers(1, &mUniformBufferHandle);
         }
 
-
         void setData(const std::string &name, const BufferDataPointer &pointer) override {
             const auto &attribute = mLayout.attribute(name);
 
             bind();
             glBufferSubData(GL_UNIFORM_BUFFER, attribute.offset, attribute.size, pointer.data());
         }
-
 
         void bind() const override {
             glBindBuffer(GL_UNIFORM_BUFFER, mUniformBufferHandle);
