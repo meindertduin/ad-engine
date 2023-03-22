@@ -124,26 +124,24 @@ namespace gpu {
 
     class SharedUniformBufferImpl : public SharedUniformBuffer {
     public:
-        SharedUniformBufferImpl(uint32_t bindingBlock, const SharedBufferLayout &layout)
-            : mLayout(layout)
+        SharedUniformBufferImpl(uint32_t bindingBlock, uint32_t size)
+            : mSize(size)
         {
             glGenBuffers(1, &mUniformBufferHandle);
             glBindBuffer(GL_UNIFORM_BUFFER, mUniformBufferHandle);
-            glBufferData(GL_UNIFORM_BUFFER, layout.totalSize(), nullptr, GL_DYNAMIC_DRAW);
+            glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
             glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-            glBindBufferRange(GL_UNIFORM_BUFFER, bindingBlock, mUniformBufferHandle, 0, layout.totalSize());
+            glBindBufferRange(GL_UNIFORM_BUFFER, bindingBlock, mUniformBufferHandle, 0, size);
         }
 
         ~SharedUniformBufferImpl() override {
             glDeleteBuffers(1, &mUniformBufferHandle);
         }
 
-        void setData(const std::string &name, const BufferDataPointer &pointer) override {
-            const auto &attribute = mLayout.attribute(name);
-
+        void setData(uint32_t offset, void *data, uint32_t size) override {
             bind();
-            glBufferSubData(GL_UNIFORM_BUFFER, attribute.offset, attribute.size, pointer.data());
+            glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
         }
 
         void bind() const override {
@@ -152,10 +150,24 @@ namespace gpu {
 
     private:
         uint32_t mUniformBufferHandle { 0 };
-        SharedBufferLayout mLayout;
+        uint32_t mSize { 0 };
     };
 
-    std::unique_ptr<SharedUniformBuffer> SharedUniformBuffer::create(uint32_t bindingBlock, const SharedBufferLayout &layout) {
-        return std::make_unique<SharedUniformBufferImpl>(bindingBlock, layout);
+    void DirLight::setBufferData(uint32_t startOffset, std::unique_ptr<SharedUniformBuffer> &buffer) {
+        auto layout = DirLight::layout();
+
+        auto directionOffset = layout->attribute("direction").offset + startOffset;
+        auto ambientOffset = layout->attribute("ambient").offset + startOffset;
+        auto diffuseOffset = layout->attribute("diffuse").offset + startOffset;
+        auto specularOffset = layout->attribute("specular").offset + startOffset;
+
+        buffer->setData(directionOffset, &direction, sizeof(direction));
+        buffer->setData(ambientOffset, &ambient, sizeof(ambient));
+        buffer->setData(diffuseOffset, &diffuse, sizeof(diffuse));
+        buffer->setData(specularOffset, &specular, sizeof(specular));
+    }
+
+    std::unique_ptr<SharedUniformBuffer> SharedUniformBuffer::create(uint32_t bindingBlock, uint32_t size) {
+        return std::make_unique<SharedUniformBufferImpl>(bindingBlock, size);
     }
 }

@@ -8,6 +8,8 @@
 #include <functional>
 #include "math/size.h"
 
+#include <optional>
+
 namespace gpu {
     enum class ShaderType {
         Vertex,
@@ -80,47 +82,21 @@ namespace gpu {
         uint32_t mSize;
     };
 
-    class SharedBufferLayout {
+    class BufferLayout {
     public:
         struct AttributeInfo {
-            uint32_t offset;
-            AttributeType type;
             std::string name;
+            uint32_t offset;
             uint32_t size;
         };
 
-        SharedBufferLayout() = default;
+        BufferLayout() = default;
 
-        explicit SharedBufferLayout(uint32_t alignment)
+        explicit BufferLayout(uint32_t alignment)
             : mAlignment(alignment)
         {}
 
-        SharedBufferLayout& addAttribute(const std::string &name, AttributeType type, uint32_t size) {
-            uint32_t lastOffset;
-            uint32_t lastSize;
-            if (mAttributes.empty()) {
-                lastOffset = 0;
-                lastSize = 0;
-            } else {
-                lastOffset = mAttributes.back().offset;
-                lastSize = mAttributes.back().size;
-            }
-
-            auto newOffset = lastOffset + lastSize;
-            auto blockRemainder = newOffset % mAlignment;
-
-            // Add padding to previous block
-            if (blockRemainder != 0 && blockRemainder < size) {
-                newOffset += mAlignment - blockRemainder;
-            }
-
-            mAttributes.push_back({ newOffset, type, name, size });
-
-            auto index = mAttributes.size() - 1;
-            mAttributeIndices[name] = index;
-
-            return *this;
-        }
+        BufferLayout& addAttribute(const std::string &name, uint32_t size);
 
         [[nodiscard]] uint32_t totalSize() const {
             auto lastOffset = mAttributes.back().offset;
@@ -149,13 +125,42 @@ namespace gpu {
 
     class SharedUniformBuffer {
     public:
-        static std::unique_ptr<SharedUniformBuffer> create(uint32_t bindingBlock, const SharedBufferLayout &layout);
+        static std::unique_ptr<SharedUniformBuffer> create(uint32_t bindingBlock, uint32_t size);
         virtual ~SharedUniformBuffer() = default;
 
-        virtual void setData(const std::string &name, const BufferDataPointer &data) = 0;
+        virtual void setData(uint32_t offset, void *data, uint32_t size) = 0;
 
         virtual void bind() const = 0;
     };
+
+    struct DirLight {
+        glm::vec3 direction;
+        glm::vec3 ambient;
+        glm::vec3 diffuse;
+        glm::vec3 specular;
+
+        static const BufferLayout* layout() {
+            if (sLayout == nullptr) {
+                sLayout = std::make_unique<BufferLayout>();
+
+                sLayout->addAttribute("direction", sizeof(glm::vec3));
+                sLayout->addAttribute("ambient", sizeof(glm::vec3));
+                sLayout->addAttribute("diffuse", sizeof(glm::vec3));
+                sLayout->addAttribute("specular", sizeof(glm::vec3));
+            }
+
+            return sLayout.get();
+        }
+
+        static int bufferSize() {
+            return layout()->totalSize();
+        }
+
+        void setBufferData(uint32_t startOffset, std::unique_ptr<SharedUniformBuffer> &buffer);
+    private:
+        static inline std::unique_ptr<BufferLayout> sLayout;
+    };
+
 
     using ShaderProgramHandle = uint32_t;
     using ShaderHandle = uint32_t;

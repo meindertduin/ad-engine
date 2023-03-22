@@ -36,28 +36,15 @@ namespace gfx {
         }
 
         void initialize() override {
-            using enum gpu::AttributeType;
-
             PosTextVertex::init();
 
-            gpu::SharedBufferLayout layout;
-            layout
-                .addAttribute("direction", Vec3, sizeof(glm::vec3))
-                .addAttribute("ambient", Vec3, sizeof(glm::vec3))
-                .addAttribute("diffuse", Vec3, sizeof(glm::vec3))
-                .addAttribute("specular", Vec3, sizeof(glm::vec3));
+            mDirLight.direction = glm::vec3(0.0f, -1.0f, 0.0f);
+            mDirLight.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
+            mDirLight.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
+            mDirLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
 
-            mSharedUniformBuffer = gpu::SharedUniformBuffer::create(LightsBlockBinding, layout);
-
-            auto direction = glm::vec3(0.0f, -1.0f, 0.0f);
-            auto ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-            auto diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
-            auto specular = glm::vec3(1.0f, 1.0f, 1.0f);
-
-            mSharedUniformBuffer->setData("direction", gpu::BufferDataPointer(&direction, sizeof(glm::vec3)));
-            mSharedUniformBuffer->setData("ambient", gpu::BufferDataPointer(&ambient, sizeof(glm::vec3)));
-            mSharedUniformBuffer->setData("diffuse", gpu::BufferDataPointer(&diffuse, sizeof(glm::vec3)));
-            mSharedUniformBuffer->setData("specular", gpu::BufferDataPointer(&specular, sizeof(glm::vec3)));
+            mSharedUniformBuffer = gpu::SharedUniformBuffer::create(LightsBlockBinding, gpu::DirLight::bufferSize());
+            mDirLight.setBufferData(0, mSharedUniformBuffer);
         }
 
         void renderCommand(const RenderCommand &command) override {
@@ -108,6 +95,7 @@ namespace gfx {
 
         std::queue<RenderCommand> mRenderCommands;
         std::unique_ptr<gpu::SharedUniformBuffer> mSharedUniformBuffer;
+        gpu::DirLight mDirLight;
     };
 
     std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(Allocator &allocator, math::Size2D frameDimensions) {
