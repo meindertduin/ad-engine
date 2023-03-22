@@ -121,4 +121,43 @@ namespace gpu {
     std::unique_ptr<IndexBuffer> IndexBuffer::create(const uint32_t *data, uint32_t size) {
         return std::make_unique<IndexBufferImpl>(data, size);
     }
+
+    class SharedUniformBufferImpl : public SharedUniformBuffer {
+    public:
+        SharedUniformBufferImpl(uint32_t bindingBlock, const SharedBufferLayout &layout)
+            : mLayout(layout)
+        {
+            glGenBuffers(1, &mUniformBufferHandle);
+            glBindBuffer(GL_UNIFORM_BUFFER, mUniformBufferHandle);
+            glBufferData(GL_UNIFORM_BUFFER, layout.totalSize(), nullptr, GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+            glBindBufferRange(GL_UNIFORM_BUFFER, bindingBlock, mUniformBufferHandle, 0, layout.totalSize());
+        }
+
+        ~SharedUniformBufferImpl() override {
+            glDeleteBuffers(1, &mUniformBufferHandle);
+        }
+
+
+        void setData(const std::string &name, const BufferDataPointer &pointer) override {
+            const auto &attribute = mLayout.attribute(name);
+
+            bind();
+            glBufferSubData(GL_UNIFORM_BUFFER, attribute.offset, attribute.size, pointer.data());
+        }
+
+
+        void bind() const override {
+            glBindBuffer(GL_UNIFORM_BUFFER, mUniformBufferHandle);
+        }
+
+    private:
+        uint32_t mUniformBufferHandle { 0 };
+        SharedBufferLayout mLayout;
+    };
+
+    std::unique_ptr<SharedUniformBuffer> SharedUniformBuffer::create(uint32_t bindingBlock, const SharedBufferLayout &layout) {
+        return std::make_unique<SharedUniformBufferImpl>(bindingBlock, layout);
+    }
 }
