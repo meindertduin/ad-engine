@@ -25,9 +25,7 @@ namespace game {
 
     void RenderWorld::render() {
         // Render terrain
-        auto terrainTransform = Transform(-50, 0, -80);
-        gfx::RenderCommand terrainRenderCommand { mTerrain.material().get(), &terrainTransform, mTerrain.mesh().get() };
-        mRenderPipeline->renderCommand(terrainRenderCommand);
+        renderTerrain();
 
         // Render objects
         auto transformComponentArray = mScene.ecs().getComponentArray<Transform>();
@@ -44,6 +42,26 @@ namespace game {
         }
 
         mRenderPipeline->renderFrame();
+    }
+
+    void RenderWorld::renderTerrain() {
+        auto terrainTransform = Transform(-50, 0, -80);
+
+        auto &terrainData = mTerrain.terrainData();
+        for (int i = 0; i < terrainData->size.width(); i++) {
+            for (int j = 0; j < terrainData->size.height(); j++) {
+                auto tileId = terrainData->tiles[i + j * terrainData->size.width()];
+                auto &tile = terrainData->tileSet.getTile(tileId);
+
+                auto tileTransform = Transform(i * terrainData->tileSize + terrainTransform.position().x, 0, j * terrainData->tileSize + terrainTransform.position().z);
+
+                auto material = tile.material();
+                auto &mesh = tile.mesh();
+
+                gfx::RenderCommand command { material.get(), &terrainTransform, mesh.get() };
+                mRenderPipeline->renderCommand(command);
+            }
+        }
     }
 
     void RenderWorld::resize(const math::Size2D &frameDimensions) {

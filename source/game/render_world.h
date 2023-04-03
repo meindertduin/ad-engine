@@ -15,6 +15,7 @@ namespace game {
         explicit RenderWorld(Scene &scene, Allocator &allocator, const math::Size2D &frameDimensions);
         void resize(const math::Size2D &frameDimensions);
         void render();
+        void renderTerrain();
     private:
         Scene &mScene;
         Terrain mTerrain;

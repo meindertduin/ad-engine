@@ -1,8 +1,9 @@
-//
-// Created by dikkie on 4/3/23.
-//
-
 #include "tile.h"
 
+#include "gfx/material_manager.h"
+
 namespace game {
-} // game
+    void TerrainTile::setMaterial(const Path &path) {
+        mMaterial = gfx::MaterialManager::instance().createMaterial(path);
+    }
+}

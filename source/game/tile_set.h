@@ -1,16 +1,21 @@
-//
-// Created by dikkie on 4/3/23.
-//
+#pragma once
 
-#ifndef BUILDDIR_TILE_SET_H
-#define BUILDDIR_TILE_SET_H
+#include "engine/path.h"
+#include "tile.h"
+#include <unordered_map>
 
 namespace game {
+    class TileSet {
+    public:
+        explicit TileSet() = default;
 
-    class tile_set {
+        TileSet(const TileSet &other) = delete;
+        TileSet& operator=(const TileSet &other) = delete;
 
+        TerrainTile& getTile(int id) { return mTiles[id]; }
+        bool hasTile(int id) const;
+        void addTile(int id, TerrainTile &&tile);
+    private:
+        std::unordered_map<int, TerrainTile> mTiles;
     };
-
-} // game
-
-#endif //BUILDDIR_TILE_SET_H
+}

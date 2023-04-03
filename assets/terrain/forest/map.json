@@ -1,5 +1,7 @@
 {
   "textureMap": "assets/grass.png",
+  "width": 128,
+  "height": 128,
   "tiles": [
     {
       "r": 0,

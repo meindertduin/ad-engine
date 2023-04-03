@@ -49,6 +49,7 @@ namespace game {
 
     struct TilesMapData {
         struct Tile {
+            int id;
             Color color;
             glm::vec2 textCoordinatesPos;
             glm::vec2 textureSize;
@@ -193,6 +194,7 @@ namespace game {
         auto height = obj["height"].asInt();
         result.size = { width, height };
 
+        int id = 0;
         for (const auto& tile : obj["tiles"]) {
             TilesMapData::Tile tileData {
                 .color = { static_cast<uint8_t>(tile["r"].asInt()), static_cast<uint8_t>(tile["g"].asInt()), static_cast<uint8_t>(tile["b"].asInt()) },
@@ -200,66 +202,81 @@ namespace game {
                 .textureSize = { tile["width"].asInt(), tile["height"].asInt() },
             };
 
+            tileData.id = id++;
             result.tiles[tileData.color] = tileData;
         }
 
         return result;
     }
 
-    std::unique_ptr<gfx::Mesh> TerrainGenerator::generateTerrainMesh(const std::string &folder) {
-        auto output = generateWfcImage(folder);
-        auto map = readMap(folder);
+    std::unique_ptr<gfx::Mesh> generateTileMesh(const TilesMapData &map, const TilesMapData::Tile &tile, float tileSize) {
+        // This function can be optimized greatly
+        std::vector<gfx::Vertex> vertices;
 
-        auto getCubeVertices = [&map](float x, float z, float tileSize, const TilesMapData::Tile &tile) {
-            std::vector<gfx::Vertex> vertices;
+        auto normalizedXStart = tile.textCoordinatesPos.x / (float) map.size.width();
+        auto normalizedYStart = tile.textCoordinatesPos.y / (float) map.size.height();
+        auto normalizedXEnd = (tile.textCoordinatesPos.x + tile.textureSize.x) / (float) map.size.width();
+        auto normalizedYEnd = (tile.textCoordinatesPos.y + tile.textureSize.y) / (float) map.size.height();
 
-            auto normalizedXStart = tile.textCoordinatesPos.x / (float) map.size.width();
-            auto normalizedYStart = tile.textCoordinatesPos.y / (float) map.size.height();
-            auto normalizedXEnd = (tile.textCoordinatesPos.x + tile.textureSize.x) / (float) map.size.width();
-            auto normalizedYEnd = (tile.textCoordinatesPos.y + tile.textureSize.y) / (float) map.size.height();
+        float tileStart = -tileSize / 2.0f;
+        float tileEnd = tileSize / 2.0f;
 
-            gfx::Vertex rightTop = { { x + tileSize, 0.0f, z }, { 0.0f, 1.0f, 0.0f }, { normalizedXEnd, normalizedYStart } };
-            gfx::Vertex rightBottom = { { x + tileSize, 0.0f, z + tileSize }, { 0.0f, 1.0f, 0.0f }, { normalizedXEnd, normalizedYEnd } };
-            gfx::Vertex leftBottom = { { x, 0.0f, z + tileSize }, { 0.0f, 1.0f, 0.0f }, { normalizedXStart, normalizedYEnd } };
-            gfx::Vertex leftTop = { { x, 0.0f, z }, { 0.0f, 1.0f, 0.0f }, { normalizedXStart, normalizedYStart } };
+        gfx::Vertex rightTop = { { tileEnd, 0.0f, tileStart }, { 0.0f, 1.0f, 0.0f }, { normalizedXEnd, normalizedYStart } };
+        gfx::Vertex rightBottom = { { tileEnd, 0.0f, tileEnd }, { 0.0f, 1.0f, 0.0f }, { normalizedXEnd, normalizedYEnd } };
+        gfx::Vertex leftBottom = { { tileStart, 0.0f, tileEnd }, { 0.0f, 1.0f, 0.0f }, { normalizedXStart, normalizedYEnd } };
+        gfx::Vertex leftTop = { { tileStart, 0.0f, tileStart }, { 0.0f, 1.0f, 0.0f }, { normalizedXStart, normalizedYStart } };
 
-            vertices.push_back(rightTop);
-            vertices.push_back(rightBottom);
-            vertices.push_back(leftTop);
+        vertices.push_back(rightTop);
+        vertices.push_back(rightBottom);
+        vertices.push_back(leftTop);
 
-            vertices.push_back(rightBottom);
-            vertices.push_back(leftBottom);
-            vertices.push_back(leftTop);
+        vertices.push_back(rightBottom);
+        vertices.push_back(leftBottom);
+        vertices.push_back(leftTop);
 
-            return vertices;
-        };
-
-        std::vector<gfx::Vertex> meshVertices;
-        constexpr auto TileSize = 1.0f;
-
-        // setting all the vertices
-        for (unsigned i = 0; i < output.height; i++) {
-            for (unsigned j = 0; j < output.width; j++) {
-                auto color = output.data[i * output.width + j];
-
-                auto tile = map.tiles[color];
-
-                auto vertices = getCubeVertices(static_cast<float>(j) * TileSize, static_cast<float>(i) * TileSize, TileSize, tile);
-                meshVertices.insert(meshVertices.end(), vertices.begin(), vertices.end());
-            }
-        }
-
-        for (auto i = 0; i < meshVertices.size(); i += 3) {
-            auto& v1 = meshVertices[i];
-            auto& v2 = meshVertices[i + 1];
-            auto& v3 = meshVertices[i + 2];
+        for (auto i = 0; i < vertices.size(); i += 3) {
+            auto& v1 = vertices[i];
+            auto& v2 = vertices[i + 1];
+            auto& v3 = vertices[i + 2];
 
             auto normal = glm::normalize(glm::cross(v3.position - v2.position, v3.position - v1.position));
+
             v1.normal = normal;
             v2.normal = normal;
             v3.normal = normal;
         }
 
-        return std::make_unique<gfx::Mesh>(meshVertices);
+        return std::make_unique<gfx::Mesh>(vertices);
+    }
+
+    std::unique_ptr<TerrainData> TerrainGenerator::generateTerrain(const std::string &folder) {
+        auto output = generateWfcImage(folder);
+        auto map = readMap(folder);
+
+        auto result = std::make_unique<TerrainData>();
+        result->size = { static_cast<int>(output.width), static_cast<int>(output.height) };
+        result->tileSize = 1.0f;
+
+        result->tiles.reserve(output.height * output.width);
+
+        for (auto i = 0; i < output.height; i++) {
+            for (auto j = 0; j < output.width; j++) {
+                auto color = output.data[i * output.width + j];
+                auto tile = map.tiles[color];
+
+                if (!result->tileSet.hasTile(tile.id)) {
+                    TerrainTile resultTile;
+                    auto tileMesh = generateTileMesh(map, tile, 1.0f);
+                    resultTile.setMesh(std::move(tileMesh));
+                    resultTile.setMaterial(Path {"assets/material_scripts/background.lua"});
+
+                    result->tileSet.addTile(tile.id, std::move(resultTile));
+                }
+
+                result->tiles.push_back(tile.id);
+            }
+        }
+
+        return result;
     }
 }

@@ -1,8 +1,11 @@
-//
-// Created by dikkie on 4/3/23.
-//
-
 #include "tile_set.h"
 
 namespace game {
-} // game
+    bool TileSet::hasTile(int id) const {
+        return mTiles.contains(id);
+    }
+
+    void TileSet::addTile(int id, TerrainTile &&tile) {
+        mTiles.insert({ id, std::move(tile) });
+    }
+}

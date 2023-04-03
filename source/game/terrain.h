@@ -4,6 +4,7 @@
 
 #include "gfx/mesh.h"
 #include "gfx/material.h"
+#include "terrain_generator.h"
 
 namespace game {
 
@@ -16,10 +17,8 @@ namespace game {
 
         void initialize();
 
-        [[nodiscard]] gfx::MaterialHandle material() const { return mMaterial; }
-        std::unique_ptr<gfx::Mesh>& mesh() { return mTerrainMesh; }
+        std::unique_ptr<TerrainData> &terrainData() { return mTerrainData; }
     private:
-        std::unique_ptr<gfx::Mesh> mTerrainMesh;
-        gfx::MaterialHandle mMaterial;
+        std::unique_ptr<TerrainData> mTerrainData;
     };
 }
