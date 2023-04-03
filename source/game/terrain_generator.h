@@ -8,7 +8,7 @@ namespace game {
     struct TerrainData {
         math::Size2D size;
         int tileSize;
-        TileSet tileSet;
+        std::unordered_map<int, std::shared_ptr<TerrainTile>> tilesSet;
         std::vector<uint32_t> tiles;
     };
 

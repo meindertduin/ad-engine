@@ -36,7 +36,7 @@ namespace game {
             auto &component = it.value();
 
             auto &transform = transformComponentArray->get(object);
-            gfx::RenderCommand command { component.material().get(), &transform, mMesh.get() };
+            gfx::RenderCommand command { component.material().get(), transform, mMesh.get() };
 
             mRenderPipeline->renderCommand(command);
         }
@@ -51,14 +51,14 @@ namespace game {
         for (int i = 0; i < terrainData->size.width(); i++) {
             for (int j = 0; j < terrainData->size.height(); j++) {
                 auto tileId = terrainData->tiles[i + j * terrainData->size.width()];
-                auto &tile = terrainData->tileSet.getTile(tileId);
+                auto &tile = terrainData->tilesSet[tileId];
 
                 auto tileTransform = Transform(i * terrainData->tileSize + terrainTransform.position().x, 0, j * terrainData->tileSize + terrainTransform.position().z);
 
-                auto material = tile.material();
-                auto &mesh = tile.mesh();
+                auto material = tile->material();
+                auto &mesh = tile->mesh();
 
-                gfx::RenderCommand command { material.get(), &terrainTransform, mesh.get() };
+                gfx::RenderCommand command { material.get(), tileTransform, mesh.get() };
                 mRenderPipeline->renderCommand(command);
             }
         }

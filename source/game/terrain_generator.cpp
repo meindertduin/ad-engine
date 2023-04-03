@@ -264,13 +264,14 @@ namespace game {
                 auto color = output.data[i * output.width + j];
                 auto tile = map.tiles[color];
 
-                if (!result->tileSet.hasTile(tile.id)) {
-                    TerrainTile resultTile;
+                if (!result->tilesSet.contains(tile.id)) {
+                    auto resultTile = std::make_shared<TerrainTile>();
                     auto tileMesh = generateTileMesh(map, tile, 1.0f);
-                    resultTile.setMesh(std::move(tileMesh));
-                    resultTile.setMaterial(Path {"assets/material_scripts/background.lua"});
 
-                    result->tileSet.addTile(tile.id, std::move(resultTile));
+                    resultTile->setMesh(std::move(tileMesh));
+                    resultTile->setMaterial(Path {"assets/material_scripts/background.lua"});
+
+                    result->tilesSet.try_emplace(tile.id, resultTile);
                 }
 
                 result->tiles.push_back(tile.id);

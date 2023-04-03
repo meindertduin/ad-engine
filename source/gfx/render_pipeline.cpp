@@ -65,7 +65,7 @@ namespace gfx {
                 command.material->shader()->bind();
 
                 auto model = glm::mat4(1.0f);
-                model = glm::translate(model, command.transform->position());
+                model = glm::translate(model, command.transform.position());
 
                 gpu::setUniform(command.material->shader()->programHandle(), "model", model);
                 gpu::setUniform(command.material->shader()->programHandle(), "view", mCamera.view());

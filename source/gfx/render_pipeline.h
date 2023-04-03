@@ -5,13 +5,12 @@
 #include "render_component.h"
 #include "math/size.h"
 #include "mesh.h"
-
-namespace game { class Transform; }
+#include "game/transform.h"
 
 namespace gfx {
     struct RenderCommand {
         Material *material;
-        game::Transform *transform;
+        game::Transform transform;
         Mesh *mesh;
     };
 
