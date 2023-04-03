@@ -55,6 +55,7 @@ namespace game {
         };
 
         std::string textureMap;
+        math::Size2D size;
         std::unordered_map<Color, Tile> tiles;
     };
 
@@ -188,6 +189,10 @@ namespace game {
 
         result.textureMap = obj["textureMap"].asString();
 
+        auto width = obj["width"].asInt();
+        auto height = obj["height"].asInt();
+        result.size = { width, height };
+
         for (const auto& tile : obj["tiles"]) {
             TilesMapData::Tile tileData {
                 .color = { static_cast<uint8_t>(tile["r"].asInt()), static_cast<uint8_t>(tile["g"].asInt()), static_cast<uint8_t>(tile["b"].asInt()) },
@@ -205,13 +210,18 @@ namespace game {
         auto output = generateWfcImage(folder);
         auto map = readMap(folder);
 
-        auto getCubeVertices = [](float x, float z, float tileSize, const TilesMapData::Tile &tile) {
+        auto getCubeVertices = [&map](float x, float z, float tileSize, const TilesMapData::Tile &tile) {
             std::vector<gfx::Vertex> vertices;
 
-            gfx::Vertex rightTop = { { x + tileSize, 0.0f, z }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f } };
-            gfx::Vertex rightBottom = { { x + tileSize, 0.0f, z + tileSize }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 1.0f } };
-            gfx::Vertex leftBottom = { { x, 0.0f, z + tileSize }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f } };
-            gfx::Vertex leftTop = { { x, 0.0f, z }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } };
+            auto normalizedXStart = tile.textCoordinatesPos.x / (float) map.size.width();
+            auto normalizedYStart = tile.textCoordinatesPos.y / (float) map.size.height();
+            auto normalizedXEnd = (tile.textCoordinatesPos.x + tile.textureSize.x) / (float) map.size.width();
+            auto normalizedYEnd = (tile.textCoordinatesPos.y + tile.textureSize.y) / (float) map.size.height();
+
+            gfx::Vertex rightTop = { { x + tileSize, 0.0f, z }, { 0.0f, 1.0f, 0.0f }, { normalizedXEnd, normalizedYStart } };
+            gfx::Vertex rightBottom = { { x + tileSize, 0.0f, z + tileSize }, { 0.0f, 1.0f, 0.0f }, { normalizedXEnd, normalizedYEnd } };
+            gfx::Vertex leftBottom = { { x, 0.0f, z + tileSize }, { 0.0f, 1.0f, 0.0f }, { normalizedXStart, normalizedYEnd } };
+            gfx::Vertex leftTop = { { x, 0.0f, z }, { 0.0f, 1.0f, 0.0f }, { normalizedXStart, normalizedYStart } };
 
             vertices.push_back(rightTop);
             vertices.push_back(rightBottom);
