@@ -36,7 +36,7 @@ void Application::run() {
     auto object = mScene->createObject();
     Logger::info("Object: {}", object);
     object.addComponent(gfx::RenderComponent{Path{"assets/material_scripts/material.lua"}});
-    object.addComponent(game::Transform{0.0f, 0.0f});
+    object.addComponent(game::Transform(0.5f, 0.0f, 0));
 
     auto secondObject = mScene->createObject();
     Logger::info("SecondObject: {} \n", secondObject);

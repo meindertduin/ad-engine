@@ -31,6 +31,7 @@ struct DirLight {
 #define MAX_POINT_LIGHTS 8
 
 layout (std140) uniform Lights {
+    int dirLightsCount;
     DirLight dirLight;
 };
 

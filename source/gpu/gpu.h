@@ -161,7 +161,6 @@ namespace gpu {
         static inline std::unique_ptr<BufferLayout> sLayout;
     };
 
-
     using ShaderProgramHandle = uint32_t;
     using ShaderHandle = uint32_t;
     using TextureHandle = uint32_t;
