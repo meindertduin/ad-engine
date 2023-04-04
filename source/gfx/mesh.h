@@ -4,8 +4,13 @@
 #include <vector>
 #include <memory>
 #include "gpu/gpu.h"
+#include "engine/resource.h"
 
 namespace gfx {
+    class Mesh;
+    class MeshManager;
+    using MeshHandle = Handle<Mesh>;
+
     struct Vertex {
         glm::vec3 position;
         glm::vec3 normal;
@@ -28,11 +33,12 @@ namespace gfx {
         static inline bool initialized = false;
     };
 
-    class Mesh {
+    class Mesh : public Resource<MeshManager> {
     public:
         explicit Mesh(const std::vector<Vertex> &vertices);
         Mesh(Vertex *vertices, size_t size);
         void draw() const;
+
     private:
         std::unique_ptr<gpu::VertexBuffer> mVertexBuffer;
     };

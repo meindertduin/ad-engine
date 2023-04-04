@@ -1,7 +1,3 @@
-//
-// Created by dikkie on 3/15/23.
-//
-
 #include "mesh.h"
 
 namespace gfx {
@@ -17,5 +13,4 @@ namespace gfx {
         mVertexBuffer->bind();
         mVertexBuffer->draw();
     }
-
 }

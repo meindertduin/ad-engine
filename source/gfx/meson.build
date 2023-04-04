@@ -8,6 +8,7 @@ gfx_sources = files(
     'shader_manager.cpp',
     'material_manager.cpp',
     'texture_manager.cpp',
+    'mesh_manager.cpp',
     'camera.cpp',
     'mesh.cpp'
 )

@@ -6,7 +6,6 @@
 #include <unordered_map>
 
 #include "stb_image.h"
-#include "engine/logging.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stbi_image_write.h>

@@ -27,6 +27,8 @@ bool Application::initialize() {
     mScene = game::Scene::createInstance(Engine::instance().allocator());
     mScene->initialize();
 
+    Engine::initialize();
+
     return true;
 }
 
@@ -38,9 +40,6 @@ void Application::run() {
 
     auto secondObject = mScene->createObject();
     Logger::info("SecondObject: {} \n", secondObject);
-    secondObject.addComponent(
-            gfx::RenderComponent{Path{"assets/material_scripts/material.lua"}});
-    secondObject.addComponent(game::Transform{200.0f, 100.0f});
 
     while (!mWindow.closed()) {
         mWindow.pollEvents();

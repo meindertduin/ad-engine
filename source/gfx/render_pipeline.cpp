@@ -38,9 +38,9 @@ namespace gfx {
         void initialize() override {
             PosTextVertex::init();
 
-            mDirLight.direction = glm::vec3(0.0f, -1.0f, 0.0f);
+            mDirLight.direction = glm::vec3(0.0f, -1.0f, -1.0f);
             mDirLight.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-            mDirLight.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
+            mDirLight.diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
             mDirLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
 
             mSharedUniformBuffer = gpu::SharedUniformBuffer::create(LightsBlockBinding, gpu::DirLight::bufferSize());

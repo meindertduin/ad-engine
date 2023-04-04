@@ -19,7 +19,6 @@ namespace game {
     private:
         Scene &mScene;
         Terrain mTerrain;
-        std::unique_ptr<gfx::Mesh> mMesh;
         std::unique_ptr<gfx::RenderPipeline> mRenderPipeline;
     };
 }

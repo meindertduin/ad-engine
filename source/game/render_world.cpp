@@ -2,24 +2,14 @@
 #include "ecs.h"
 #include "transform.h"
 #include "gfx/material_manager.h"
+#include "gfx/mesh_manager.h"
 
 namespace game {
-    gfx::Vertex vertices[] = {
-        { glm::vec3(1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f) }, // 0
-        { glm::vec3(1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f) }, // 1
-        { glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f) }, // 3
-        { glm::vec3(1.0f, -1.0f, 0.0f),  glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f) }, // 1
-        { glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) }, // 2
-        { glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f) }, // 3
-    };
-
     RenderWorld::RenderWorld(Scene &scene, Allocator &allocator, const math::Size2D &frameDimensions)
         : mScene(scene)
         , mRenderPipeline(gfx::RenderPipeline::createInstance(allocator, frameDimensions))
     {
         mRenderPipeline->initialize();
-
-        mMesh = std::make_unique<gfx::Mesh>(vertices, sizeof(vertices));
         mTerrain.initialize();
     }
 
@@ -36,7 +26,7 @@ namespace game {
             auto &component = it.value();
 
             auto &transform = transformComponentArray->get(object);
-            gfx::RenderCommand command { component.material().get(), transform, mMesh.get() };
+            gfx::RenderCommand command { component.material().get(), transform, component.mesh().get() };
 
             mRenderPipeline->renderCommand(command);
         }
@@ -53,7 +43,7 @@ namespace game {
                 auto tileId = terrainData->tiles[i + j * terrainData->size.width()];
                 auto &tile = terrainData->tilesSet[tileId];
 
-                auto tileTransform = Transform(i * terrainData->tileSize + terrainTransform.position().x, 0, j * terrainData->tileSize + terrainTransform.position().z);
+                auto tileTransform = Transform(i * terrainData->tileSize * 1.05f + terrainTransform.position().x, 0, j * terrainData->tileSize * 1.05f + terrainTransform.position().z);
 
                 auto material = tile->material();
                 auto &mesh = tile->mesh();
