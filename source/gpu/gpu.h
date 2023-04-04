@@ -133,34 +133,6 @@ namespace gpu {
         virtual void bind() const = 0;
     };
 
-    struct DirLight {
-        glm::vec3 direction;
-        glm::vec3 ambient;
-        glm::vec3 diffuse;
-        glm::vec3 specular;
-
-        static const BufferLayout* layout() {
-            if (sLayout == nullptr) {
-                sLayout = std::make_unique<BufferLayout>();
-
-                sLayout->addAttribute("direction", sizeof(glm::vec3));
-                sLayout->addAttribute("ambient", sizeof(glm::vec3));
-                sLayout->addAttribute("diffuse", sizeof(glm::vec3));
-                sLayout->addAttribute("specular", sizeof(glm::vec3));
-            }
-
-            return sLayout.get();
-        }
-
-        static int bufferSize() {
-            return layout()->totalSize();
-        }
-
-        void setBufferData(uint32_t startOffset, std::unique_ptr<SharedUniformBuffer> &buffer);
-    private:
-        static inline std::unique_ptr<BufferLayout> sLayout;
-    };
-
     using ShaderProgramHandle = uint32_t;
     using ShaderHandle = uint32_t;
     using TextureHandle = uint32_t;

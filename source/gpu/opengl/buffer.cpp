@@ -153,20 +153,6 @@ namespace gpu {
         uint32_t mSize { 0 };
     };
 
-    void DirLight::setBufferData(uint32_t startOffset, std::unique_ptr<SharedUniformBuffer> &buffer) {
-        auto layout = DirLight::layout();
-
-        auto directionOffset = layout->attribute("direction").offset + startOffset;
-        auto ambientOffset = layout->attribute("ambient").offset + startOffset;
-        auto diffuseOffset = layout->attribute("diffuse").offset + startOffset;
-        auto specularOffset = layout->attribute("specular").offset + startOffset;
-
-        buffer->setData(directionOffset, &direction, sizeof(direction));
-        buffer->setData(ambientOffset, &ambient, sizeof(ambient));
-        buffer->setData(diffuseOffset, &diffuse, sizeof(diffuse));
-        buffer->setData(specularOffset, &specular, sizeof(specular));
-    }
-
     std::unique_ptr<SharedUniformBuffer> SharedUniformBuffer::create(uint32_t bindingBlock, uint32_t size) {
         return std::make_unique<SharedUniformBufferImpl>(bindingBlock, size);
     }
