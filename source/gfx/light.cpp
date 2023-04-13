@@ -8,7 +8,7 @@ namespace gfx {
         mLayout = std::make_unique<gpu::BufferLayout>();
         mLayout->addAttribute("dirLightsCount", sizeof(int));
 
-        for (int i = 0; i < mDirLightsCount; ++i) {
+        for (int i = 0; i < MaxDirLights; i++) {
             mLayout->addAttribute("dirLights[" + std::to_string(i) + "].direction", sizeof(glm::vec3));
             mLayout->addAttribute("dirLights[" + std::to_string(i) + "].ambient", sizeof(glm::vec3));
             mLayout->addAttribute("dirLights[" + std::to_string(i) + "].diffuse", sizeof(glm::vec3));
