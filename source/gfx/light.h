@@ -28,7 +28,7 @@ namespace gfx {
     class Lights {
     public:
         Lights() = default;
-        Lights(const std::vector<DirLight> &dirLights);
+        Lights(const std::vector<DirLight> &dirLights, const std::vector<PointLight> &pointLights);
 
         void setBufferData();
     private:
@@ -37,6 +37,9 @@ namespace gfx {
 
         int mDirLightsCount;
         std::vector<DirLight> mDirLights;
+
+        int mPointLightsCount;
+        std::vector<PointLight> mPointLights;
     };
 
 }

@@ -183,4 +183,12 @@ namespace gpu {
 
         return *this;
     }
+
+    void BufferLayout::padLastAttribute() {
+        auto &lastAttribute = mAttributes.back();
+        auto blockRemainder = (lastAttribute.offset + lastAttribute.size) % mAlignment;
+        if (blockRemainder != 0) {
+            lastAttribute.size += mAlignment - blockRemainder;
+        }
+    }
 }

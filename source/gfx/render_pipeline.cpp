@@ -43,11 +43,24 @@ namespace gfx {
 
             dirLight.direction = glm::vec3(0.0f, -1.0f, -1.0f);
             dirLight.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-            dirLight.diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
+            dirLight.diffuse = glm::vec3(0.3f, 0.3f, 0.3f);
             dirLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
             dirLights.push_back(dirLight);
 
-            mLights = Lights(dirLights);
+            PointLight pointLight {};
+            std::vector<PointLight> pointLights;
+
+            pointLight.position = glm::vec3(0.0f, 1.0f, 3.0f);
+            pointLight.ambient = glm::vec3(0.1f, 0.1f, 0.1f);
+            pointLight.diffuse = glm::vec3(0.3f, 0.3f, 0.3f);
+            pointLight.specular = glm::vec3(0.8f, 0.8f, 0.8f);
+            pointLight.constant = 1.0f;
+            pointLight.linear = 0.3f;
+            pointLight.quadratic = 0.032f;
+
+            pointLights.push_back(pointLight);
+
+            mLights = Lights(dirLights, pointLights);
             mLights.setBufferData();
         }
 

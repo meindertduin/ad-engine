@@ -33,6 +33,8 @@ struct DirLight {
 layout (std140) uniform Lights {
     int dirLightsCount;
     DirLight dirLights[MAX_DIR_LIGHTS];
+    int pointLightsCount;
+    PointLight pointLights[MAX_POINT_LIGHTS];
 };
 
 vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 viewDir, vec3 pixel) {
@@ -80,9 +82,9 @@ void main()
     for (int i = 0; i < dirLightsCount; i++) {
         result += CalulateDirLight(dirLights[i], normal, viewDir, vec3(texColor));
     }
-    // for (int i = 0; i < pointLightsCount; i++) {
-    //     result += CalculatePointLight(pointLights[i], normal, viewDir, vec3(texturePixel));
-    // }
+    for (int i = 0; i < pointLightsCount; i++) {
+        result += CalculatePointLight(pointLights[i], normal, viewDir, vec3(texColor));
+    }
 
     FragColor = vec4(result, 1.0);
 }

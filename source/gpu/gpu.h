@@ -97,6 +97,7 @@ namespace gpu {
         {}
 
         BufferLayout& addAttribute(const std::string &name, uint32_t size);
+        void padLastAttribute();
 
         [[nodiscard]] uint32_t totalSize() const {
             auto lastOffset = mAttributes.back().offset;
