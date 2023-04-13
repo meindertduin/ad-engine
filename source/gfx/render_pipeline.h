@@ -4,14 +4,14 @@
 #include "texture.h"
 #include "render_component.h"
 #include "math/size.h"
-
-namespace game { class Transform; }
+#include "mesh.h"
+#include "game/transform.h"
 
 namespace gfx {
     struct RenderCommand {
         Material *material;
-        Texture2D *texture;
-        game::Transform *transform;
+        game::Transform transform;
+        Mesh *mesh;
     };
 
     class RenderPipeline {
@@ -20,7 +20,6 @@ namespace gfx {
 
         virtual void initialize() = 0;
 
-        virtual void beforeRender() = 0;
         virtual void renderCommand(const RenderCommand &command) = 0;
         virtual void renderFrame() = 0;
 

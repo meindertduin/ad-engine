@@ -1,3 +1,4 @@
+#include <GL/glew.h>
 #include "shader.h"
 #include "engine/logging.h"
 #include "gpu/gpu.h"
@@ -28,6 +29,10 @@ namespace gfx {
         }
 
         mProgramHandle = gpu::createShaderProgram(vertexShader, fragmentShader, true);
+
+        // TODO move to gpu namespace
+        auto lightsBlockIndex = glGetUniformBlockIndex(mProgramHandle, "Lights");
+        glUniformBlockBinding(mProgramHandle, lightsBlockIndex, LightsBlockBinding);
 
         bind();
         for (auto const &[name, value] : mUniformLocs) {

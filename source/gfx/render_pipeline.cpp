@@ -4,18 +4,18 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "render_pipeline.h"
-#include "game/transform.h"
 #include "texture.h"
 #include "shader_manager.h"
 #include "texture_manager.h"
 #include "material_manager.h"
 
-#include "gpu/gpu.h"
+#include "light.h"
+#include "camera.h"
 
 namespace gfx {
     struct PosTextVertex {
-        float x, y, z;
-        float u, v;
+        glm::vec3 position;
+        glm::vec2 texCoords;
 
         static void init() {
             layout
@@ -26,48 +26,46 @@ namespace gfx {
         static inline gpu::VertexLayout layout;
     };
 
-    PosTextVertex vertices[] = {
-        { 50.0f,  50.0f, 0.0f, 1.0f, 1.0f, }, // top right
-        { 50.0f, -50.0f, 0.0f, 1.0f, 0.0f, }, // bottom right
-        { -50.0f, -50.0f, 0.0f, 0.0f, 0.0f, }, // bottom left
-        { -50.0f,  50.0f, 0.0f, 0.0f, 1.0f }, // top left
-    };
-
-    unsigned int indices[] = {  // note that we start from 0!
-            0, 1, 3,  // first Triangle
-            1, 2, 3   // second Triangle
-    };
-
     class RenderPipelineImpl : public RenderPipeline {
     public:
         explicit RenderPipelineImpl(Allocator &allocator, math::Size2D frameDimensions)
             : mWidth(frameDimensions.width())
             , mHeight(frameDimensions.height())
+            , mCamera(frameDimensions)
         {
         }
 
         void initialize() override {
             PosTextVertex::init();
 
-            mVertexBuffer = gpu::VertexBuffer::create(vertices, sizeof(vertices), PosTextVertex::layout);
-            mIndexBuffer = gpu::IndexBuffer::create(indices, sizeof(indices));
+            DirLight dirLight {};
+            std::vector<DirLight> dirLights;
+
+            dirLight.direction = glm::vec3(0.0f, -1.0f, -1.0f);
+            dirLight.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
+            dirLight.diffuse = glm::vec3(0.3f, 0.3f, 0.3f);
+            dirLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+            dirLights.push_back(dirLight);
+
+            PointLight pointLight {};
+            std::vector<PointLight> pointLights;
+
+            pointLight.position = glm::vec3(0.0f, 1.0f, 3.0f);
+            pointLight.ambient = glm::vec3(0.1f, 0.1f, 0.1f);
+            pointLight.diffuse = glm::vec3(0.3f, 0.3f, 0.3f);
+            pointLight.specular = glm::vec3(0.8f, 0.8f, 0.8f);
+            pointLight.constant = 1.0f;
+            pointLight.linear = 0.3f;
+            pointLight.quadratic = 0.032f;
+
+            pointLights.push_back(pointLight);
+
+            mLights = Lights(dirLights, pointLights);
+            mLights.setBufferData();
         }
 
         void renderCommand(const RenderCommand &command) override {
             mRenderCommands.push(command);
-        }
-
-        void beforeRender() override {
-            constexpr glm::vec3 at = { 0.0f, 0.0f, 0.0f };
-            constexpr glm::vec3 eye = { 0.0f, 0.0f, 10.0f };
-
-            // Set view and projection matrix for view 0.
-            mView = glm::lookAt(eye, at, glm::vec3(0.0f, 1.0f, 0.0f));
-
-            auto halfWidth = float(mWidth) / 2.0f;
-            auto halfHeight = float(mHeight) / 2.0f;
-
-            mView *= glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.0f, 1000.0f);
         }
 
         void renderFrame() override {
@@ -84,28 +82,22 @@ namespace gfx {
                 command.material->shader()->bind();
 
                 auto model = glm::mat4(1.0f);
-                model = glm::translate(model, glm::vec3(command.transform->x(), command.transform->y(), 0.0f));
-
-                auto view = glm::mat4(1.0f);
-                auto projection = glm::mat4(1.0f);
-
-                auto halfWidth = float(mWidth) / 2.0f;
-                auto halfHeight = float(mHeight) / 2.0f;
-
-                projection = glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.0f, 1000.0f);
-                view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
+                model = glm::translate(model, command.transform.position());
 
                 gpu::setUniform(command.material->shader()->programHandle(), "model", model);
-                gpu::setUniform(command.material->shader()->programHandle(), "view", view);
-                gpu::setUniform(command.material->shader()->programHandle(), "projection", projection);
+                gpu::setUniform(command.material->shader()->programHandle(), "view", mCamera.view());
+                gpu::setUniform(command.material->shader()->programHandle(), "projection", mCamera.projection());
+                gpu::setUniform(command.material->shader()->programHandle(), "invtransmodel", glm::inverse(glm::transpose(model)));
 
-                mVertexBuffer->draw();
+                command.mesh->draw();
 
                 mRenderCommands.pop();
             }
         }
 
         void resize(math::Size2D frameDimensions) override {
+            mCamera.resize(frameDimensions);
+
             mWidth = frameDimensions.width();
             mHeight = frameDimensions.height();
 
@@ -116,12 +108,10 @@ namespace gfx {
         uint32_t mWidth;
         uint32_t mHeight;
 
-        std::unique_ptr<gpu::VertexBuffer> mVertexBuffer;
-        std::unique_ptr<gpu::IndexBuffer> mIndexBuffer;
-
-        glm::mat4x4 mView;
+        Camera mCamera;
 
         std::queue<RenderCommand> mRenderCommands;
+        Lights mLights;
     };
 
     std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(Allocator &allocator, math::Size2D frameDimensions) {

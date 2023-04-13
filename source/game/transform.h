@@ -1,3 +1,6 @@
+#pragma once
+
+#include <glm/vec3.hpp>
 #include "component.h"
 
 namespace game {
@@ -5,31 +8,13 @@ namespace game {
     public:
         Transform() noexcept = default;
 
-        Transform(float x, float y) noexcept
-            : mX(x)
-            , mY(y)
-        {}
+        Transform(float x, float y) noexcept : mPosition(x, y, 0.0f) {}
+        Transform(float x, float y, float z) noexcept : mPosition(x, y, z) {}
 
-        [[nodiscard]] ALWAYS_INLINE constexpr float x() const {
-            return mX;
-        }
+        explicit Transform(const glm::vec3 &position) noexcept : mPosition(position) {}
 
-        [[nodiscard]] ALWAYS_INLINE constexpr float y() const {
-            return mY;
-        }
-
-        void move(float x, float y) {
-            mX += x;
-            mY += y;
-        }
-
-        void setPosition(float x, float y) {
-            mX = x;
-            mY = y;
-        }
-
+        [[nodiscard]] const glm::vec3& position() const { return mPosition; }
     private:
-        float mX = 0.0f;
-        float mY = 0.0f;
+        glm::vec3 mPosition { 0.0f };
     };
 }

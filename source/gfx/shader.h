@@ -18,6 +18,8 @@ namespace gfx {
 
     using ShaderHandle = Handle<Shader>;
 
+    constexpr int LightsBlockBinding = 0;
+
     enum class ShaderType {
         Vertex,
         Fragment

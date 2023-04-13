@@ -156,4 +156,39 @@ namespace gpu {
         glActiveTexture(GL_TEXTURE0 + slot);
         glBindTexture(GL_TEXTURE_2D, handle);
     }
+
+    BufferLayout &BufferLayout::addAttribute(const std::string &name, uint32_t size) {
+        uint32_t lastOffset;
+        uint32_t lastSize;
+        if (mAttributes.empty()) {
+            lastOffset = 0;
+            lastSize = 0;
+        } else {
+            lastOffset = mAttributes.back().offset;
+            lastSize = mAttributes.back().size;
+        }
+
+        auto newOffset = lastOffset + lastSize;
+        auto blockRemainder = newOffset % mAlignment;
+
+        // Add padding to previous block
+        if (blockRemainder != 0 && blockRemainder < size) {
+            newOffset += mAlignment - blockRemainder;
+        }
+
+        mAttributes.push_back({ name, newOffset, size });
+
+        auto index = mAttributes.size() - 1;
+        mAttributeIndices[name] = index;
+
+        return *this;
+    }
+
+    void BufferLayout::padLastAttribute() {
+        auto &lastAttribute = mAttributes.back();
+        auto blockRemainder = (lastAttribute.offset + lastAttribute.size) % mAlignment;
+        if (blockRemainder != 0) {
+            lastAttribute.size += mAlignment - blockRemainder;
+        }
+    }
 }

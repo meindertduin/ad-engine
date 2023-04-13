@@ -27,20 +27,19 @@ bool Application::initialize() {
     mScene = game::Scene::createInstance(Engine::instance().allocator());
     mScene->initialize();
 
+    Engine::initialize();
+
     return true;
 }
 
 void Application::run() {
     auto object = mScene->createObject();
     Logger::info("Object: {}", object);
-    object.addComponent(gfx::RenderComponent{Path{"assets/material_scripts/material.lua"}, Path{"assets/bricks.png"}});
-    object.addComponent(game::Transform{20.0f, 20.0f});
+    object.addComponent(gfx::RenderComponent{Path{"assets/material_scripts/material.lua"}});
+    object.addComponent(game::Transform(0.5f, 0.0f, 0));
 
     auto secondObject = mScene->createObject();
     Logger::info("SecondObject: {} \n", secondObject);
-    secondObject.addComponent(
-            gfx::RenderComponent{Path{"assets/material_scripts/material.lua"}, Path{"assets/bricks.png"}});
-    secondObject.addComponent(game::Transform{200.0f, 100.0f});
 
     while (!mWindow.closed()) {
         mWindow.pollEvents();

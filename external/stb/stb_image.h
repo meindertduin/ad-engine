@@ -293,7 +293,7 @@ RECENT REVISION HISTORY:
 //    float *data = stbi_loadf(filename, &x, &y, &n, 0);
 //
 // If you load LDR images through this interface, those images will
-// be promoted to floating point values, run through the inverse of
+// be promoted to floating point data, run through the inverse of
 // constants corresponding to the above:
 //
 //     stbi_ldr_to_hdr_scale(1.0f);
@@ -1920,7 +1920,7 @@ typedef struct
    stbi_uc  fast[1 << FAST_BITS];
    // weirdly, repacking this into AoS is a 10% speed loss, instead of a win
    stbi__uint16 code[256];
-   stbi_uc  values[256];
+   stbi_uc  data[256];
    stbi_uc  size[257];
    unsigned int maxcode[18];
    int    delta[17];   // old 'firstsymbol' - old 'firstcode'
@@ -2031,7 +2031,7 @@ static void stbi__build_fast_ac(stbi__int16 *fast_ac, stbi__huffman *h)
       stbi_uc fast = h->fast[i];
       fast_ac[i] = 0;
       if (fast < 255) {
-         int rs = h->values[fast];
+         int rs = h->data[fast];
          int run = (rs >> 4) & 15;
          int magbits = rs & 15;
          int len = h->size[fast];
@@ -2088,7 +2088,7 @@ stbi_inline static int stbi__jpeg_huff_decode(stbi__jpeg *j, stbi__huffman *h)
          return -1;
       j->code_buffer <<= s;
       j->code_bits -= s;
-      return h->values[k];
+      return h->data[k];
    }
 
    // naive test is to shift the code_buffer down so k bits are
@@ -2117,7 +2117,7 @@ stbi_inline static int stbi__jpeg_huff_decode(stbi__jpeg *j, stbi__huffman *h)
    // convert the m_id to a symbol
    j->code_bits -= k;
    j->code_buffer <<= k;
-   return h->values[c];
+   return h->data[c];
 }
 
 // bias[n] = (-1<<n) + 1
@@ -2188,7 +2188,7 @@ static int stbi__jpeg_decode_block(stbi__jpeg *j, short data[64], stbi__huffman 
    t = stbi__jpeg_huff_decode(j, hdc);
    if (t < 0 || t > 15) return stbi__err("bad huffman code","Corrupt JPEG");
 
-   // 0 all the ac values now so we can do it 32-bits at a time
+   // 0 all the ac data now so we can do it 32-bits at a time
    memset(data,0,64*sizeof(data[0]));
 
    diff = t ? stbi__extend_receive(j, t) : 0;
@@ -2241,7 +2241,7 @@ static int stbi__jpeg_decode_block_prog_dc(stbi__jpeg *j, short data[64], stbi__
 
    if (j->succ_high == 0) {
       // first scan for DC coefficient, must be first
-      memset(data,0,64*sizeof(data[0])); // 0 all the ac values now
+      memset(data,0,64*sizeof(data[0])); // 0 all the ac data now
       t = stbi__jpeg_huff_decode(j, hdc);
       if (t < 0 || t > 15) return stbi__err("can't merge dc and ac", "Corrupt JPEG");
       diff = t ? stbi__extend_receive(j, t) : 0;
@@ -3105,10 +3105,10 @@ static int stbi__process_marker(stbi__jpeg *z, int m)
             L -= 17;
             if (tc == 0) {
                if (!stbi__build_huffman(z->huff_dc+th, sizes)) return 0;
-               v = z->huff_dc[th].values;
+               v = z->huff_dc[th].data;
             } else {
                if (!stbi__build_huffman(z->huff_ac+th, sizes)) return 0;
-               v = z->huff_ac[th].values;
+               v = z->huff_ac[th].data;
             }
             for (i=0; i < n; ++i)
                v[i] = stbi__get8(z->s);
@@ -3331,7 +3331,7 @@ static int stbi__decode_jpeg_header(stbi__jpeg *z, int scan)
 {
    int m;
    z->jfif = 0;
-   z->app14_color_transform = -1; // valid values are 0,1,2
+   z->app14_color_transform = -1; // valid data are 0,1,2
    z->marker = STBI__MARKER_none; // initialize cached marker to empty
    m = stbi__get_marker(z);
    if (!stbi__SOI(m)) return stbi__err("no SOI","Corrupt JPEG");
@@ -4724,7 +4724,7 @@ static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, stbi__uint32 r
          stbi_uc *in  = a->out + stride*j + x*out_n - img_width_bytes;
          // unpack 1/2/4-bit into a 8-bit buffer. allows us to keep the common 8-bit path optimal at minimal cost for 1/2/4-bit
          // png guarante byte alignment, if width is not multiple of 8/4/2 we'll decode dummy trailing data that will be skipped in the later loop
-         stbi_uc scale = (color == 0) ? stbi__depth_scale_table[depth] : 1; // scale grayscale values to 0..255 range
+         stbi_uc scale = (color == 0) ? stbi__depth_scale_table[depth] : 1; // scale grayscale data to 0..255 range
 
          // note that the final byte might overshoot and write more data than desired.
          // we can allocate enough data that this never writes out of memory, but it
@@ -5104,7 +5104,7 @@ static int stbi__parse_png_file(stbi__png *z, int scan, int req_comp)
                if (c.length != (stbi__uint32) s->img_n*2) return stbi__err("bad tRNS len","Corrupt PNG");
                has_trans = 1;
                if (z->depth == 16) {
-                  for (k = 0; k < s->img_n; ++k) tc16[k] = (stbi__uint16)stbi__get16be(s); // copy the values as-is
+                  for (k = 0; k < s->img_n; ++k) tc16[k] = (stbi__uint16)stbi__get16be(s); // copy the data as-is
                } else {
                   for (k = 0; k < s->img_n; ++k) tc[k] = (stbi_uc)(stbi__get16be(s) & 255) * stbi__depth_scale_table[z->depth]; // non 8-bit images will be larger
                }
@@ -6106,7 +6106,7 @@ static void *stbi__psd_load(stbi__context *s, int *x, int *y, int *comp, int req
    stbi__skip(s, stbi__get32be(s) );
 
    // Find out if the data is compressed.
-   // Known values:
+   // Known data:
    //   0: no compression
    //   1: RLE compressed
    compression = stbi__get16be(s);
@@ -7688,7 +7688,7 @@ STBIDEF int stbi_is_16_bit_from_callbacks(stbi_io_callbacks const *c, void *user
                          documentation fixes
       2.15  (2017-03-18) fix png-1,2,4 bug; now all Imagenet JPGs decode;
                          warning fixes; disable run-time SSE detection on gcc;
-                         uniform handling of optional "return" values;
+                         uniform handling of optional "return" data;
                          thread-safe initialization of zlib tables
       2.14  (2017-03-03) remove deprecated STBI_JPEG_OLD; fixes for Imagenet JPGs
       2.13  (2016-11-29) add 16-bit API, only supported for PNG right now
@@ -7752,7 +7752,7 @@ STBIDEF int stbi_is_16_bit_from_callbacks(stbi_io_callbacks const *c, void *user
               fix to GIF loading because BMP wasn't rewinding (whoops, no GIFs in my test suite)
               add support for BMP version 5 (more ignored fields)
       1.38  (2014-06-06)
-              suppress MSVC warnings on integer casts truncating values
+              suppress MSVC warnings on integer casts truncating data
               fix accidental rename of 'skip' field of I/O
       1.37  (2014-06-04)
               remove duplicate typedef

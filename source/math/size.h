@@ -40,4 +40,5 @@ namespace math {
     Size(T, U...) -> Size<T, 1 + sizeof...(U)>;
 
     using Size2D = Size<int, 2>;
+    using Size2Df = Size<float, 2>;
 }

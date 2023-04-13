@@ -1,13 +1,14 @@
 #include "render_component.h"
-#include "game/component.h"
 #include "material_manager.h"
+#include "mesh_manager.h"
 
 namespace gfx {
     REGISTER_COMPONENT(RenderComponent);
 
-    RenderComponent::RenderComponent(const Path &materialPath, const Path &texturePath) noexcept
+    RenderComponent::RenderComponent(const Path &materialPath) noexcept
         : mMaterial(MaterialManager::instance().createMaterial(materialPath))
-        , mTexture(Texture2D::loadFromFile("assets/bricks.png"))
     {
+        // Testing with a plane
+        mMesh = MeshManager::instance().plane();
     }
 }

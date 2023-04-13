@@ -4,16 +4,17 @@
 #include "engine/path.h"
 #include "material.h"
 #include "texture.h"
+#include "mesh.h"
 
 namespace gfx {
     class RenderComponent : public game::Component<RenderComponent> {
     public:
-        explicit RenderComponent(const Path &materialPath, const Path &texturePath) noexcept;
+        explicit RenderComponent(const Path &materialPath) noexcept;
 
         MaterialHandle material() { return mMaterial; }
-        std::shared_ptr<Texture2D> texture() { return mTexture; }
+        MeshHandle mesh() { return mMesh; }
     private:
         MaterialHandle mMaterial;
-        std::shared_ptr<Texture2D> mTexture;
+        MeshHandle mMesh;
     };
 };

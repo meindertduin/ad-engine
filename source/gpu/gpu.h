@@ -8,6 +8,8 @@
 #include <functional>
 #include "math/size.h"
 
+#include <optional>
+
 namespace gpu {
     enum class ShaderType {
         Vertex,
@@ -21,6 +23,7 @@ namespace gpu {
     };
 
     enum class AttributeType {
+        Int,
         Float,
         Vec2,
         Vec3,
@@ -33,6 +36,7 @@ namespace gpu {
 
         VertexLayout& addAttribute(Attribute attribute, AttributeType type, bool normalized = false);
         void bind() const;
+        [[nodiscard]] constexpr int totalSize() const { return mTotalSize; }
     private:
         int mTotalSize { 0 };
 
@@ -60,6 +64,72 @@ namespace gpu {
     public:
         static std::unique_ptr<IndexBuffer> create(const uint32_t *data, uint32_t size);
         virtual ~IndexBuffer() = default;
+
+        virtual void bind() const = 0;
+    };
+
+    class BufferDataPointer {
+    public:
+        BufferDataPointer(const void *data, uint32_t size)
+            : mData(data)
+            , mSize(size)
+        {}
+
+        [[nodiscard]] const void* data() const { return mData; }
+        [[nodiscard]] uint32_t size() const { return mSize; }
+    private:
+        const void *mData;
+        uint32_t mSize;
+    };
+
+    class BufferLayout {
+    public:
+        struct AttributeInfo {
+            std::string name;
+            uint32_t offset;
+            uint32_t size;
+        };
+
+        BufferLayout() = default;
+
+        explicit BufferLayout(uint32_t alignment)
+            : mAlignment(alignment)
+        {}
+
+        BufferLayout& addAttribute(const std::string &name, uint32_t size);
+        void padLastAttribute();
+
+        [[nodiscard]] uint32_t totalSize() const {
+            auto lastOffset = mAttributes.back().offset;
+            auto lastSize = mAttributes.back().size;
+
+            auto blockRemainder = (lastOffset + lastSize) % mAlignment;
+
+            auto padding = mAlignment - blockRemainder;
+
+            return lastOffset + lastSize + padding;
+        }
+
+        [[nodiscard]] const AttributeInfo& attribute(const std::string &name) const {
+            return mAttributes[mAttributeIndices.at(name)];
+        }
+
+        [[nodiscard]] const std::vector<AttributeInfo>& attributes() const {
+            return mAttributes;
+        }
+    private:
+        uint32_t mAlignment { 16 };
+
+        std::vector<AttributeInfo> mAttributes;
+        std::unordered_map<std::string, uint32_t> mAttributeIndices;
+    };
+
+    class SharedUniformBuffer {
+    public:
+        static std::unique_ptr<SharedUniformBuffer> create(uint32_t bindingBlock, uint32_t size);
+        virtual ~SharedUniformBuffer() = default;
+
+        virtual void setData(uint32_t offset, void *data, uint32_t size) = 0;
 
         virtual void bind() const = 0;
     };

@@ -49,8 +49,9 @@ namespace gpu {
 
     class VertexBufferImpl : public VertexBuffer {
     public:
-        VertexBufferImpl(const void *data, uint32_t size, VertexLayout layout)
-            : mLayout(std::move(layout))
+        VertexBufferImpl(const void *data, uint32_t totalSize, VertexLayout layout)
+            : mVertexCount(totalSize / layout.totalSize())
+            , mLayout(std::move(layout))
         {
             glGenVertexArrays(1, &mVertexArrayHandle);
             glGenBuffers(1, &mVertexBufferHandle);
@@ -58,7 +59,7 @@ namespace gpu {
             glBindVertexArray(mVertexArrayHandle);
 
             glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferHandle);
-            glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, totalSize, data, GL_STATIC_DRAW);
 
             mLayout.bind();
         }
@@ -80,12 +81,13 @@ namespace gpu {
 
         void draw() const override {
             glBindVertexArray(mVertexArrayHandle);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glDrawArrays(GL_TRIANGLES, 0, mVertexCount);
         }
 
     private:
         uint32_t mVertexArrayHandle { 0 };
         uint32_t mVertexBufferHandle { 0 };
+        uint32_t mVertexCount { 0 };
         VertexLayout mLayout;
     };
 
@@ -118,5 +120,40 @@ namespace gpu {
 
     std::unique_ptr<IndexBuffer> IndexBuffer::create(const uint32_t *data, uint32_t size) {
         return std::make_unique<IndexBufferImpl>(data, size);
+    }
+
+    class SharedUniformBufferImpl : public SharedUniformBuffer {
+    public:
+        SharedUniformBufferImpl(uint32_t bindingBlock, uint32_t size)
+            : mSize(size)
+        {
+            glGenBuffers(1, &mUniformBufferHandle);
+            glBindBuffer(GL_UNIFORM_BUFFER, mUniformBufferHandle);
+            glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+            glBindBufferRange(GL_UNIFORM_BUFFER, bindingBlock, mUniformBufferHandle, 0, size);
+        }
+
+        ~SharedUniformBufferImpl() override {
+            glDeleteBuffers(1, &mUniformBufferHandle);
+        }
+
+        void setData(uint32_t offset, void *data, uint32_t size) override {
+            bind();
+            glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
+        }
+
+        void bind() const override {
+            glBindBuffer(GL_UNIFORM_BUFFER, mUniformBufferHandle);
+        }
+
+    private:
+        uint32_t mUniformBufferHandle { 0 };
+        uint32_t mSize { 0 };
+    };
+
+    std::unique_ptr<SharedUniformBuffer> SharedUniformBuffer::create(uint32_t bindingBlock, uint32_t size) {
+        return std::make_unique<SharedUniformBufferImpl>(bindingBlock, size);
     }
 }
