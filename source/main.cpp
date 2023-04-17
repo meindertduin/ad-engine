@@ -2,7 +2,7 @@
 
 #include "engine/logging.h"
 #include "engine/window.h"
-#include "game/scene.h"
+#include "game/universe.h"
 #include "engine/application.h"
 #include "engine/engine.h"
 

@@ -1,6 +1,6 @@
 #include "application.h"
 
-#include "game/scene.h"
+#include "game/universe.h"
 #include "engine.h"
 #include "logging.h"
 #include "game/transform.h"
@@ -23,7 +23,7 @@ bool Application::initialize() {
 
     sInitialized = true;
 
-    mScene = game::Scene::createInstance(Engine::instance().allocator());
+    mScene = game::Universe::createInstance(Engine::instance().allocator());
     mScene->initialize();
 
     Engine::initialize();

@@ -8,11 +8,11 @@
 namespace game {
     class Ecs;
 
-    class Scene {
+    class Universe {
     public:
-        virtual ~Scene() = default;
+        virtual ~Universe() = default;
 
-        static std::unique_ptr<Scene> createInstance(Allocator &allocator);
+        static std::unique_ptr<Universe> createInstance(Allocator &allocator);
 
         virtual void initialize() = 0;
         virtual void update(float dt) = 0;

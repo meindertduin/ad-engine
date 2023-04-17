@@ -7,11 +7,11 @@
 #include "transform.h"
 
 namespace game {
-    class Scene;
+    class Universe;
 
     class Node {
     public:
-        explicit Node(Scene *scene);
+        explicit Node(Universe *scene);
         virtual ~Node();
 
         void addChild(Node *child);
@@ -31,7 +31,7 @@ namespace game {
         Object mObject;
 
         Node *mParent { nullptr };
-        Scene *mScene { nullptr };
+        Universe *mScene {nullptr };
 
         Transform mRelativeTransform;
 
@@ -43,12 +43,12 @@ namespace game {
 
     class SpriteNode : public Node {
     public:
-        explicit SpriteNode(Scene *scene);
+        explicit SpriteNode(Universe *scene);
     };
 
     class NodeIterator {
     public:
-        NodeIterator(Node *node)
+        explicit NodeIterator(Node *node)
             : mNode(node)
         {
         }

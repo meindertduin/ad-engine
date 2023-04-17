@@ -1,4 +1,4 @@
-#include "scene.h"
+#include "universe.h"
 #include "render_world.h"
 
 #include <cassert>
@@ -8,9 +8,9 @@
 #include "node.h"
 
 namespace game {
-    class SceneImpl : public Scene {
+    class UniverseImpl : public Universe {
     public:
-        SceneImpl(Allocator &allocator)
+        UniverseImpl(Allocator &allocator)
             : mAllocator(allocator)
         {
             mRootNode = new Node(this);
@@ -62,7 +62,7 @@ namespace game {
         std::shared_ptr<Observer<WindowEvent>> mWindowEventObserver { nullptr };
     };
 
-    std::unique_ptr<Scene> Scene::createInstance(Allocator &allocator) {
-        return std::make_unique<SceneImpl>(allocator);
+    std::unique_ptr<Universe> Universe::createInstance(Allocator &allocator) {
+        return std::make_unique<UniverseImpl>(allocator);
     }
 }
