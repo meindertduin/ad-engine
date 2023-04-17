@@ -14,6 +14,7 @@ namespace game {
             : mAllocator(allocator)
         {
             mRootNode = new Node(this);
+            mRootNode->addChild(new SpriteNode(this));
         }
 
         void initialize() override {

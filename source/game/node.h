@@ -12,14 +12,10 @@ namespace game {
     class Node {
     public:
         explicit Node(Scene *scene);
+        virtual ~Node();
 
-        void setParent(Node *parent) {
-            mParent = parent;
-        }
-
-        void addChild(Node *child) {
-            mChildren.push_back(child);
-        }
+        void addChild(Node *child);
+        void addParent(Node *parent);
 
         void removeChild(Node *child) {
             auto it = std::find(mChildren.begin(), mChildren.end(), child);
@@ -27,14 +23,27 @@ namespace game {
                 mChildren.erase(it);
             }
         }
-    private:
+
+        void move(const glm::vec3 &position);
+    protected:
+        friend class NodeIterator;
+
         Object mObject;
 
-        friend class NodeIterator;
         Node *mParent { nullptr };
+        Scene *mScene { nullptr };
+
+        Transform mRelativeTransform;
 
         // May optimize with a hash map where nodes have an id
         std::vector<Node*> mChildren;
+
+        void setWorldTransform();
+    };
+
+    class SpriteNode : public Node {
+    public:
+        explicit SpriteNode(Scene *scene);
     };
 
     class NodeIterator {

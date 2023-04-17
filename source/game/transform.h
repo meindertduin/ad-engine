@@ -14,6 +14,7 @@ namespace game {
         explicit Transform(const glm::vec3 &position) noexcept : mPosition(position) {}
 
         [[nodiscard]] const glm::vec3& position() const { return mPosition; }
+        void setPosition(const glm::vec3 &position) { mPosition = position; }
     private:
         glm::vec3 mPosition { 0.0f };
     };

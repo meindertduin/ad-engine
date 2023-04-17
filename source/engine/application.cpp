@@ -4,7 +4,6 @@
 #include "engine.h"
 #include "logging.h"
 #include "game/transform.h"
-#include "gfx/render_component.h"
 #include "game/ecs.h"
 
 Application::Application(const WindowOptions &options)
