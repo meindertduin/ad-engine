@@ -1,11 +1,11 @@
 #include "scene.h"
-#include "engine/allocator.h"
 #include "render_world.h"
 
 #include <cassert>
 
 #include "ecs.h"
 #include "engine/application.h"
+#include "node.h"
 
 namespace game {
     class SceneImpl : public Scene {
@@ -13,6 +13,7 @@ namespace game {
         SceneImpl(Allocator &allocator)
             : mAllocator(allocator)
         {
+            mRootNode = new Node(this);
         }
 
         void initialize() override {
@@ -50,11 +51,12 @@ namespace game {
         Ecs& ecs() override {
             return mEcs;
         }
-
     private:
         Allocator &mAllocator;
         Ecs mEcs;
         std::unique_ptr<RenderWorld> mRenderWorld;
+
+        Node *mRootNode;
 
         std::shared_ptr<Observer<WindowEvent>> mWindowEventObserver { nullptr };
     };
