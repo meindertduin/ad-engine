@@ -9,9 +9,14 @@
 namespace game {
     class Universe;
 
+    enum class NodeType {
+        Node,
+        SpriteNode,
+    };
+
     class Node {
     public:
-        explicit Node(Universe *scene);
+        Node(Universe *scene, const Transform &transform);
         virtual ~Node();
 
         void addChild(Node *child);
@@ -43,7 +48,7 @@ namespace game {
 
     class SpriteNode : public Node {
     public:
-        explicit SpriteNode(Universe *scene);
+        SpriteNode(Universe *scene, const Transform &transform);
     };
 
     class NodeIterator {

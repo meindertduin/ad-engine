@@ -4,9 +4,10 @@
 #include "gfx/render_component.h"
 
 namespace game {
-    Node::Node(Universe *scene)
+    Node::Node(Universe *scene, const Transform &transform)
         : mObject(scene->createObject())
         , mScene(scene)
+        , mRelativeTransform(transform)
     {
         mObject.addComponent(game::Transform(0, 0, 0));
 
@@ -46,8 +47,9 @@ namespace game {
         }
     }
 
-    SpriteNode::SpriteNode(Universe *scene) : Node(scene) {
-        mRelativeTransform = game::Transform(0.5f, 0, 0);
+    SpriteNode::SpriteNode(Universe *scene, const Transform &transform)
+        : Node(scene, transform)
+    {
         mObject.addComponent(gfx::RenderComponent{ Path{ "assets/material_scripts/material.lua" } });
     }
 }

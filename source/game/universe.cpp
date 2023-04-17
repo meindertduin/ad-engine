@@ -6,15 +6,15 @@
 #include "ecs.h"
 #include "engine/application.h"
 #include "node.h"
+#include "scene.h"
 
 namespace game {
     class UniverseImpl : public Universe {
     public:
         UniverseImpl(Allocator &allocator)
             : mAllocator(allocator)
+            , mScene(this, Path { "assets/scene/demo.json" })
         {
-            mRootNode = new Node(this);
-            mRootNode->addChild(new SpriteNode(this));
         }
 
         void initialize() override {
@@ -57,7 +57,7 @@ namespace game {
         Ecs mEcs;
         std::unique_ptr<RenderWorld> mRenderWorld;
 
-        Node *mRootNode;
+        Scene mScene;
 
         std::shared_ptr<Observer<WindowEvent>> mWindowEventObserver { nullptr };
     };

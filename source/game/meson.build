@@ -7,6 +7,7 @@ game_sources = files(
     'tile.cpp',
     'tile_set.cpp',
     'node.cpp',
+    'scene.cpp'
 )
 project_sources += game_sources
 
