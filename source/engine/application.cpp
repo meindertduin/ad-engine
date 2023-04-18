@@ -1,10 +1,9 @@
 #include "application.h"
 
-#include "game/scene.h"
+#include "game/universe.h"
 #include "engine.h"
 #include "logging.h"
 #include "game/transform.h"
-#include "gfx/render_component.h"
 #include "game/ecs.h"
 
 Application::Application(const WindowOptions &options)
@@ -24,7 +23,7 @@ bool Application::initialize() {
 
     sInitialized = true;
 
-    mScene = game::Scene::createInstance(Engine::instance().allocator());
+    mScene = game::Universe::createInstance(Engine::instance().allocator());
     mScene->initialize();
 
     Engine::initialize();
@@ -33,14 +32,6 @@ bool Application::initialize() {
 }
 
 void Application::run() {
-    auto object = mScene->createObject();
-    Logger::info("Object: {}", object);
-    object.addComponent(gfx::RenderComponent{Path{"assets/material_scripts/material.lua"}});
-    object.addComponent(game::Transform(0.5f, 0.0f, 0));
-
-    auto secondObject = mScene->createObject();
-    Logger::info("SecondObject: {} \n", secondObject);
-
     while (!mWindow.closed()) {
         mWindow.pollEvents();
 

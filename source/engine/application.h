@@ -6,7 +6,7 @@
 #include <memory>
 
 namespace game {
-    class Scene;
+    class Universe;
 }
 
 namespace gfx {
@@ -28,7 +28,7 @@ private:
     static inline bool sInitialized { false };
 
     AdWindow mWindow;
-    std::unique_ptr<game::Scene> mScene { nullptr };
+    std::unique_ptr<game::Universe> mScene {nullptr };
 
     static inline Application* sInstance { nullptr };
 };
