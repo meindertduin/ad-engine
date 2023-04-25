@@ -6,8 +6,8 @@
 #include "engine/application.h"
 #include "engine/engine.h"
 
-constexpr int WIDTH = 640;
-constexpr int HEIGHT = 480;
+constexpr int WIDTH = 1920;
+constexpr int HEIGHT = 1080;
 
 auto main() -> int {
     LOG_DEBUG("Application starting");

@@ -11,18 +11,22 @@
 namespace game {
     class UniverseImpl : public Universe {
     public:
-        UniverseImpl(Allocator &allocator)
-            : mAllocator(allocator)
-            , mScene(this, Path { "assets/scene/demo.json" })
+        UniverseImpl()
+            : mScene(this, Path { "assets/scene/demo.json" })
         {
         }
 
         void initialize() override {
-            mRenderWorld = std::make_unique<RenderWorld>(*this, mAllocator, Application::instance()->window().size());
+            auto frameDimensions = math::Size2D { 640, 480 };
+
+            mRenderWorld = std::make_unique<RenderWorld>(*this, frameDimensions);
+            mRenderWorld->resize(frameDimensions);
 
             auto windowEventCallback = [this](const WindowEvent &value) {
+                auto frameDimensions = math::Size2D { 640, 480 };
+
                 if (value.type == WindowEvent::Type::Resize) {
-                    mRenderWorld->resize(value.size);
+                    mRenderWorld->resize(frameDimensions);
                 }
             };
 
@@ -53,7 +57,6 @@ namespace game {
             return mEcs;
         }
     private:
-        Allocator &mAllocator;
         Ecs mEcs;
         std::unique_ptr<RenderWorld> mRenderWorld;
 
@@ -62,7 +65,7 @@ namespace game {
         std::shared_ptr<Observer<WindowEvent>> mWindowEventObserver { nullptr };
     };
 
-    std::unique_ptr<Universe> Universe::createInstance(Allocator &allocator) {
-        return std::make_unique<UniverseImpl>(allocator);
+    std::unique_ptr<Universe> Universe::createInstance() {
+        return std::make_unique<UniverseImpl>();
     }
 }

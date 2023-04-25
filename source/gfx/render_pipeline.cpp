@@ -28,10 +28,8 @@ namespace gfx {
 
     class RenderPipelineImpl : public RenderPipeline {
     public:
-        explicit RenderPipelineImpl(Allocator &allocator, math::Size2D frameDimensions)
-            : mWidth(frameDimensions.width())
-            , mHeight(frameDimensions.height())
-            , mCamera(frameDimensions)
+        explicit RenderPipelineImpl(math::Size2D frameDimensions)
+            : mCamera(frameDimensions)
         {
         }
 
@@ -105,8 +103,8 @@ namespace gfx {
         }
 
     private:
-        uint32_t mWidth;
-        uint32_t mHeight;
+        uint32_t mWidth = 0;
+        uint32_t mHeight = 0;
 
         Camera mCamera;
 
@@ -114,7 +112,7 @@ namespace gfx {
         Lights mLights;
     };
 
-    std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(Allocator &allocator, math::Size2D frameDimensions) {
-        return std::make_unique<RenderPipelineImpl>(allocator, frameDimensions);
+    std::unique_ptr<RenderPipeline> RenderPipeline::createInstance(math::Size2D frameDimensions) {
+        return std::make_unique<RenderPipelineImpl>(frameDimensions);
     }
 }

@@ -5,9 +5,9 @@
 #include "gfx/mesh_manager.h"
 
 namespace game {
-    RenderWorld::RenderWorld(Universe &scene, Allocator &allocator, const math::Size2D &frameDimensions)
+    RenderWorld::RenderWorld(Universe &scene, const math::Size2D &frameDimensions)
         : mScene(scene)
-        , mRenderPipeline(gfx::RenderPipeline::createInstance(allocator, frameDimensions))
+        , mRenderPipeline(gfx::RenderPipeline::createInstance(frameDimensions))
     {
         mRenderPipeline->initialize();
         mTerrain.initialize();

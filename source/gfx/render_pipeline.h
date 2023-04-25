@@ -16,7 +16,7 @@ namespace gfx {
 
     class RenderPipeline {
     public:
-        static std::unique_ptr<RenderPipeline> createInstance(Allocator &allocator, math::Size2D frameDimensions);
+        static std::unique_ptr<RenderPipeline> createInstance(math::Size2D frameDimensions);
 
         virtual void initialize() = 0;
 

@@ -23,7 +23,7 @@ bool Application::initialize() {
 
     sInitialized = true;
 
-    mScene = game::Universe::createInstance(Engine::instance().allocator());
+    mScene = game::Universe::createInstance();
     mScene->initialize();
 
     Engine::initialize();

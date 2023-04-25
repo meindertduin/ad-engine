@@ -12,7 +12,7 @@ namespace game {
     public:
         virtual ~Universe() = default;
 
-        static std::unique_ptr<Universe> createInstance(Allocator &allocator);
+        static std::unique_ptr<Universe> createInstance();
 
         virtual void initialize() = 0;
         virtual void update(float dt) = 0;
