@@ -73,7 +73,7 @@ void main()
     vec3 viewPos = vec3(0.0, 10.0, 10.0);
 
     if (texColor.a < 0.1)
-        discard;
+    discard;
 
     vec3 normal = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);

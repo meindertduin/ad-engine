@@ -19,12 +19,10 @@ namespace gfx {
         gpu::ShaderHandle fragmentShader;
 
         for (auto &stage : mStages) {
-            const char* data =  stage.data.data();
-
             if (stage.type == ShaderType::Vertex) {
-                vertexShader = gpu::createShader(gpu::ShaderType::Vertex, data, stage.path.value());
+                vertexShader = gpu::createShader(gpu::ShaderType::Vertex, stage.data.c_str(), stage.path.value());
             } else if (stage.type == ShaderType::Fragment) {
-                fragmentShader = gpu::createShader(gpu::ShaderType::Fragment, data, stage.path.value());
+                fragmentShader = gpu::createShader(gpu::ShaderType::Fragment, stage.data.c_str(), stage.path.value());
             }
         }
 

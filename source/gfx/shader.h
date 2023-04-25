@@ -26,26 +26,22 @@ namespace gfx {
     };
 
     struct ShaderStage {
-        explicit ShaderStage(Allocator &allocator)
-            : data(allocator)
-        {}
-
         ShaderType type;
         Path path;
-        Vector<char> data;
+        std::string data;
     };
 
     struct Uniform {
-        std::string name;
-
-       enum class Type {
+        enum class Type {
             Float,
             Vec2,
             Vec3,
             Vec4,
             Mat3,
             Mat4
-        } type;
+        };
+        std::string name;
+        Type type;
     };
 
     class Shader : public Resource<ShaderManager> {
