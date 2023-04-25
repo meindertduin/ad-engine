@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include "allocator.h"
-#include "xxhash32.h"
+#include "xxh3/xxhash32.h"
 
 template<typename K, typename T>
 class HashMap {

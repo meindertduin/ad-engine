@@ -7,8 +7,7 @@ project_header_files = []
 
 inc = [
     include_directories('source'),
-    include_directories('external/xxh3'),
-    include_directories('external/stb'),
+    include_directories('external'),
 ]
 
 sdl2_dep = dependency('sdl2')
@@ -20,7 +19,7 @@ jsoncpp_dep = dependency('jsoncpp')
 subdir('source')
 subdir('external')
 
-bin_dep_libs = [fast_wfc_lib]
+bin_dep_libs = [fast_wfc_lib, imgui_lib]
 
 executable('adengine', project_sources,
     include_directories: inc,

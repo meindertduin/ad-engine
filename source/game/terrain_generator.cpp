@@ -5,10 +5,10 @@
 #include <json/json.h>
 #include <unordered_map>
 
-#include "stb_image.h"
+#include <stb/stb_image.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stbi_image_write.h>
+#include <stb/stbi_image_write.h>
 
 struct Color {
     unsigned char r, g, b;

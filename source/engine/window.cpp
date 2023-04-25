@@ -5,6 +5,8 @@
 #include <SDL2/SDL_syswm.h>
 
 #include "gpu/gpu.h"
+#include "imgui/imgui_impl_sdl2.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 AdWindow::AdWindow(const WindowOptions &options)
     : mSize(options.size)
@@ -13,6 +15,12 @@ AdWindow::AdWindow(const WindowOptions &options)
 }
 
 AdWindow::~AdWindow() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+
+    // SDL_GL_DeleteContext(mContext);
+
     SDL_DestroyWindow(pWindow);
     SDL_Quit();
 }
@@ -23,6 +31,8 @@ bool AdWindow::initialize() {
         Logger::error("Failed to initialize SDL: {}", SDL_GetError());
         return false;
     }
+
+    // TODO set attributes based on platform etc
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
@@ -48,6 +58,22 @@ bool AdWindow::initialize() {
         return false;
     }
 
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
+
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplSDL2_InitForOpenGL(pWindow, context);
+    // TODO parse the actual openGL version
+
+    const char* glsl_version = "#version 330";
+    ImGui_ImplOpenGL3_Init(glsl_version);
+
+
     return true;
 }
 
@@ -55,6 +81,7 @@ void AdWindow::pollEvents() {
     SDL_Event currentEvent;
 
     while(SDL_PollEvent(&currentEvent) != 0) {
+        ImGui_ImplSDL2_ProcessEvent(&currentEvent);
         if(currentEvent.type == SDL_QUIT) {
             mClosed = true;
         }
@@ -67,9 +94,17 @@ void AdWindow::pollEvents() {
             }
         }
     }
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::ShowDemoWindow();
 }
 
 void AdWindow::swapBuffers() {
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     SDL_GL_SwapWindow(pWindow);
 }
 
