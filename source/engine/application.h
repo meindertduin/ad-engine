@@ -21,13 +21,13 @@ public:
     bool initialize();
     void run();
 
-    AdWindow &window() { return mWindow; }
+    AdWindow& window() { return *mWindow; }
 protected:
     explicit Application(const WindowOptions &options);
 private:
     static inline bool sInitialized { false };
 
-    AdWindow mWindow;
+    std::unique_ptr<AdWindow> mWindow;
     std::unique_ptr<game::Universe> mScene {nullptr };
 
     static inline Application* sInstance { nullptr };

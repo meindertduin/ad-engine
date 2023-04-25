@@ -7,7 +7,7 @@
 #include "game/ecs.h"
 
 Application::Application(const WindowOptions &options)
-    : mWindow(options)
+    : mWindow(AdWindow::createInstance(options))
 {
 }
 
@@ -17,7 +17,7 @@ bool Application::initialize() {
         return false;
     }
 
-    if (!mWindow.initialize()) {
+    if (!mWindow->initialize()) {
         return false;
     }
 
@@ -32,12 +32,13 @@ bool Application::initialize() {
 }
 
 void Application::run() {
-    while (!mWindow.closed()) {
-        mWindow.pollEvents();
+    while (!mWindow->closed()) {
+        mWindow->pollEvents();
+        mWindow->setupFrame();
 
         mScene->render();
 
-        mWindow.swapBuffers();
+        mWindow->renderFrame();
     }
 }
 

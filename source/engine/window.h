@@ -5,8 +5,6 @@
 #include <math/size.h>
 #include "observable.h"
 
-struct SDL_Window;
-
 struct WindowOptions {
     std::string title;
     math::Size2D size;
@@ -25,30 +23,15 @@ struct WindowEvent {
 
 class AdWindow {
 public:
-    explicit AdWindow(const WindowOptions &options);
-    ~AdWindow();
+    static std::unique_ptr<AdWindow> createInstance(const WindowOptions &options);
+    virtual ~AdWindow() = default;
 
-    bool initialize();
-    void swapBuffers();
-    void pollEvents();
+    virtual bool initialize() = 0;
+    virtual void setupFrame() = 0;
+    virtual void renderFrame() = 0;
+    virtual void pollEvents() = 0;
 
-    [[nodiscard]] constexpr ALWAYS_INLINE math::Size2D size() const {
-        return mSize;
-    }
-
-    [[nodiscard]] constexpr ALWAYS_INLINE bool closed() const {
-        return mClosed;
-    }
-
-    [[nodiscard]] constexpr ALWAYS_INLINE Observable<WindowEvent> &windowEvent() {
-        return mWindowEventObservable;
-    }
-
-private:
-    SDL_Window* pWindow { nullptr };
-    math::Size2D mSize;
-    std::string mTitle;
-    bool mClosed { false };
-
-    Observable<WindowEvent> mWindowEventObservable;
+    virtual math::Size2D size() const = 0;
+    virtual bool closed() const = 0;
+    virtual Observable<WindowEvent> &windowEvent() = 0;
 };
