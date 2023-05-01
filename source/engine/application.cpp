@@ -5,6 +5,7 @@
 #include "logging.h"
 #include "game/transform.h"
 #include "game/ecs.h"
+#include "profiler.h"
 
 Application::Application(const WindowOptions &options)
     : mWindow(AdWindow::createInstance(options))
@@ -21,6 +22,8 @@ bool Application::initialize() {
         return false;
     }
 
+    Profiler::createInstance(mWindow.get());
+
     sInitialized = true;
 
     mScene = game::Universe::createInstance();
@@ -33,12 +36,15 @@ bool Application::initialize() {
 
 void Application::run() {
     while (!mWindow->closed()) {
+        Profiler::instance().begin("Frame start");
         mWindow->pollEvents();
+        Profiler::instance().writeEntry("Poll events");
         mWindow->setupFrame();
-
+        Profiler::instance().writeEntry("Setup frame");
         mScene->render();
-
+        Profiler::instance().writeEntry("Render");
         mWindow->renderFrame();
+        Profiler::instance().writeEntry("Render frame");
     }
 }
 

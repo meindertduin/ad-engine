@@ -99,7 +99,7 @@ public:
     void pollEvents() override {
         SDL_Event currentEvent;
 
-        while(SDL_PollEvent(&currentEvent) != 0) {
+        while(SDL_PollEvent(&currentEvent)) {
             ImGui_ImplSDL2_ProcessEvent(&currentEvent);
             if(currentEvent.type == SDL_QUIT) {
                 mClosed = true;
@@ -113,6 +113,10 @@ public:
                 }
             }
         }
+    }
+
+    uint32_t getTicks() const override {
+        return SDL_GetTicks();
     }
 
     math::Size2D size() const override {

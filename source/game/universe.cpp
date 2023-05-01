@@ -21,18 +21,6 @@ namespace game {
 
             mRenderWorld = std::make_unique<RenderWorld>(*this, frameDimensions);
             mRenderWorld->resize(frameDimensions);
-
-            auto windowEventCallback = [this](const WindowEvent &value) {
-                auto frameDimensions = math::Size2D { 640, 480 };
-
-                if (value.type == WindowEvent::Type::Resize) {
-                    mRenderWorld->resize(frameDimensions);
-                }
-            };
-
-            mWindowEventObserver = Application::instance()->window()
-                    .windowEvent()
-                    .subscribe(windowEventCallback);
         }
 
         void update(float dt) override {

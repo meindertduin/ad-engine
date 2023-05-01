@@ -35,9 +35,9 @@ namespace game {
     }
 
     void RenderWorld::renderTerrain() {
-        auto terrainTransform = Transform(-50, 0, -80);
-
         auto &terrainData = mTerrain.terrainData();
+        auto terrainTransform = Transform(-terrainData->size.width() / 2.0f, 0, -terrainData->size.height()/2);
+
         for (int i = 0; i < terrainData->size.width(); i++) {
             for (int j = 0; j < terrainData->size.height(); j++) {
                 auto tileId = terrainData->tiles[i + j * terrainData->size.width()];

@@ -6,6 +6,7 @@ engine_sources = files(
     'allocator.cpp',
     'engine.cpp',
     'application.cpp',
+    'profiler.cpp',
 )
 project_sources += engine_sources
 

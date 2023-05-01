@@ -169,7 +169,7 @@ namespace game {
         for (auto test = 0; test < 10; test++) {
             int seed = std::random_device()();
 
-            TilingWFC<Color> wfc(tileList, neighborIds, 60, 60, { true }, seed);
+            TilingWFC<Color> wfc(tileList, neighborIds, 20, 20, { true }, seed);
             if (auto success = wfc.run(); success.has_value()) {
                 return *success;
             }
@@ -253,7 +253,7 @@ namespace game {
         auto map = readMap(folder);
 
         auto result = std::make_unique<TerrainData>();
-        result->size = { static_cast<int>(output.width), static_cast<int>(output.height) };
+        result->size = map.size;
         result->tileSize = 1.0f;
 
         result->tiles.reserve(output.height * output.width);

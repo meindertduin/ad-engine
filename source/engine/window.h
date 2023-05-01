@@ -30,6 +30,7 @@ public:
     virtual void setupFrame() = 0;
     virtual void renderFrame() = 0;
     virtual void pollEvents() = 0;
+    virtual uint32_t getTicks() const = 0;
 
     virtual math::Size2D size() const = 0;
     virtual bool closed() const = 0;
