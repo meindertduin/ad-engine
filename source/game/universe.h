@@ -4,6 +4,7 @@
 #include "object.h"
 #include "engine/allocator.h"
 #include "engine/format.h"
+#include "scene.h"
 
 namespace game {
     class Ecs;
@@ -20,6 +21,8 @@ namespace game {
 
         virtual Object createObject() = 0;
         virtual void destroyObject(Object object) = 0;
+
+        virtual Scene* scene() = 0;
 
         virtual Ecs& ecs() = 0;
     };

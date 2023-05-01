@@ -44,6 +44,10 @@ namespace game {
         Ecs& ecs() override {
             return mEcs;
         }
+
+        Scene* scene() override {
+            return &mScene;
+        }
     private:
         Ecs mEcs;
         std::unique_ptr<RenderWorld> mRenderWorld;

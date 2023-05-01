@@ -4,9 +4,23 @@
 #include "gfx/render_component.h"
 
 namespace game {
-    Node::Node(Universe *scene, const Transform &transform)
-        : mObject(scene->createObject())
-        , mScene(scene)
+    const std::vector<std::string>& getNodeTypes() {
+        static bool initialized = false;
+        static std::vector<std::string> types;
+        if (initialized) {
+            return types;
+        }
+        for (const auto &[key, value] : nodeTypeToStringMap) {
+            types.push_back(value);
+        }
+        initialized = true;
+
+        return types;
+    }
+
+    Node::Node(Universe *universe, const Transform &transform)
+        : mObject(universe->createObject())
+        , mScene(universe)
         , mRelativeTransform(transform)
     {
         mObject.addComponent(game::Transform(0, 0, 0));

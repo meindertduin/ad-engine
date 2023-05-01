@@ -6,6 +6,7 @@
 #include "game/transform.h"
 #include "game/ecs.h"
 #include "profiler.h"
+#include "editor/editor.h"
 
 Application::Application(const WindowOptions &options)
     : mWindow(AdWindow::createInstance(options))
@@ -26,8 +27,9 @@ bool Application::initialize() {
 
     sInitialized = true;
 
-    mScene = game::Universe::createInstance();
-    mScene->initialize();
+    mUniverse = game::Universe::createInstance();
+    mUniverse->initialize();
+    mEditor = std::make_unique<editor::Editor>(this);
 
     Engine::initialize();
 
@@ -36,15 +38,11 @@ bool Application::initialize() {
 
 void Application::run() {
     while (!mWindow->closed()) {
-        Profiler::instance().begin("Frame start");
         mWindow->pollEvents();
-        Profiler::instance().writeEntry("Poll events");
         mWindow->setupFrame();
-        Profiler::instance().writeEntry("Setup frame");
-        mScene->render();
-        Profiler::instance().writeEntry("Render");
+        mEditor->update();
+        mUniverse->render();
         mWindow->renderFrame();
-        Profiler::instance().writeEntry("Render frame");
     }
 }
 

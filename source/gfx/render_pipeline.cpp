@@ -11,7 +11,6 @@
 
 #include "light.h"
 #include "camera.h"
-#include "engine/profiler.h"
 
 namespace gfx {
     struct PosTextVertex {
@@ -69,8 +68,6 @@ namespace gfx {
 
         void renderFrame() override {
             gpu::clear();
-            Profiler::instance().writeEntry("Render start");
-
             while (!mRenderCommands.empty()) {
                 auto const &command = mRenderCommands.front();
 

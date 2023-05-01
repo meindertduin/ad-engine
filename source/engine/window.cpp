@@ -68,7 +68,7 @@ public:
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-
+        io.Fonts->AddFontFromFileTTF("assets/fonts/intelone-mono-font-family-regular.ttf", 20.0f);
 
         ImGui::StyleColorsDark();
 
@@ -77,7 +77,6 @@ public:
         // TODO parse the actual openGL version
         const char* glsl_version = "#version 330";
         ImGui_ImplOpenGL3_Init(glsl_version);
-
 
         return true;
     }

@@ -14,10 +14,36 @@ namespace game {
         SpriteNode,
     };
 
+    static const std::unordered_map<NodeType, std::string> nodeTypeToStringMap = {
+        { NodeType::Node, "Node" },
+        { NodeType::SpriteNode, "Sprite" },
+    };
+
+    static const std::unordered_map<std::string, NodeType> stringToNodeTypeMap = {
+        { "Node", NodeType::Node },
+        { "Sprite", NodeType::SpriteNode },
+    };
+
+    const std::vector<std::string>& getNodeTypes();
+
     class Node {
     public:
-        Node(Universe *scene, const Transform &transform);
+        Node(Universe *universe, const Transform &transform);
         virtual ~Node();
+
+        [[nodiscard]] constexpr ALWAYS_INLINE const std::string& name() const { return mName; }
+        constexpr ALWAYS_INLINE void setName(const std::string &name) { mName = name; }
+
+        [[nodiscard]] constexpr ALWAYS_INLINE const Transform& transform() const { return mRelativeTransform; }
+        constexpr ALWAYS_INLINE void setTransform(const Transform &transform) { mRelativeTransform = transform; }
+
+        [[nodiscard]] constexpr ALWAYS_INLINE const Object& object() const { return mObject; }
+        [[nodiscard]] constexpr ALWAYS_INLINE uint32_t id() const { return mObject.id(); }
+
+        [[nodiscard]] constexpr ALWAYS_INLINE Node *parent() const { return mParent; }
+
+        [[nodiscard]] constexpr ALWAYS_INLINE const std::vector<Node*>& children() const { return mChildren; }
+
 
         void addChild(Node *child);
         void addParent(Node *parent);
@@ -37,6 +63,7 @@ namespace game {
 
         Node *mParent { nullptr };
         Universe *mScene {nullptr };
+        std::string mName;
 
         Transform mRelativeTransform;
 

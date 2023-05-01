@@ -11,6 +11,7 @@
   "children": [
     {
       "type": "Sprite",
+      "name": "Sprite",
       "material": "assets/material_scripts/material.lua",
       "transform": {
         "position": {
@@ -18,7 +19,20 @@
           "y": 0,
           "z": 0
         }
-      }
+      },
+      "children": [
+        {
+          "type": "Node",
+          "name": "test",
+          "transform": {
+            "position": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          }
+        },
+      ]
     }
   ]
 }

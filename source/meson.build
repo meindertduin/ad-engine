@@ -9,3 +9,5 @@ subdir('lua')
 subdir('utils')
 subdir('math')
 subdir('platform')
+
+subdir('editor')
