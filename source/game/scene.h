@@ -7,12 +7,14 @@ namespace game {
     class Scene {
     public:
         explicit Scene(Universe *universe, const Path &path);
+        ~Scene();
 
         [[nodiscard]] constexpr ALWAYS_INLINE Node *root() const { return mRoot; }
         Node* getNodeById(uint32_t id);
         Node* getNodeByName(const std::string &name);
 
         Node* createNode(NodeType type, const std::string &name, Node *parent);
+        void removeNode(Node *node);
     private:
         Node *mRoot;
         Universe *mUniverse;
@@ -21,6 +23,5 @@ namespace game {
         std::unordered_map<std::string, uint32_t> mNodeIdsMap;
 
         void addNode(Node *node);
-        void removeNode(Node *node);
     };
 }

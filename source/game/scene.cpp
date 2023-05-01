@@ -8,6 +8,12 @@ namespace game {
     Node* readNode(Universe *universe, Json::Value &object);
     Transform readTransform(Json::Value &object);
 
+    Scene::~Scene() {
+        for (auto &[id, node] : mNodesMap) {
+            delete node;
+        }
+    }
+
     Scene::Scene(Universe *universe, const Path &path)
         : mUniverse(universe)
     {
@@ -50,6 +56,8 @@ namespace game {
     void Scene::removeNode(Node *node) {
         mNodesMap.erase(node->id());
         mNodeIdsMap.erase(node->name());
+
+        delete node;
     }
 
     Node* Scene::createNode(NodeType type, const std::string &name, Node *parent) {
