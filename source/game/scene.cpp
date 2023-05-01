@@ -9,7 +9,7 @@ namespace game {
     Transform readTransform(Json::Value &object);
 
     Scene::~Scene() {
-        for (auto &[id, node] : mNodesMap) {
+        for (const auto &[id, node] : mNodesMap) {
             delete node;
         }
     }
@@ -56,6 +56,8 @@ namespace game {
     void Scene::removeNode(Node *node) {
         mNodesMap.erase(node->id());
         mNodeIdsMap.erase(node->name());
+
+        node->parent()->removeChild(node);
 
         delete node;
     }

@@ -2,6 +2,14 @@
 #include "imgui/imgui.h"
 
 namespace editor {
+    SceneTree::SceneTree(game::Scene *scene)
+            : mScene(scene)
+            , mHasRoot(scene->root() != nullptr)
+    {
+        if (mHasRoot)
+            mRoot = SceneTreeNode(mScene, scene->root());
+    }
+
     void SceneTree::update() {
         if (!ImGui::Begin("Scene")) {
             ImGui::End();
@@ -36,14 +44,6 @@ namespace editor {
         }
 
         ImGui::End();
-    }
-
-    SceneTree::SceneTree(game::Scene *scene)
-        : mScene(scene)
-        , mHasRoot(scene->root() != nullptr)
-    {
-        if (mHasRoot)
-            mRoot = SceneTreeNode(mScene, scene->root());
     }
 }
 

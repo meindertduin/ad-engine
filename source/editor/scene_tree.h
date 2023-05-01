@@ -3,6 +3,7 @@
 #include "game/universe.h"
 #include "game/scene.h"
 #include "scene_tree_node.h"
+#include "node_select_popup.h"
 
 namespace editor {
     class SceneTree {
@@ -13,7 +14,6 @@ namespace editor {
     private:
         game::Scene *mScene { nullptr };
         bool mHasRoot { false };
-
         std::optional<SceneTreeNode> mRoot { std::nullopt };
     };
 }
