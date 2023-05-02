@@ -12,6 +12,10 @@ namespace editor {
         }
     }
 
+    SceneTreeNode::~SceneTreeNode() {
+        mScene->removeNode(mNode);
+    }
+
     void SceneTreeNode::update() {
         static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
         ImGuiTreeNodeFlags node_flags = base_flags;
@@ -52,10 +56,6 @@ namespace editor {
         if (mParent) {
             mParent->removeChild(this);
         }
-    }
-
-    SceneTreeNode::~SceneTreeNode() {
-        mScene->removeNode(mNode);
     }
 
     void SceneTreeNode::removeChild(const SceneTreeNode *node) {

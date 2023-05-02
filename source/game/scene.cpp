@@ -19,11 +19,14 @@ namespace game {
     {
         FileReader fileReader(path.value());
 
-
         std::function<void(Node*, Json::Value&)> readChildren = [&](Node *node, Json::Value &object) {
             auto &children = object["children"];
             for (auto &child : children) {
                 auto childNode = readNode(universe, child);
+                if (childNode == nullptr) {
+                    continue;
+                }
+
                 node->addChild(childNode);
                 addNode(childNode);
                 readChildren(childNode, child);
@@ -88,7 +91,11 @@ namespace game {
     }
 
     Node* readNode(Universe *universe, Json::Value &object) {
-        auto type = object["type"];
+        auto typeString = object["type"].asString();
+        if (typeString.empty()) {
+            return nullptr;
+        }
+
         auto transform = readTransform(object);
         auto name = object["name"].asString();
 
@@ -96,8 +103,7 @@ namespace game {
             { "Node", NodeType::Node },
             { "Sprite", NodeType::SpriteNode },
         };
-
-        auto nodeType = nodeTypeMap[type.asString()];
+        auto nodeType = nodeTypeMap[typeString];
         Node* node;
         switch (nodeType) {
             case NodeType::Node:
