@@ -2,17 +2,21 @@
 
 #include <functional>
 #include "game/node.h"
+#include "game/scene.h"
 
 namespace editor {
+    class SceneTreeNode;
 
     class NodeSelectPopup {
     public:
-        explicit NodeSelectPopup(const char *id, const std::function<void(game::NodeType, const std::string &name)> &onNodeSelect);
-
+        NodeSelectPopup(const char *id, SceneTreeNode *node);
         bool update();
     private:
-        const char *mId { nullptr };
-        std::function<void(game::NodeType, const std::string &name)> mOnNodeSelect;
-    };
+        const char *mId;
+        SceneTreeNode *mNode;
 
+        char mNewNodeName[32] = "node";
+        int mNewNodeTypeIndex = 0;
+        void renderButtonAndPopup();
+    };
 }

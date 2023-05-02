@@ -25,10 +25,7 @@ namespace editor {
         bool hasChildren = !mNode->children().empty();
 
         if (ImGui::IsItemClicked(ImGuiMouseButton_Right) && !mPopup) {
-            mPopup = std::make_unique<NodeSelectPopup>(&"node_select" [ mNode->id()], [&](game::NodeType type, const std::string &name) {
-                auto node = mScene->createNode(type, name, mNode);
-                mChildren.emplace_back(mScene, node);
-            });
+            mPopup = std::make_unique<NodeSelectPopup>(mNode->name().c_str(), this);
         }
 
         if(mPopup && !mPopup->update()) {
@@ -42,5 +39,9 @@ namespace editor {
         }
         if (node_open && hasChildren)
             ImGui::TreePop();
+    }
+
+    void SceneTreeNode::addChild(game::Node *node) {
+        mChildren.emplace_back(mScene, node);
     }
 }
