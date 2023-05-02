@@ -2,7 +2,7 @@
 #include "imgui/imgui.h"
 
 namespace editor {
-    SceneTreeNode::SceneTreeNode(SceneTreeNode *parent, game::Scene *scene, game::Node *node)
+    SceneTreeNode::SceneTreeNode(SceneTreeObject *parent, game::Scene *scene, game::Node *node)
             : mParent(parent)
             , mScene(scene)
             , mNode(node)
@@ -39,9 +39,7 @@ namespace editor {
 
         if (node_open) {
             for (auto &child : mChildren) {
-                if (child) {
-                    child->update();
-                }
+                child->update();
             }
         }
         if (node_open && hasChildren)
@@ -52,13 +50,7 @@ namespace editor {
         mChildren.push_back(std::make_unique<SceneTreeNode>(this, mScene, node));
     }
 
-    void SceneTreeNode::deleteNode() {
-        if (mParent) {
-            mParent->removeChild(this);
-        }
-    }
-
-    void SceneTreeNode::removeChild(const SceneTreeNode *node) {
+    void SceneTreeNode::removeChild(const SceneTreeObject *node) {
         for (auto it = mChildren.begin(); it != mChildren.end(); it++) {
             if (it->get() == node) {
                 mChildren.erase(it);
@@ -66,4 +58,11 @@ namespace editor {
             }
         }
     }
+
+    void SceneTreeNode::deleteNode() {
+        if (mParent) {
+            mParent->removeChild(this);
+        }
+    }
+
 }

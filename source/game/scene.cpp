@@ -60,7 +60,11 @@ namespace game {
         mNodesMap.erase(node->id());
         mNodeIdsMap.erase(node->name());
 
-        node->parent()->removeChild(node);
+        if (node->parent()) {
+            node->parent()->removeChild(node);
+        } else {
+            mRoot = nullptr;
+        }
 
         delete node;
     }
@@ -128,5 +132,4 @@ namespace game {
 
         return { x, y, z };
     }
-
 }

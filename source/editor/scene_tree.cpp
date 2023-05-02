@@ -7,7 +7,7 @@ namespace editor {
             , mHasRoot(scene->root() != nullptr)
     {
         if (mHasRoot)
-            mRoot = std::make_unique<SceneTreeNode>(nullptr, mScene, scene->root());
+            mRoot = std::make_unique<SceneTreeNode>(this, mScene, scene->root());
     }
 
     void SceneTree::update() {
@@ -30,13 +30,13 @@ namespace editor {
                 for (int i = names.size(); i-- > 0; )
                     if (ImGui::Selectable(names[i].c_str())) {
                         auto type = game::stringToNodeTypeMap.at(names[i]);
-                        mRoot = std::make_unique<SceneTreeNode>(nullptr, mScene, mScene->createNode(type, "root", nullptr));
+                        mRoot = std::make_unique<SceneTreeNode>(this, mScene, mScene->createNode(type, "root", nullptr));
+                        mHasRoot = true;
                     }
 
                 ImGui::EndPopup();
             }
 
-            ImGui::End();
         }
 
         if (mRoot) {
@@ -44,6 +44,11 @@ namespace editor {
         }
 
         ImGui::End();
+    }
+
+    void SceneTree::removeChild(const SceneTreeObject *node) {
+        mRoot = nullptr;
+        mHasRoot = false;
     }
 }
 

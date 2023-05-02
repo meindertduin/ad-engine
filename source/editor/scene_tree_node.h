@@ -2,12 +2,13 @@
 
 #include "game/scene.h"
 #include "node_select_popup.h"
+#include "scene_tree_object.h"
 
 namespace editor {
-    class SceneTreeNode {
+    class SceneTreeNode : public SceneTreeObject {
     public:
-        SceneTreeNode(SceneTreeNode *parent, game::Scene *scene, game::Node *node);
-        ~SceneTreeNode();
+        SceneTreeNode(SceneTreeObject *parent, game::Scene *scene, game::Node *node);
+        ~SceneTreeNode() override;
 
         void update();
 
@@ -15,11 +16,11 @@ namespace editor {
         [[nodiscard]] ALWAYS_INLINE constexpr game::Scene* scene() const { return mScene; }
 
         void createChild(game::Node *node);
-        void removeChild(const SceneTreeNode *node);
+        void removeChild(const SceneTreeObject *node) override;
 
         void deleteNode();
     private:
-        SceneTreeNode *mParent { nullptr };
+        SceneTreeObject *mParent { nullptr };
         game::Scene *mScene;
         game::Node *mNode;
 
