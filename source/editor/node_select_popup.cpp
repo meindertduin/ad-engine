@@ -3,9 +3,10 @@
 #include "scene_tree_node.h"
 
 namespace editor {
-    NodeSelectPopup::NodeSelectPopup(const char *id, SceneTreeNode *node)
+    NodeSelectPopup::NodeSelectPopup(const char *id, SceneTreeNode *node, std::function<void()> onNodeDelete)
             : mId(id)
             , mNode(node)
+            , mOnNodeDelete(onNodeDelete)
     {
         ImGui::OpenPopup(mId);
     }
@@ -50,6 +51,7 @@ namespace editor {
 
         if (ImGui::Button("Delete")) {
             mNode->deleteNode();
+            mOnNodeDelete();
             ImGui::CloseCurrentPopup();
         }
     }

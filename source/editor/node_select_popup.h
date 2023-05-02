@@ -9,11 +9,12 @@ namespace editor {
 
     class NodeSelectPopup {
     public:
-        NodeSelectPopup(const char *id, SceneTreeNode *node);
+        NodeSelectPopup(const char *id, SceneTreeNode *node, std::function<void()> onNodeDelete);
         bool update();
     private:
         const char *mId;
         SceneTreeNode *mNode;
+        std::function<void()> mOnNodeDelete;
 
         char mNewNodeName[32] = "node";
         int mNewNodeTypeIndex = 0;

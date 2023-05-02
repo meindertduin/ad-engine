@@ -24,6 +24,8 @@ namespace editor {
         game::Scene *mScene;
         game::Node *mNode;
 
+        bool mIsDeleted { false };
+
         std::unique_ptr<NodeSelectPopup> mPopup { nullptr };
 
         std::vector<std::unique_ptr<SceneTreeNode>> mChildren;

@@ -30,15 +30,17 @@ namespace editor {
         bool hasChildren = !mNode->children().empty();
 
         if (ImGui::IsItemClicked(ImGuiMouseButton_Right) && !mPopup) {
-            mPopup = std::make_unique<NodeSelectPopup>(mNode->name().c_str(), this);
+            mPopup = std::make_unique<NodeSelectPopup>(mNode->name().c_str(), this, [&](){
+                mIsDeleted = true;
+            });
         }
 
         if(mPopup && !mPopup->update()) {
             mPopup = nullptr;
         }
 
-        if (node_open) {
-            for (auto &child : mChildren) {
+        if (node_open && !mIsDeleted) {
+            for (const auto &child : mChildren) {
                 child->update();
             }
         }
