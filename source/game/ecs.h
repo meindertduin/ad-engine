@@ -33,7 +33,7 @@ namespace game {
         void destroyObject(Object object) {
             assert(object.id() <= MaxObjects);
 
-            mComponentManager->entityDestroyed(object);
+            mComponentManager->entityDestroyed(object, mSignatures[object.id()]);
 
             mFreeObjects.push(object);
 

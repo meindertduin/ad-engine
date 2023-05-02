@@ -6,19 +6,25 @@
 namespace editor {
     class SceneTreeNode {
     public:
-        explicit SceneTreeNode(game::Scene *scene, game::Node *node);
+        SceneTreeNode(SceneTreeNode *parent, game::Scene *scene, game::Node *node);
+        ~SceneTreeNode();
 
         void update();
 
         [[nodiscard]] ALWAYS_INLINE constexpr game::Node* node() const { return mNode; }
         [[nodiscard]] ALWAYS_INLINE constexpr game::Scene* scene() const { return mScene; }
-        void addChild(game::Node *node);
+
+        void createChild(game::Node *node);
+        void removeChild(const SceneTreeNode *node);
+
+        void deleteNode();
     private:
-        game::Scene *mScene { nullptr };
-        game::Node *mNode { nullptr };
+        SceneTreeNode *mParent { nullptr };
+        game::Scene *mScene;
+        game::Node *mNode;
 
         std::unique_ptr<NodeSelectPopup> mPopup { nullptr };
 
-        std::vector<SceneTreeNode> mChildren;
+        std::vector<std::unique_ptr<SceneTreeNode>> mChildren;
     };
 }

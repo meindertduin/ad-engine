@@ -14,6 +14,6 @@ namespace editor {
     private:
         game::Scene *mScene { nullptr };
         bool mHasRoot { false };
-        std::optional<SceneTreeNode> mRoot { std::nullopt };
+        std::unique_ptr<SceneTreeNode> mRoot { nullptr };
     };
 }

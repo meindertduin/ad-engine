@@ -2,12 +2,13 @@
 #include "imgui/imgui.h"
 
 namespace editor {
-    SceneTreeNode::SceneTreeNode(game::Scene *scene, game::Node *node)
-            : mScene(scene)
+    SceneTreeNode::SceneTreeNode(SceneTreeNode *parent, game::Scene *scene, game::Node *node)
+            : mParent(parent)
+            , mScene(scene)
             , mNode(node)
     {
         for (auto &child : node->children()) {
-            mChildren.emplace_back(scene, child);
+            mChildren.push_back(std::make_unique<SceneTreeNode>(this, scene, child));
         }
     }
 
@@ -34,14 +35,35 @@ namespace editor {
 
         if (node_open) {
             for (auto &child : mChildren) {
-                child.update();
+                if (child) {
+                    child->update();
+                }
             }
         }
         if (node_open && hasChildren)
             ImGui::TreePop();
     }
 
-    void SceneTreeNode::addChild(game::Node *node) {
-        mChildren.emplace_back(mScene, node);
+    void SceneTreeNode::createChild(game::Node *node) {
+        mChildren.push_back(std::make_unique<SceneTreeNode>(this, mScene, node));
+    }
+
+    void SceneTreeNode::deleteNode() {
+        if (mParent) {
+            mParent->removeChild(this);
+        }
+    }
+
+    SceneTreeNode::~SceneTreeNode() {
+        mScene->removeNode(mNode);
+    }
+
+    void SceneTreeNode::removeChild(const SceneTreeNode *node) {
+        for (auto it = mChildren.begin(); it != mChildren.end(); it++) {
+            if (it->get() == node) {
+                mChildren.erase(it);
+                break;
+            }
+        }
     }
 }

@@ -5,7 +5,6 @@
 
 #include "ecs.h"
 #include "engine/application.h"
-#include "node.h"
 #include "scene.h"
 
 namespace game {
@@ -14,6 +13,7 @@ namespace game {
         UniverseImpl()
             : mScene(this, Path { "assets/scene/demo.json" })
         {
+            mScene.removeNode(mScene.getNodeByName("test"));
         }
 
         void initialize() override {

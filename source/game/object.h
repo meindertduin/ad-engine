@@ -40,6 +40,11 @@ namespace game {
         C& getComponent() const {
             mManager->template getComponent<C>(*this);
         }
+
+        template<typename C>
+        bool hasComponent() const {
+            return mManager->template hasComponent<C>(*this);
+        }
     private:
         uint32_t  mId;
         T *mManager;

@@ -41,7 +41,7 @@ namespace editor {
                 auto &names = game::getNodeTypes();
                 auto type = game::stringToNodeTypeMap.at(names[mNewNodeTypeIndex]);
                 auto node = mNode->scene()->createNode(type, name, mNode->node());
-                mNode->addChild(node);
+                mNode->createChild(node);
                 ImGui::CloseCurrentPopup();
             }
 
@@ -49,6 +49,7 @@ namespace editor {
         }
 
         if (ImGui::Button("Delete")) {
+            mNode->deleteNode();
             ImGui::CloseCurrentPopup();
         }
     }

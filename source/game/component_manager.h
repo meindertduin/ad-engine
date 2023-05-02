@@ -45,9 +45,11 @@ namespace game {
             return getComponentArray<T>()->tryGetPtr(object);
         }
 
-        void entityDestroyed(Object object) {
+        void entityDestroyed(Object object, const Signature &signature) {
             for (auto const& [type, componentArray] : mComponentArrays) {
-                componentArray->entityDestroyed(object);
+                if (signature[type]) {
+                    componentArray->entityDestroyed(object);
+                }
             }
         }
 
