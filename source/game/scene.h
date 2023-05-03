@@ -17,6 +17,8 @@ namespace game {
 
         void removeNode(Node *node);
         void renameNode(Node *node, const std::string &name);
+
+        void moveNode(uint32_t *node);
     private:
         Node *mRoot;
         Universe *mUniverse;

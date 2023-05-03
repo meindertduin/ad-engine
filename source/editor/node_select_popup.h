@@ -6,6 +6,7 @@
 
 namespace editor {
     class SceneTreeNode;
+    class SceneTreeObject;
 
     enum class NodeAction {
         New,
@@ -43,11 +44,11 @@ namespace editor {
 
     class NodeNewPopup : public NodePopup {
     public:
-        NodeNewPopup(const std::string &id, SceneTreeNode *node);
+        NodeNewPopup(const std::string &id, SceneTreeObject *node);
         bool update() override;
     private:
         std::string mId;
-        SceneTreeNode *mNode;
+        SceneTreeObject *mTreeNode;
         char mNewNodeName[32] = "node";
         int mNewNodeTypeIndex = 0;
     };

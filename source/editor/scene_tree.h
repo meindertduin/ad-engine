@@ -13,10 +13,15 @@ namespace editor {
 
         void update();
 
+        void createChild(game::NodeType type, const std::string &name) override;
         void removeChild(const SceneTreeObject *node) override;
+        std::shared_ptr<SceneTreeNode> findChild(const std::string &name) override;
+
+        game::Node* node() override { return nullptr; }
     private:
         game::Scene *mScene { nullptr };
         bool mHasRoot { false };
-        std::unique_ptr<SceneTreeNode> mRoot { nullptr };
+        std::shared_ptr<SceneTreeNode> mRoot { nullptr };
+        std::unique_ptr<NodePopup> mPopup { nullptr };
     };
 }

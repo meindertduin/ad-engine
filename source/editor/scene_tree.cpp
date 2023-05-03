@@ -20,21 +20,10 @@ namespace editor {
 
         if (!mHasRoot) {
             if (ImGui::Button("New +"))
-                ImGui::OpenPopup("my_select_popup");
+                mPopup = std::make_unique<NodeNewPopup>("new_root_popup", this);
 
-            ImGui::SameLine();
-            auto &names = game::getNodeTypes();
-            if (ImGui::BeginPopup("my_select_popup"))
-            {
-                ImGui::SeparatorText("Select node");
-                for (int i = names.size(); i-- > 0; )
-                    if (ImGui::Selectable(names[i].c_str())) {
-                        auto type = game::stringToNodeTypeMap.at(names[i]);
-                        mRoot = std::make_unique<SceneTreeNode>(this, mScene, mScene->createNode(type, "root", nullptr));
-                        mHasRoot = true;
-                    }
-
-                ImGui::EndPopup();
+            if (mPopup && !mPopup->update()) {
+                mPopup = nullptr;
             }
         }
 
@@ -48,6 +37,18 @@ namespace editor {
     void SceneTree::removeChild(const SceneTreeObject *node) {
         mRoot = nullptr;
         mHasRoot = false;
+    }
+
+    void SceneTree::createChild(game::NodeType type, const std::string &name) {
+        auto node = mScene->createNode(type, name, nullptr);
+        mRoot = std::make_unique<SceneTreeNode>(this, mScene, node);
+    }
+
+    std::shared_ptr<SceneTreeNode> SceneTree::findChild(const std::string &name) {
+        if (mRoot && mRoot->node()->name() == name)
+            return mRoot;
+
+        return nullptr;
     }
 }
 

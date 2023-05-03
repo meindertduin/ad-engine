@@ -2,6 +2,10 @@
 #include "imgui/imgui.h"
 
 namespace editor {
+    struct SceneTreeDragPayload {
+        SceneTreeNode *treeNode;
+    };
+
     SceneTreeNode::SceneTreeNode(SceneTreeObject *parent, game::Scene *scene, game::Node *node)
             : mParent(parent)
             , mScene(scene)
@@ -17,17 +21,32 @@ namespace editor {
     }
 
     void SceneTreeNode::update() {
-        static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-        ImGuiTreeNodeFlags node_flags = base_flags;
+        static ImGuiTreeNodeFlags baseFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
+        ImGuiTreeNodeFlags nodeFlags = baseFlags;
 
         if (mNode->children().empty()) {
-            node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+            nodeFlags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
         }
 
         auto nodeId = mNode->id();
-        bool node_open = ImGui::TreeNodeEx((void*)(intptr_t) nodeId, node_flags, mNode->name().c_str());
-
+        bool nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t) nodeId, nodeFlags, mNode->name().c_str());
         bool hasChildren = !mNode->children().empty();
+
+        if (ImGui::BeginDragDropSource()) {
+            SceneTreeDragPayload payload { this };
+            ImGui::SetDragDropPayload("node", &payload, sizeof(SceneTreeDragPayload));
+            ImGui::Text("%s", mNode->name().c_str());
+            ImGui::EndDragDropSource();
+        }
+
+        if (ImGui::BeginDragDropTarget()) {
+            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("node")) {
+                IM_ASSERT(payload->DataSize == sizeof(SceneTreeDragPayload));
+                SceneTreeDragPayload dragPayload = *(SceneTreeDragPayload*) payload->Data;
+                dragPayload.treeNode->changeParent(this);
+            }
+            ImGui::EndDragDropTarget();
+        }
 
         if (ImGui::IsItemClicked(ImGuiMouseButton_Right) && !mPopup) {
             mPopup = std::make_unique<NodeSelectPopup>(mNode->name().c_str(), [&](NodeAction action){
@@ -53,17 +72,19 @@ namespace editor {
             mPopup = nullptr;
         }
 
-        if (node_open && !mIsDeleted) {
+        if (nodeOpen && !mIsDeleted) {
             for (const auto &child : mChildren) {
                 child->update();
             }
         }
-        if (node_open && hasChildren)
+        if (nodeOpen && hasChildren)
             ImGui::TreePop();
     }
 
-    void SceneTreeNode::createChild(game::Node *node) {
-        mChildren.push_back(std::make_unique<SceneTreeNode>(this, mScene, node));
+    void SceneTreeNode::createChild(game::NodeType type, const std::string &name) {
+        auto node = mScene->createNode(type, name, mNode);
+
+        mChildren.push_back(std::make_shared<SceneTreeNode>(this, mScene, node));
     }
 
     void SceneTreeNode::removeChild(const SceneTreeObject *node) {
@@ -83,5 +104,34 @@ namespace editor {
 
     void SceneTreeNode::renameNode(const std::string &name) {
         mScene->renameNode(mNode, name);
+    }
+
+    void SceneTreeNode::addChild(const std::shared_ptr<SceneTreeNode>& child) {
+        mChildren.push_back(child);
+    }
+
+    void SceneTreeNode::changeParent(SceneTreeNode *newParent) {
+        if (newParent == mParent) {
+            return;
+        }
+        auto sharedNodePointer = mParent->findChild(mNode->name());
+        mParent->removeChild(this);
+
+        auto parentNode = mNode->parent();
+        parentNode->removeChild(mNode);
+
+        mParent = newParent;
+        mParent->node()->addChild(mNode);
+
+        newParent->addChild(sharedNodePointer);
+    }
+
+    std::shared_ptr<SceneTreeNode> SceneTreeNode::findChild(const std::string &name) {
+        for (const auto &child : mChildren) {
+            if (child->mNode->name() == name) {
+                return child;
+            }
+        }
+        return nullptr;
     }
 }

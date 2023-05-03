@@ -59,9 +59,9 @@ namespace editor {
         return open;
     }
 
-    NodeNewPopup::NodeNewPopup(const std::string &id, SceneTreeNode *node)
+    NodeNewPopup::NodeNewPopup(const std::string &id, SceneTreeObject *node)
         : mId(id)
-        , mNode(node)
+        , mTreeNode(node)
     {
         ImGui::OpenPopup(mId.c_str());
     }
@@ -84,8 +84,8 @@ namespace editor {
                 std::string name = mNewNodeName;
                 auto &names = game::getNodeTypes();
                 auto type = game::stringToNodeTypeMap.at(names[mNewNodeTypeIndex]);
-                auto node = mNode->scene()->createNode(type, name, mNode->node());
-                mNode->createChild(node);
+
+                mTreeNode->createChild(type, name);
 
                 ImGui::CloseCurrentPopup();
                 ImGui::EndPopup();
