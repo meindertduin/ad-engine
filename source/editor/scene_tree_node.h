@@ -27,7 +27,7 @@ namespace editor {
 
         bool mIsDeleted { false };
 
-        std::unique_ptr<NodeSelectPopup> mPopup { nullptr };
+        std::unique_ptr<NodePopup> mPopup { nullptr };
 
         std::vector<std::unique_ptr<SceneTreeNode>> mChildren;
     };

@@ -30,8 +30,22 @@ namespace editor {
         bool hasChildren = !mNode->children().empty();
 
         if (ImGui::IsItemClicked(ImGuiMouseButton_Right) && !mPopup) {
-            mPopup = std::make_unique<NodeSelectPopup>(mNode->name().c_str(), this, [&](){
-                mIsDeleted = true;
+            mPopup = std::make_unique<NodeSelectPopup>(mNode->name().c_str(), [&](NodeAction action){
+                std::string name = mNode->name();
+                auto id = "node_popup_select" + std::to_string(mNode->id());
+                switch (action) {
+                    using enum editor::NodeAction;
+                    case New:
+                        mPopup = std::make_unique<NodeNewPopup>(id, this);
+                        break;
+                    case Rename:
+                        mPopup = std::make_unique<NodeRenamePopup>(id, this, name);
+                        break;
+                    case Delete:
+                        deleteNode();
+                        mIsDeleted = true;
+                        break;
+                }
             });
         }
 

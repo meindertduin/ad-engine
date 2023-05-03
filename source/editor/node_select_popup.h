@@ -7,17 +7,48 @@
 namespace editor {
     class SceneTreeNode;
 
-    class NodeSelectPopup {
-    public:
-        NodeSelectPopup(const char *id, SceneTreeNode *node, std::function<void()> onNodeDelete);
-        bool update();
-    private:
-        const char *mId;
-        SceneTreeNode *mNode;
-        std::function<void()> mOnNodeDelete;
+    enum class NodeAction {
+        New,
+        Rename,
+        Delete,
+    };
 
+    class NodePopup {
+    public:
+        NodePopup() = default;
+        virtual ~NodePopup() = default;
+        virtual bool update() = 0;
+    };
+
+    class NodeSelectPopup : public NodePopup {
+    public:
+        NodeSelectPopup(const std::string &id, const std::function<void(NodeAction)> &onSelect);
+        bool update() override;
+    private:
+        std::string mId;
+        std::function<void(NodeAction)> mOnSelect;
+
+        bool select(NodeAction action);
+    };
+
+    class NodeRenamePopup : public NodePopup {
+    public:
+        NodeRenamePopup(const std::string &id, SceneTreeNode *node, const std::string &name);
+        bool update() override;
+    private:
+        std::string mId;
+        SceneTreeNode *mNode;
+        char mNewNodeName[128] = "";
+    };
+
+    class NodeNewPopup : public NodePopup {
+    public:
+        NodeNewPopup(const std::string &id, SceneTreeNode *node);
+        bool update() override;
+    private:
+        std::string mId;
+        SceneTreeNode *mNode;
         char mNewNodeName[32] = "node";
         int mNewNodeTypeIndex = 0;
-        void renderButtonAndPopup();
     };
 }
