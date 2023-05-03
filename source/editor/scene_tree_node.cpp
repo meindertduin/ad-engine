@@ -11,8 +11,8 @@ namespace editor {
             , mScene(scene)
             , mNode(node)
     {
-        for (auto &child : node->children()) {
-            mChildren.push_back(std::make_unique<SceneTreeNode>(this, scene, child));
+        for (auto &[name, child] : node->children()) {
+            mChildren.push_back(std::make_shared<SceneTreeNode>(this, scene, child));
         }
     }
 
@@ -74,7 +74,9 @@ namespace editor {
 
         if (nodeOpen && !mIsDeleted) {
             for (const auto &child : mChildren) {
-                child->update();
+                if (child != nullptr) {
+                    child->update();
+                }
             }
         }
         if (nodeOpen && hasChildren)

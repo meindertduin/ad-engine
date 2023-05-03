@@ -13,7 +13,6 @@ namespace game {
         UniverseImpl()
             : mScene(this, Path { "assets/scene/demo.json" })
         {
-            mScene.removeNode(mScene.getNodeByName("test"));
         }
 
         void initialize() override {

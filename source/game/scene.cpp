@@ -47,18 +47,12 @@ namespace game {
         return mNodesMap[id];
     }
 
-    Node *Scene::getNodeByName(const std::string &name) {
-        return getNodeById(mNodeIdsMap[name]);
-    }
-
     void Scene::addNode(Node *node) {
         mNodesMap[node->id()] = node;
-        mNodeIdsMap[node->name()] = node->id();
     }
 
     void Scene::removeNode(Node *node) {
         mNodesMap.erase(node->id());
-        mNodeIdsMap.erase(node->name());
 
         if (node->parent()) {
             node->parent()->removeChild(node);
@@ -79,6 +73,7 @@ namespace game {
                 node = new SpriteNode(mUniverse, Transform());
                 break;
         }
+        node->setName(name);
 
         if (parent) {
             parent->addChild(node);
@@ -88,15 +83,12 @@ namespace game {
             mRoot = node;
         }
 
-        node->setName(name);
         addNode(node);
 
         return node;
     }
 
     void Scene::renameNode(Node *node, const std::string &name) {
-        mNodeIdsMap.erase(node->name());
-        mNodeIdsMap[name] = node->id();
         node->setName(name);
     }
 

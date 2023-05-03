@@ -33,8 +33,18 @@ namespace game {
     }
 
     void Node::addChild(Node *child) {
-        mChildren.push_back(child);
+        if (mChildrenMap.contains(child->name())) {
+            // TODO might be able to optimize, for now don't care
+            const auto &childName = child->name();
+            int i = 2;
+            auto newName = childName + std::to_string(i);
+            while (mChildrenMap.contains(newName)) {
+                newName = childName + std::to_string(i++);
+            }
+            mUniverse->scene()->renameNode(child, newName);
+        }
 
+        mChildrenMap[child->name()] = child;
         child->addParent(this);
     }
 

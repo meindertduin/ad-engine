@@ -42,16 +42,15 @@ namespace game {
 
         [[nodiscard]] constexpr ALWAYS_INLINE Node *parent() const { return mParent; }
 
-        [[nodiscard]] constexpr ALWAYS_INLINE const std::vector<Node*>& children() const { return mChildren; }
+        [[nodiscard]] constexpr ALWAYS_INLINE const std::unordered_map<std::string, Node*>& children() const { return mChildrenMap; }
 
 
         void addChild(Node *child);
         void addParent(Node *parent);
 
         void removeChild(Node *child) {
-            auto it = std::find(mChildren.begin(), mChildren.end(), child);
-            if (it != mChildren.end()) {
-                mChildren.erase(it);
+            if (mChildrenMap.contains(child->name())) {
+                mChildrenMap.erase(child->name());
             }
         }
 
@@ -67,8 +66,7 @@ namespace game {
 
         Transform mRelativeTransform;
 
-        // May optimize with a hash map where nodes have an id
-        std::vector<Node*> mChildren;
+        std::unordered_map<std::string, Node*> mChildrenMap;
 
         void setWorldTransform();
     };
@@ -87,7 +85,7 @@ namespace game {
 
         void each(const std::function<void(Node*)>& callback) {
             callback(mNode);
-            for (auto child : mNode->mChildren) {
+            for (const auto &[name, child] : mNode->children()) {
                 NodeIterator(child).each(callback);
             }
         }
