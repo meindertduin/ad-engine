@@ -19,6 +19,7 @@ namespace editor {
         void removeChild(const SceneTreeObject *node) override;
 
         void deleteNode();
+        void renameNode(const std::string &name);
     private:
         SceneTreeObject *mParent { nullptr };
         game::Scene *mScene;

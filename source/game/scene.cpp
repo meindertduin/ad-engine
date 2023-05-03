@@ -94,6 +94,12 @@ namespace game {
         return node;
     }
 
+    void Scene::renameNode(Node *node, const std::string &name) {
+        mNodeIdsMap.erase(node->name());
+        mNodeIdsMap[name] = node->id();
+        node->setName(name);
+    }
+
     Node* readNode(Universe *universe, Json::Value &object) {
         auto typeString = object["type"].asString();
         if (typeString.empty()) {

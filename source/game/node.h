@@ -62,7 +62,7 @@ namespace game {
         Object mObject;
 
         Node *mParent { nullptr };
-        Universe *mScene {nullptr };
+        Universe *mUniverse {nullptr };
         std::string mName;
 
         Transform mRelativeTransform;

@@ -54,5 +54,17 @@ namespace editor {
             mOnNodeDelete();
             ImGui::CloseCurrentPopup();
         }
+
+        if (ImGui::Button("Rename"))
+            ImGui::OpenPopup("rename_popup");
+
+        if (ImGui::BeginPopup("rename_popup")) {
+            ImGui::InputText("New name", mNewNodeName, IM_ARRAYSIZE(mNewNodeName));
+            if (ImGui::Button("Rename")) {
+                mNode->renameNode(mNewNodeName);
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
     }
 }

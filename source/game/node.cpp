@@ -20,7 +20,7 @@ namespace game {
 
     Node::Node(Universe *universe, const Transform &transform)
         : mObject(universe->createObject())
-        , mScene(universe)
+        , mUniverse(universe)
         , mRelativeTransform(transform)
     {
         mObject.addComponent(game::Transform(0, 0, 0));
@@ -29,7 +29,7 @@ namespace game {
     }
 
     Node::~Node() {
-        mScene->destroyObject(mObject);
+        mUniverse->destroyObject(mObject);
     }
 
     void Node::addChild(Node *child) {

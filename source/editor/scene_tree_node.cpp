@@ -67,4 +67,7 @@ namespace editor {
         }
     }
 
+    void SceneTreeNode::renameNode(const std::string &name) {
+        mScene->renameNode(mNode, name);
+    }
 }

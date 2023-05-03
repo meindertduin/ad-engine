@@ -36,7 +36,6 @@ namespace editor {
 
                 ImGui::EndPopup();
             }
-
         }
 
         if (mRoot) {

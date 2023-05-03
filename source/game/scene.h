@@ -14,7 +14,9 @@ namespace game {
         Node* getNodeByName(const std::string &name);
 
         Node* createNode(NodeType type, const std::string &name, Node *parent);
+
         void removeNode(Node *node);
+        void renameNode(Node *node, const std::string &name);
     private:
         Node *mRoot;
         Universe *mUniverse;
